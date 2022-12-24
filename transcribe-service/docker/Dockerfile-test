@@ -1,0 +1,10 @@
+FROM translate-service
+ 
+RUN apt-get install httping -y
+COPY serving/translate-service/api-tst /srv/api-tst
+COPY serving/translate-service/docker/entry-point.sh /srv/
+COPY serving/translate-service/docker/entry-point-test.sh /srv/
+RUN pip install -r /srv/api-tst/requirements.txt
+
+ENTRYPOINT bash /srv/entry-point-test.sh
+
