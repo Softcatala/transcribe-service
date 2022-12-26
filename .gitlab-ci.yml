@@ -25,7 +25,7 @@ transcribe-service:
     - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
     - export DOCKER_PATH=transcribe-service/docker/Dockerfile
     - docker build --tag transcribe-service -f $DOCKER_PATH --tag $IMAGE_NAME --tag $REPO_NAME:$CI_COMMIT_SHA .
-    - docker push $REPO_NAME:$CI_COMMIT_SHA    
+    - docker push $REPO_NAME:$CI_COMMIT_SHA
     - docker push $IMAGE_NAME
 
 transcribe-batch:
@@ -40,4 +40,5 @@ transcribe-batch:
 
 deploy:
   stage: deploy
-
+  extends:
+    .default-deploy
