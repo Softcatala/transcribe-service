@@ -36,6 +36,11 @@ MODELS = '/srv/models/'
 UPLOAD_FOLDER = '/srv/data/files/'
 SAVED_TEXTS = '/srv/data/saved/'
 
+@app.route('/hello', methods=['GET'])
+def hello_word():
+    return "Hello!"
+
+
 def init_logging():
     logfile = 'translate-service.log'
 
