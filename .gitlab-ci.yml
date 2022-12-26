@@ -1,6 +1,10 @@
+include:
+  - project: 'docker/process-webhooks'
+    file: '/gitlab/deploy.yml'
+
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-
+  PROJECT_TO_BE_DEPLOYED: 'docker/transcribe-service'
 
 image: docker:latest
 services:
@@ -9,6 +13,7 @@ services:
 stages:
   - transcribe-service
   - transcribe-batch
+  - deploy
 
 before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -32,4 +37,7 @@ transcribe-batch:
     - docker build -f $DOCKER_PATH --tag $IMAGE_NAME --tag $REPO_NAME:$CI_COMMIT_SHA .
     - docker push $REPO_NAME:$CI_COMMIT_SHA
     - docker push $IMAGE_NAME
+
+deploy:
+  stage: deploy
 
