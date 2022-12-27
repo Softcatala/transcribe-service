@@ -57,7 +57,7 @@ def init_logging():
     logger.addHandler(console)
 
 def _allowed_file(filename):
-    ALLOWED_EXTENSIONS = ['txt', 'po']
+    ALLOWED_EXTENSIONS = ['mp3', 'wav']
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
