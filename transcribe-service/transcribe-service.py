@@ -91,8 +91,6 @@ def upload_file():
         save_file_to_process(fullname, email, model_name)
         logging.debug("Saved file {0}".format(fullname))
         result = []
-        usage = Usage()
-        usage.log(model_name, 0, datetime.timedelta(), 'file')
         return json_answer(result)
 
     result = {}
