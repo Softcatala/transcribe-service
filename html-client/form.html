@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <script type="text/javascript" src="openmnt.js"></script>
+    </head>
+
+<body>
+
+    <p><b>Transcripció de fitxers de text</b></p>
+    <p>També pots enviar-nos un fitxer en format de text pla.</p>
+
+    <form id="form-id" method=post enctype=multipart/form-data">
+    <p>Traducció: 
+     <select id="model_name" name="model_name">
+      <option value="eng-cat">Small</option>
+      <option value="cat-eng">Medium</option>
+    </select>
+    </p>
+    <p>
+     <label for="email">Correu on voleu que us enviem la traducció:</label>
+     <input type="email" id="email" name="email"> 
+    <p>
+      <input type=file  name=file>
+      <input type=submit value="Demanar transcripció" onclick="sendFile();return false;">
+    </form>
+</body>
+</html>
+
+
