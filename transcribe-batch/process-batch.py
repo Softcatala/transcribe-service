@@ -19,15 +19,13 @@
 # Boston, MA 02111-1307, USA.
 
 from __future__ import print_function
+import time
 import logging
 import logging.handlers
 import os
 from batchfilesdb import BatchFilesDB
-import time
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from email.mime.text import MIMEText
+from sendmail import Sendmail
+import datetime
 
 TRANSLATION_MODELS = '/srv/models/'
 
@@ -47,41 +45,6 @@ def init_logging():
     console.setLevel(LOGLEVEL)
     logger.addHandler(console)
 
-def send_email(translated_file, email, attachment):
-    try:
-        port = 25
-        sender_email = "info@softcatala.org"
-
-        with smtplib.SMTP("mail.scnet", port) as server:
-            message = MIMEMultipart("alternative")
-            message["Subject"] = "Traducció de Softcatalà"
-            message["From"] = sender_email
-            message["To"] = email
-
-            if attachment:
-
-                with open(translated_file, mode='rb') as file:
-                    translation = file.read()
-
-                attachment_name = 'ca.po'
-                part1 = MIMEText("Aquí teniu la transcripció que heu demanat", "plain")
-                message.attach(part1)
-
-                part = MIMEApplication(translation, Name="ca.po")
-                part['Content-Disposition'] = f'attachment; filename={attachment_name}'
-                message.attach(part)
-
-            else:
-                with open(translated_file, encoding='utf-8', mode='r') as file:
-                    translation = file.read()
-
-                part1 = MIMEText(translation, "plain")
-                message.attach(part1)
-
-            server.sendmail(sender_email, email, message.as_string())
-    except Exception as e:
-        msg = "Error '{0}' sending to {1}".format(e, email)
-        logging.error(msg)
 
 MAX_SIZE = 8192 * 1024
 
@@ -89,38 +52,6 @@ def truncate_file(filename):
     f = open(filename, "a")
     f.truncate(MAX_SIZE)
     f.close()
-
-def _is_po_file(filename):
-
-    try:
-        msgid = False
-        msgstr = False
-        with open(filename, "r") as read_file:
-            lines = 0
-            while True:
-
-                src = read_file.readline().lower()
-
-                if not src or lines > 50:
-                    break
-
-                if 'msgid' in src:
-                    msgid = True
-
-                if 'msgstr' in src:
-                    msgstr = True
-
-                if msgid and msgstr:
-                    return True
-
-                lines += 1
-
-    except Exception as e:
-        msg = "_is_po_file. Error '{0}'".format(e)
-        logging.error(msg)
-
-    return False
-
 
 def main():
 
@@ -130,24 +61,45 @@ def main():
 
     while True:
         batchfiles = db.select()
-        for batchfile in batchfiles:
+        if (len(batchfiles) > 0):
+
+            batchfile = batchfiles[0]
             source_file = batchfile.filename
-            print(source_file)
-            translated_file = source_file + "-translated.txt"
+            logging.debug(f"Processing: {source_file} - pending {len(batchfiles)}")
 
             truncate_file(source_file)
-            attachment = False
+            attachment = True
+            outdir = "outdir/"
 
-            cmd = f"whisper --language ca {source_file} > {translated_file}"
+            print(f"batchfile.model_name: {batchfile.model_name}")
+            if batchfile.model_name == "small":
+                model = "small"
+            elif batchfile.model_name == "medium":
+                model = "medium"
+            elif batchfile.model_name == "large":
+                model = "large-v2"
+            elif batchfile.model_name == "sc-small":
+                model = "sc-small"
+            else: # default
+                model = "tiny"
 
-            logging.debug("Run {0}".format(cmd))
+            cmd = f"whisper --threads 16 --language ca --model {model} {source_file} -o {outdir} > /dev/null"
+
+            start_time = datetime.datetime.now()
             os.system(cmd)
-            send_email(translated_file, batchfile.email, attachment)
+            end_time = datetime.datetime.now() - start_time
+
+            source_file_base = os.path.basename(source_file)
+            target_file_srt = os.path.join(outdir, source_file_base + ".srt")
+            target_file_txt = os.path.join(outdir, source_file_base + ".txt")
+            print(f"target_file_srt: {target_file_srt}")
+
+            logging.debug(f"Run {cmd} in {end_time}")
+            Sendmail().send(target_file_txt, batchfile.email, target_file_srt)
             db.delete(batchfile.filename_dbrecord)
             os.remove(source_file)
-            os.remove(translated_file)
 
-        time.sleep(10)
+        time.sleep(30)
 
 
 if __name__ == "__main__":

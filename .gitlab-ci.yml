@@ -23,7 +23,7 @@ transcribe-service:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-service
     - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
     - export DOCKER_PATH=transcribe-service/docker/Dockerfile
-    - docker build --cache-from $REPO_NAME --tag transcribe-service -f $DOCKER_PATH --tag $IMAGE_NAME .
+    - docker build --cache-from $IMAGE_NAME --tag transcribe-service -f $DOCKER_PATH --tag $IMAGE_NAME .
     - docker push $IMAGE_NAME
 
 transcribe-batch:
@@ -35,9 +35,8 @@ transcribe-batch:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-batch
     - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
     - export DOCKER_PATH=transcribe-batch/docker/Dockerfile
-    - docker build --cache-from $REPO_NAME -f $DOCKER_PATH --tag $IMAGE_NAME .
+    - docker build --cache-from $IMAGE_NAME -f $DOCKER_PATH --tag $IMAGE_NAME .
     - docker push $IMAGE_NAME
-
 
 deploy:
   stage: deploy

@@ -30,7 +30,7 @@ import logging
 import logging.handlers
 
 app = Flask(__name__)
-#CORS(app)
+CORS(app)
 
 MODELS = '/srv/models/'
 UPLOAD_FOLDER = '/srv/data/files/'
@@ -57,7 +57,7 @@ def init_logging():
     logger.addHandler(console)
 
 def _allowed_file(filename):
-    ALLOWED_EXTENSIONS = ['mp3', 'wav']
+    ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg']
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -65,8 +65,20 @@ def _allowed_file(filename):
 def save_file_to_process(filename, email, model_name):
     db = BatchFilesDB()
     db.create(filename, email, model_name)
+    
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+@app.route('/get_file', methods=['GET'])
+def health_get():
+    uuid = request.args.get('uuid')
+    ext = request.args.get('ext')
+    fullname = os.path.join(UPLOAD_FOLDER, uuid)
+    fullname += ext
+    with open(filename, mode='rb') as file:
+        content = file.read()
 
-#@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+    return content
+
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 @app.route('/translate_file/', methods=['POST'])
 def upload_file():
     file = request.files['file']
@@ -84,7 +96,7 @@ def upload_file():
         return json_answer(result, 404)
 
     if file and _allowed_file(file.filename):
-        filename = uuid.uuid4().hex;
+        filename = uuid.uuid4().hex
         fullname = os.path.join(UPLOAD_FOLDER, filename)
         file.save(fullname)
 

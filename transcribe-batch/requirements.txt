@@ -1,1 +1,3 @@
+numpy==1.24
+torch==1.13
 git+https://github.com/openai/whisper.git@0b5dcfdef7ec04250b76e13f1630e32b0935ce76
