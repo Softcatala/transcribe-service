@@ -64,7 +64,7 @@ def send_email(translated_file, email, attachment):
                     translation = file.read()
 
                 attachment_name = 'ca.po'
-                part1 = MIMEText("Aquí teniu la traducció que heu demanat", "plain")
+                part1 = MIMEText("Aquí teniu la transcripció que heu demanat", "plain")
                 message.attach(part1)
 
                 part = MIMEApplication(translation, Name="ca.po")
@@ -124,7 +124,7 @@ def _is_po_file(filename):
 
 def main():
 
-    print("Process batch files to trascribe")
+    print("Process batch files to transcribe")
     init_logging()
     db = BatchFilesDB()
 
