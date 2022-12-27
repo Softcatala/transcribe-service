@@ -135,12 +135,10 @@ def main():
             print(source_file)
             translated_file = source_file + "-translated.txt"
 
-            command = 'model-to-txt.py'
             truncate_file(source_file)
             attachment = False
 
-            cmd = "python3 {0} -f {1} -t {2} -m {3} -x {4}".format(command, source_file,
-                   translated_file, batchfile.model_name, TRANSLATION_MODELS)
+            cmd = f"whisper --language ca {source_file} > {translated_file}"
 
             logging.debug("Run {0}".format(cmd))
             os.system(cmd)
