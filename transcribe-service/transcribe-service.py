@@ -30,7 +30,7 @@ import logging
 import logging.handlers
 
 app = Flask(__name__)
-CORS(app)
+#CORS(app)
 
 MODELS = '/srv/models/'
 UPLOAD_FOLDER = '/srv/data/files/'
@@ -66,7 +66,7 @@ def save_file_to_process(filename, email, model_name):
     db = BatchFilesDB()
     db.create(filename, email, model_name)
 
-@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+#@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 @app.route('/translate_file/', methods=['POST'])
 def upload_file():
     file = request.files['file']
