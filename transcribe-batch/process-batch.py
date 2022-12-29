@@ -45,13 +45,6 @@ def init_logging():
     logger.addHandler(console)
 
 
-MAX_SIZE = 8192 * 1024
-
-def truncate_file(filename):
-    f = open(filename, "a")
-    f.truncate(MAX_SIZE)
-    f.close()
-
 def main():
 
     print("Process batch files to transcribe")
@@ -67,7 +60,6 @@ def main():
             source_file = batchfile.filename
             logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
 
-            truncate_file(source_file)
             attachment = True
             outdir = "outdir/"
 
@@ -83,6 +75,7 @@ def main():
             else: # default
                 model = "tiny"
 
+            db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
             cmd = f"whisper --fp16 False --threads 16 --language ca --model {model} {source_file} -o {outdir} > /dev/null"
 
             start_time = datetime.datetime.now()
@@ -100,11 +93,8 @@ def main():
             text += f"https://web2015.softcatala.org/transcripcio/bentornat/?uuid={source_file_base}"
             Sendmail().send(text, batchfile.email, target_file_srt)
 
-          #  processed.copy_file(batchfile.filename_dbrecord)
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
-
-            db.delete(batchfile.filename_dbrecord)
             os.remove(source_file)
 
         time.sleep(30)

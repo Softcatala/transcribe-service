@@ -29,6 +29,7 @@ import logging
 import logging.handlers
 
 app = Flask(__name__)
+
 CORS(app)
 
 MODELS = '/srv/models/'
@@ -141,7 +142,8 @@ def upload_file():
         file.save(fullname)
 
         save_file_to_process(fullname, email, model_name, file.filename)
-        logging.debug(f"Saved file {file.filename} to {fullname}")
+        size = os.path.getsize(fullname)
+        logging.debug(f"Saved file {file.filename} to {fullname} (size: {size})")
         result = []
         return json_answer(result)
 
