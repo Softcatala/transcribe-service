@@ -24,10 +24,9 @@ import logging
 import logging.handlers
 import os
 from batchfilesdb import BatchFilesDB
+from processedfilesdb import ProcessedFilesDB
 from sendmail import Sendmail
 import datetime
-
-TRANSLATION_MODELS = '/srv/models/'
 
 def init_logging():
 
@@ -58,14 +57,15 @@ def main():
     print("Process batch files to transcribe")
     init_logging()
     db = BatchFilesDB()
+    ProcessedFilesDB.ensure_dir()
 
     while True:
         batchfiles = db.select()
-        if (len(batchfiles) > 0):
+        if len(batchfiles) > 0:
 
             batchfile = batchfiles[0]
             source_file = batchfile.filename
-            logging.debug(f"Processing: {source_file} - pending {len(batchfiles)}")
+            logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
 
             truncate_file(source_file)
             attachment = True
@@ -83,19 +83,27 @@ def main():
             else: # default
                 model = "tiny"
 
-            cmd = f"whisper --threads 16 --language ca --model {model} {source_file} -o {outdir} > /dev/null"
+            cmd = f"whisper --fp16 False --threads 16 --language ca --model {model} {source_file} -o {outdir} > /dev/null"
 
             start_time = datetime.datetime.now()
             os.system(cmd)
             end_time = datetime.datetime.now() - start_time
 
             source_file_base = os.path.basename(source_file)
+            processed = ProcessedFilesDB(source_file_base)
             target_file_srt = os.path.join(outdir, source_file_base + ".srt")
-            target_file_txt = os.path.join(outdir, source_file_base + ".txt")
-            print(f"target_file_srt: {target_file_srt}")
+            target_file_txt = os.path.join(outdir, source_file_base + ".txt")            
 
             logging.debug(f"Run {cmd} in {end_time}")
-            Sendmail().send(target_file_txt, batchfile.email, target_file_srt)
+            
+            text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{model}'. El podeu baixar des de "
+            text += f"https://web2015.softcatala.org/transcripcio/bentornat/?uuid={source_file_base}"
+            Sendmail().send(text, batchfile.email, target_file_srt)
+
+          #  processed.copy_file(batchfile.filename_dbrecord)
+            processed.move_file(target_file_srt)
+            processed.move_file(target_file_txt)
+
             db.delete(batchfile.filename_dbrecord)
             os.remove(source_file)
 

@@ -36,17 +36,7 @@ class Sendmail():
         part['Content-Disposition'] = f'attachment; filename={attachment_name}'
         return part
 
-    def _get_body_part(self, body_text_file):
-        with open(body_text_file, encoding='utf-8', mode='r') as file:
-            file_text = file.read()
-
-        body_text = "Aquí teniu la transcripció que heu demanat com a text. Com a adjunt teniu el fitxer amb les marques de temps amb format srt.\n\n\n"
-        body_text += file_text
-        part = MIMEText(body_text, "plain")
-        return part
-
-
-    def send(self, body_text_file, email, attachment):
+    def send(self, text, email, attachment):
  #       try:
         port = 25
         sender_email = "info@softcatala.org"
@@ -57,15 +47,8 @@ class Sendmail():
             message["From"] = sender_email
             message["To"] = email
 
-            if attachment:
-                body = self._get_body_part(body_text_file)
-                message.attach(body)
-                                
-                part = self._get_attachment_part(attachment)
-                message.attach(part)
-            else:
-                body = self._get_body_part(body_text_file)
-                message.attach(body)
+            part = MIMEText(text, "plain")
+            message.attach(part)
 
             server.sendmail(sender_email, email, message.as_string())
 #        except Exception as e:

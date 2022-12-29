@@ -23,11 +23,12 @@ import fnmatch
 
 
 class BatchFile():
-    def __init__(self, filename_dbrecord, filename, email, model_name):
+    def __init__(self, filename_dbrecord, filename, email, model_name, original_filename):
         self.filename_dbrecord = filename_dbrecord
         self.filename = filename
         self.email = email
         self.model_name = model_name
+        self.original_filename = original_filename
 
 class BatchFilesDB():
 
@@ -36,7 +37,7 @@ class BatchFilesDB():
     g_check_directory = True
 
 
-    def create(self, filename, email, model_name):
+    def create(self, filename, email, model_name, original_filename):
         if self.g_check_directory:
             self.g_check_directory = False
             if not os.path.exists(self.ENTRIES):
@@ -46,7 +47,7 @@ class BatchFilesDB():
         filename_dbrecord = os.path.join(self.ENTRIES, filename_dbrecord)
 
         with open(filename_dbrecord, "w") as fh:
-            line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}"
+            line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}"
             fh.write(line)
 
         return filename_dbrecord
@@ -66,7 +67,7 @@ class BatchFilesDB():
         with open(filename_dbrecord, "r") as fh:
             line = fh.readline()
             components = line.split(self.SEPARATOR)
-            return BatchFile(filename_dbrecord, components[0], components[1], components[2])
+            return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3])
 
     def select(self):
         filenames = self._find(self.ENTRIES, "*")

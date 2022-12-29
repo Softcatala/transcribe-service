@@ -34,6 +34,7 @@ CORS(app)
 
 MODELS = '/srv/models/'
 UPLOAD_FOLDER = '/srv/data/files/'
+PROCESSED_FOLDER = '/srv/data/processed/'
 SAVED_TEXTS = '/srv/data/saved/'
 
 @app.route('/hello', methods=['GET'])
@@ -57,35 +58,53 @@ def init_logging():
     logger.addHandler(console)
 
 def _allowed_file(filename):
-    ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg']
+    ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi']
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def save_file_to_process(filename, email, model_name):
+def save_file_to_process(filename, email, model_name, original_filename):
     db = BatchFilesDB()
-    db.create(filename, email, model_name)
+    db.create(filename, email, model_name, original_filename)
     
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
-@app.route('/get_file', methods=['GET'])
+@app.route('/get_file/', methods=['GET'])
 def health_get():
     uuid = request.args.get('uuid')
     ext = request.args.get('ext')
-    fullname = os.path.join(UPLOAD_FOLDER, uuid)
-    fullname += ext
-    with open(filename, mode='rb') as file:
+
+    if uuid == '':
+        result = {}
+        result['error'] = "No s'ha especificat el uuid"
+        return json_answer(result, 404)
+
+    if ext == '':  
+        result = {}
+        result['error'] = "No s'ha especificat l'extensió"
+        return json_answer(result, 404)
+
+    logging.debug(f"Get file {uuid} - {ext}")
+    fullname = os.path.join(PROCESSED_FOLDER, uuid)
+    fullname = f"{fullname}.{ext}"
+    with open(fullname, mode='rb') as file:
         content = file.read()
 
-    return content
+    resp = Response(content, mimetype="application/octet-stream")
+    resp.headers["Content-Length"] = len(content)
+    resp.headers["Content-Disposition"] = "attachment; filename=%s" % "file." + ext
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
+#    return content
 
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
 @app.route('/translate_file/', methods=['POST'])
 def upload_file():
-    file = request.files['file']
-    email = request.values['email']
-    model_name = request.values['model_name']
-    
-    if file.filename == '':
+    file = request.files['file'] if 'file' in request.files else ""
+    email = request.values['email'] if 'email' in request.values else ""    
+    model_name = request.values['model_name'] if 'model_name' in request.values else ""    
+
+    if file == '' or file.filename == '':
         result = {}
         result['error'] = "No s'ha especificat el fitxer"
         return json_answer(result, 404)
@@ -94,14 +113,19 @@ def upload_file():
         result = {}
         result['error'] = "No s'ha especificat el correu"
         return json_answer(result, 404)
-
+        
+    if model_name == '':
+        result = {}
+        result['error'] = "No s'ha especificat el model"
+        return json_answer(result, 404)
+        
     if file and _allowed_file(file.filename):
         filename = uuid.uuid4().hex
         fullname = os.path.join(UPLOAD_FOLDER, filename)
         file.save(fullname)
 
-        save_file_to_process(fullname, email, model_name)
-        logging.debug("Saved file {0}".format(fullname))
+        save_file_to_process(fullname, email, model_name, file.filename)
+        logging.debug(f"Saved file {file.filename} to {fullname}")
         result = []
         return json_answer(result)
 
