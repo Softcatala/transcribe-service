@@ -22,7 +22,6 @@ from __future__ import print_function
 from flask import Flask, request, Response
 from flask_cors import CORS, cross_origin
 import json
-import datetime
 from batchfilesdb import BatchFilesDB
 import os
 import uuid
@@ -58,7 +57,7 @@ def init_logging():
     logger.addHandler(console)
 
 def _allowed_file(filename):
-    ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi']
+    ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi', 'mp4']
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -67,9 +66,15 @@ def save_file_to_process(filename, email, model_name, original_filename):
     db = BatchFilesDB()
     db.create(filename, email, model_name, original_filename)
     
+def is_valid_uuid(val):
+    try:
+        uuid.UUID(str(val))
+        return True
+    except ValueError:
+        return False
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
 @app.route('/get_file/', methods=['GET'])
-def health_get():
+def get_file():
     uuid = request.args.get('uuid')
     ext = request.args.get('ext')
 
@@ -77,6 +82,11 @@ def health_get():
         result = {}
         result['error'] = "No s'ha especificat el uuid"
         return json_answer(result, 404)
+
+    if not is_valid_uuid(uuid):
+        result = {}
+        result['error'] = "uuid no vàlid"
+        return json_answer(result, 400)
 
     if ext == '':  
         result = {}
@@ -86,6 +96,12 @@ def health_get():
     logging.debug(f"Get file {uuid} - {ext}")
     fullname = os.path.join(PROCESSED_FOLDER, uuid)
     fullname = f"{fullname}.{ext}"
+
+    if not os.path.exists(fullname):
+        result = {}
+        result['error'] = "No existeix aquest fitxer. Potser ja s'esborrat."
+        return json_answer(result, 404)
+
     with open(fullname, mode='rb') as file:
         content = file.read()
 
