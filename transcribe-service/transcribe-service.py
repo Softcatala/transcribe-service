@@ -130,9 +130,8 @@ def get_file():
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
-
-
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
+@app.route('/transcribe_file/', methods=['POST'])
 @app.route('/translate_file/', methods=['POST'])
 def upload_file():
     file = request.files['file'] if 'file' in request.files else ""
