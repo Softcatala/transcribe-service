@@ -57,10 +57,23 @@ def init_logging():
     console.setLevel(LOGLEVEL)
     logger.addHandler(console)
 
+ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi', 'mp4']
 def _allowed_file(filename):
-    ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi', 'mp4']
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def _get_binary(uuid):
+    fullname = os.path.join(PROCESSED_FOLDER, uuid)
+    filename = ""
+    ext = ""
+    for _ext in ALLOWED_EXTENSIONS:
+        filename = f"{fullname}.{_ext}"
+        if os.path.exists(filename):
+            ext = _ext
+            break
+
+    logging.debug(f"_get_binary {uuid} -> {filename}")
+    return filename, ext
 
 
 def save_file_to_process(filename, email, model_name, original_filename):
@@ -73,6 +86,7 @@ def is_valid_uuid(val):
         return True
     except ValueError:
         return False
+        
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
 @app.route('/get_file/', methods=['GET'])
 def get_file():
@@ -95,8 +109,12 @@ def get_file():
         return json_answer(result, 404)
 
     logging.debug(f"Get file {uuid} - {ext}")
-    fullname = os.path.join(PROCESSED_FOLDER, uuid)
-    fullname = f"{fullname}.{ext}"
+    
+    if ext == "bin":
+        fullname, ext = _get_binary(uuid)
+    else:
+        fullname = os.path.join(PROCESSED_FOLDER, uuid)
+        fullname = f"{fullname}.{ext}"
 
     if not os.path.exists(fullname):
         result = {}
@@ -105,14 +123,14 @@ def get_file():
 
     with open(fullname, mode='rb') as file:
         content = file.read()
-
+        
     resp = Response(content, mimetype="application/octet-stream")
     resp.headers["Content-Length"] = len(content)
     resp.headers["Content-Disposition"] = "attachment; filename=%s" % "file." + ext
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
-#    return content
+
 
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
 @app.route('/translate_file/', methods=['POST'])

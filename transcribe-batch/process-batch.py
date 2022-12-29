@@ -44,6 +44,14 @@ def init_logging():
     console.setLevel(LOGLEVEL)
     logger.addHandler(console)
 
+def _get_extension(original_filename):
+    split_tup = os.path.splitext(original_filename)
+
+    file_extension = split_tup[1]
+    if file_extension == "":
+        file_extension = ".bin"
+
+    return file_extension
 
 def main():
 
@@ -60,7 +68,6 @@ def main():
             source_file = batchfile.filename
             logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
 
-            attachment = True
             outdir = "outdir/"
 
             print(f"batchfile.model_name: {batchfile.model_name}")
@@ -85,7 +92,9 @@ def main():
             source_file_base = os.path.basename(source_file)
             processed = ProcessedFilesDB(source_file_base)
             target_file_srt = os.path.join(outdir, source_file_base + ".srt")
-            target_file_txt = os.path.join(outdir, source_file_base + ".txt")            
+            target_file_txt = os.path.join(outdir, source_file_base + ".txt")
+            extension = _get_extension(batchfile.original_filename)
+#            target_file_bin = os.path.join(outdir, source_file_base + extension)
 
             logging.debug(f"Run {cmd} in {end_time}")
             
@@ -95,7 +104,7 @@ def main():
 
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
-            os.remove(source_file)
+            processed.move_file_bin(source_file, extension)
 
         time.sleep(30)
 
