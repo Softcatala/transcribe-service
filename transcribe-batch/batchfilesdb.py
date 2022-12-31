@@ -69,11 +69,20 @@ class BatchFilesDB():
             components = line.split(self.SEPARATOR)
             return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3])
 
-    def select(self):
+
+    def count(self):
+        filenames = self._find(self.ENTRIES, "*")
+        return len(filenames)
+
+    def select(self, email = None):
         filenames = self._find(self.ENTRIES, "*")
         records = []
         for filename in filenames:
             record = self._read_record(filename)
+
+            if email and record.email != email:
+                continue
+
             records.append(record)
 
         return records

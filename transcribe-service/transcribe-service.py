@@ -159,6 +159,17 @@ def upload_file():
         result = {"error": "El fitxer és massa gran"}
         return json_answer(result, 413)
 
+    db = BatchFilesDB()
+    if db.count() > 20:
+        result = {"error": "Hi ha massa fitxers a la cua de processament. Prova-ho en una estona"}
+        return json_answer(result, 429)
+
+    db = BatchFilesDB()
+    MAX_PER_EMAIL = 3
+    if len(db.select(email = email)) >= MAX_PER_EMAIL:
+        result = {"error": f"Ja tens {MAX_PER_EMAIL} fitxers a la cua. Espera't a que es processin per enviar-ne de nous."}
+        return json_answer(result, 429)
+
     filename = uuid.uuid4().hex
     fullname = os.path.join(UPLOAD_FOLDER, filename)
     file.save(fullname)

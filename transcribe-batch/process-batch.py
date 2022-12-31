@@ -79,11 +79,13 @@ def main():
                 model = "large-v2"
             elif batchfile.model_name == "sc-small":
                 model = "sc-small"
+            elif batchfile.model_name == "sc-medium":
+                model = "sc-medium"
             else: # default
                 model = "tiny"
 
             db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
-            cmd = f"whisper --fp16 False --threads 16 --language ca --model {model} {source_file} -o {outdir} > /dev/null"
+            cmd = f"whisper --fp16 False --threads 32 --language ca --model {model} {source_file} -o {outdir} > /dev/null"
 
             start_time = datetime.datetime.now()
             os.system(cmd)
