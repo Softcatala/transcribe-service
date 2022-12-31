@@ -86,8 +86,8 @@ def is_valid_uuid(val):
         return True
     except ValueError:
         return False
-        
-@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/get_file/', methods=['GET'])
 def get_file():
     uuid = request.args.get('uuid')
@@ -103,13 +103,13 @@ def get_file():
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
 
-    if ext == '':  
+    if ext == '':
         result = {}
         result['error'] = "No s'ha especificat l'extensió"
         return json_answer(result, 404)
 
     logging.debug(f"Get file {uuid} - {ext}")
-    
+
     if ext == "bin":
         fullname, ext = _get_binary(uuid)
     else:
@@ -123,51 +123,51 @@ def get_file():
 
     with open(fullname, mode='rb') as file:
         content = file.read()
-        
+
     resp = Response(content, mimetype="application/octet-stream")
     resp.headers["Content-Length"] = len(content)
     resp.headers["Content-Disposition"] = "attachment; filename=%s" % "file." + ext
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
-@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/transcribe_file/', methods=['POST'])
 @app.route('/translate_file/', methods=['POST'])
 def upload_file():
     file = request.files['file'] if 'file' in request.files else ""
-    email = request.values['email'] if 'email' in request.values else ""    
-    model_name = request.values['model_name'] if 'model_name' in request.values else ""    
+    email = request.values['email'] if 'email' in request.values else ""
+    model_name = request.values['model_name'] if 'model_name' in request.values else ""
 
-    if file == '' or file.filename == '':
-        result = {}
-        result['error'] = "No s'ha especificat el fitxer"
+    if file == "" or file.filename == "":
+        result = {"error": "No s'ha especificat el fitxer"}
         return json_answer(result, 404)
 
-    if email == '':
-        result = {}
-        result['error'] = "No s'ha especificat el correu"
+    if email == "":
+        result = {"error": "No s'ha especificat el correu"}
         return json_answer(result, 404)
         
-    if model_name == '':
-        result = {}
-        result['error'] = "No s'ha especificat el model"
+    if model_name == "":
+        result = {"error": "No s'ha especificat el model"}
         return json_answer(result, 404)
-        
-    if file and _allowed_file(file.filename):
-        filename = uuid.uuid4().hex
-        fullname = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(fullname)
 
-        save_file_to_process(fullname, email, model_name, file.filename)
-        size = os.path.getsize(fullname)
-        logging.debug(f"Saved file {file.filename} to {fullname} (size: {size})")
-        result = []
-        return json_answer(result)
+    if not _allowed_file(file.filename):
+        result = {"error": "Tipus de fitxer no vàlid"}
+        return json_answer(result, 415)
 
-    result = {}
-    result['error'] = "Error desconegut"
-    return json_answer(result, 500)
+    MAX_SIZE = 1024*1024*1024 # 1GB
+    if request.content_length and request.content_length > MAX_SIZE:
+        result = {"error": "El fitxer és massa gran"}
+        return json_answer(result, 413)
 
+    filename = uuid.uuid4().hex
+    fullname = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(fullname)
+
+    save_file_to_process(fullname, email, model_name, file.filename)
+    size = os.path.getsize(fullname)
+    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size})")
+    result = []
+    return json_answer(result)
 
 def json_answer(data, status = 200):
     json_data = json.dumps(data, indent=4, separators=(',', ': '))
