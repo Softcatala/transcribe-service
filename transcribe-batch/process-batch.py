@@ -101,7 +101,7 @@ def main():
             logging.debug(f"Run {cmd} in {end_time}")
             
             text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{model}'. El podeu baixar des de "
-            text += f"https://web2015.softcatala.org/transcripcio/bentornat/?uuid={source_file_base}"
+            text += f"https://web2015.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
             Sendmail().send(text, batchfile.email, target_file_srt)
 
             processed.move_file(target_file_srt)

@@ -86,6 +86,33 @@ def is_valid_uuid(val):
         return True
     except ValueError:
         return False
+        
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+@app.route('/uuid_exists/', methods=['GET'])
+def uuid_exists():
+    uuid = request.args.get('uuid')
+
+    if uuid == '':
+        result = {}
+        result['error'] = "No s'ha especificat el uuid"
+        return json_answer(result, 404)
+
+    if not is_valid_uuid(uuid):
+        result = {}
+        result['error'] = "uuid no vàlid"
+        return json_answer(result, 400)
+
+    extensions = ["txt", "srt"]
+    for extension in extensions:
+        fullname = os.path.join(PROCESSED_FOLDER, uuid)
+        fullname = f"{fullname}.{extension}"
+
+        if not os.path.exists(fullname):
+            result = {"error": f"file {extension} does not exist"}
+            return json_answer(result, 404)
+
+    logging.debug(f"uuid_exists for {uuid} - 200")
+    return json_answer([], 200)
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/get_file/', methods=['GET'])
@@ -108,7 +135,6 @@ def get_file():
         result['error'] = "No s'ha especificat l'extensió"
         return json_answer(result, 404)
 
-    logging.debug(f"Get file {uuid} - {ext}")
 
     if ext == "bin":
         fullname, ext = _get_binary(uuid)
@@ -123,6 +149,8 @@ def get_file():
 
     with open(fullname, mode='rb') as file:
         content = file.read()
+
+    logging.debug(f"Send file {uuid} - {ext}")
 
     resp = Response(content, mimetype="application/octet-stream")
     resp.headers["Content-Length"] = len(content)

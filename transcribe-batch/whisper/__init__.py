@@ -27,9 +27,9 @@ _MODELS = {
     "large-v2": "https://openaipublic.azureedge.net/main/whisper/models/81f7c96c852ee8fc832187b0132e569d6c3065a3252ed18e56effd0b6a73e524/large-v2.pt",
     "large": "https://openaipublic.azureedge.net/main/whisper/models/81f7c96c852ee8fc832187b0132e569d6c3065a3252ed18e56effd0b6a73e524/large-v2.pt",
     "large": "https://openaipublic.azureedge.net/main/whisper/models/81f7c96c852ee8fc832187b0132e569d6c3065a3252ed18e56effd0b6a73e524/large-v2.pt",
-    "sc-small" : "https://huggingface.co/softcatala/whisper-small-ca/resolve/main/openai/c3fed188a6a95d16a3493242cedd26e7705de1b1adf0a41e29ab182190a7308b/softcatala-small-openai-format.pt",    
+    "sc-small" : "https://huggingface.co/softcatala/whisper-small-ca/resolve/main/openai/c3fed188a6a95d16a3493242cedd26e7705de1b1adf0a41e29ab182190a7308b/softcatala-small-openai-format.pt",
+    "sc-medium" : "https://huggingface.co/softcatala/whisper-medium-ca/resolve/main/openai/33ea9a6ef046879ee1adf42aff012a6e02b3c1a4731634b4c8a1a3ee6e3b1a3c/softcatala-medium-openai-format.pt",
 }
-
 
 def _download(url: str, root: str, in_memory: bool) -> Union[bytes, str]:
     os.makedirs(root, exist_ok=True)
