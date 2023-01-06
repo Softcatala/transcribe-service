@@ -42,7 +42,7 @@ def hello_word():
 
 
 def init_logging():
-    logfile = 'translate-service.log'
+    logfile = 'transcribe-service.log'
 
     LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
     logger = logging.getLogger()
