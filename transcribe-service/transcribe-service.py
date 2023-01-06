@@ -42,10 +42,10 @@ def hello_word():
 
 
 def init_logging():
-    logfile = 'transcribe-service.log'
-
+    LOGDIR = os.environ.get('LOGDIR', '')
     LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
     logger = logging.getLogger()
+    logfile = os.path.join(LOGDIR, 'transcribe-service.log')
     hdlr = logging.handlers.RotatingFileHandler(logfile, maxBytes=1024*1024, backupCount=1)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     hdlr.setFormatter(formatter)
