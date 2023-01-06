@@ -20,6 +20,7 @@
 import os
 import logging
 import shutil
+import uuid
 
 PROCESSED = '/srv/data/processed'
 
@@ -27,6 +28,13 @@ class ProcessedFilesDB():
 
     def __init__(self, uuid):
         self.uuid = uuid
+
+    def is_valid_uuid(self):
+        try:
+            uuid.UUID(str(self.uuid))
+            return True
+        except ValueError:
+            return False
 
     def ensure_dir():
         if not os.path.exists(PROCESSED):
@@ -37,16 +45,29 @@ class ProcessedFilesDB():
         target = os.path.join(PROCESSED, filename)
         shutil.copy(full_filename, target)
         logging.debug(f"Copy file {full_filename} to {target}")
-        
+
     def move_file(self, full_filename):
         filename = os.path.basename(full_filename)
         target = os.path.join(PROCESSED, filename)
         shutil.move(full_filename, target)
         logging.debug(f"Moved file {full_filename} to {target}")
-        
+
     def move_file_bin(self, full_filename, extension):
         filename = os.path.basename(full_filename)
         target = os.path.join(PROCESSED, f"{filename}{extension}")
         shutil.move(full_filename, target)
 
         logging.debug(f"Moved file {full_filename} to {target}")
+
+    def get_binary(self, allowed_extensions):
+        fullname = os.path.join(PROCESSED, self.uuid)
+        filename = ""
+        ext = ""
+        for _ext in allowed_extensions:
+            filename = f"{fullname}.{_ext}"
+            if os.path.exists(filename):
+                ext = _ext
+                break
+
+        logging.debug(f"_get_binary {uuid} -> {filename}")
+        return filename, ext

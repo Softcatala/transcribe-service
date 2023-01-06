@@ -23,10 +23,11 @@ from flask import Flask, request, Response
 from flask_cors import CORS, cross_origin
 import json
 from batchfilesdb import BatchFilesDB
+from processedfilesdb import ProcessedFilesDB
 import os
-import uuid
 import logging
 import logging.handlers
+import uuid
 
 app = Flask(__name__)
 
@@ -62,31 +63,10 @@ def _allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def _get_binary(uuid):
-    fullname = os.path.join(PROCESSED_FOLDER, uuid)
-    filename = ""
-    ext = ""
-    for _ext in ALLOWED_EXTENSIONS:
-        filename = f"{fullname}.{_ext}"
-        if os.path.exists(filename):
-            ext = _ext
-            break
-
-    logging.debug(f"_get_binary {uuid} -> {filename}")
-    return filename, ext
-
-
 def save_file_to_process(filename, email, model_name, original_filename):
     db = BatchFilesDB()
     db.create(filename, email, model_name, original_filename)
-    
-def is_valid_uuid(val):
-    try:
-        uuid.UUID(str(val))
-        return True
-    except ValueError:
-        return False
-        
+
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/uuid_exists/', methods=['GET'])
 def uuid_exists():
@@ -97,22 +77,25 @@ def uuid_exists():
         result['error'] = "No s'ha especificat el uuid"
         return json_answer(result, 404)
 
-    if not is_valid_uuid(uuid):
+    if not ProcessedFilesDB(uuid).is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
 
     extensions = ["txt", "srt"]
+    result_msg = []
+    result_code = 200
     for extension in extensions:
         fullname = os.path.join(PROCESSED_FOLDER, uuid)
         fullname = f"{fullname}.{extension}"
 
         if not os.path.exists(fullname):
-            result = {"error": f"file {extension} does not exist"}
-            return json_answer(result, 404)
+            result_msg = {"error": f"file {extension} does not exist"}
+            result_code = 404
+            break
 
-    logging.debug(f"uuid_exists for {uuid} - 200")
-    return json_answer([], 200)
+    logging.debug(f"uuid_exists for {uuid} - {result_code}")
+    return json_answer(result_msg, result_code)
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/get_file/', methods=['GET'])
@@ -125,7 +108,8 @@ def get_file():
         result['error'] = "No s'ha especificat el uuid"
         return json_answer(result, 404)
 
-    if not is_valid_uuid(uuid):
+    processedFilesDB = ProcessedFilesDB(uuid)
+    if not processedFilesDB.is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
@@ -135,9 +119,8 @@ def get_file():
         result['error'] = "No s'ha especificat l'extensió"
         return json_answer(result, 404)
 
-
     if ext == "bin":
-        fullname, ext = _get_binary(uuid)
+        fullname, ext = processedFilesDB.get_binary(ALLOWED_EXTENSIONS)
     else:
         fullname = os.path.join(PROCESSED_FOLDER, uuid)
         fullname = f"{fullname}.{ext}"
@@ -160,7 +143,6 @@ def get_file():
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/transcribe_file/', methods=['POST'])
-@app.route('/translate_file/', methods=['POST'])
 def upload_file():
     file = request.files['file'] if 'file' in request.files else ""
     email = request.values['email'] if 'email' in request.values else ""
