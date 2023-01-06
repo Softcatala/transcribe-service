@@ -96,6 +96,26 @@ def uuid_exists():
 
     logging.debug(f"uuid_exists for {uuid} - {result_code}")
     return json_answer(result_msg, result_code)
+    
+def _get_mimetype(extension):
+
+    if extension == "mp3":
+        mimetype = "audio/mpeg"
+    elif extension == "wav":
+        mimetype = "audio/wav"
+    elif extension == "ogg":
+        mimetype = "application/ogg"
+    elif extension == "avi":
+        mimetype = "video/x-msvideo"
+    elif extension == "mp4":
+        mimetype = "video/mp4"
+    elif extension == "txt":
+        mimetype = "text/plain"
+    else:
+        mimetype = "application/octet-stream"
+
+    logging.debug(f"_get_mimetype {extension} -> mime: {mimetype}")
+    return mimetype
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/get_file/', methods=['GET'])
@@ -135,7 +155,7 @@ def get_file():
 
     logging.debug(f"Send file {uuid} - {ext}")
 
-    resp = Response(content, mimetype="application/octet-stream")
+    resp = Response(content, mimetype=_get_mimetype(ext))
     resp.headers["Content-Length"] = len(content)
     resp.headers["Content-Disposition"] = "attachment; filename=%s" % "file." + ext
     resp.headers['Access-Control-Allow-Origin'] = '*'
