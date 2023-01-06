@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 #
-# Copyright (c) 2022 Jordi Mas i Hernandez <jmas@softcatala.org>
+# Copyright (c) 2022-2023 Jordi Mas i Hernandez <jmas@softcatala.org>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -33,10 +33,8 @@ app = Flask(__name__)
 
 CORS(app)
 
-MODELS = '/srv/models/'
 UPLOAD_FOLDER = '/srv/data/files/'
 PROCESSED_FOLDER = '/srv/data/processed/'
-SAVED_TEXTS = '/srv/data/saved/'
 
 @app.route('/hello', methods=['GET'])
 def hello_word():
