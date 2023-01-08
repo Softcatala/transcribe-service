@@ -37,21 +37,21 @@ class Sendmail():
         return part
 
     def send(self, text, email, attachment):
- #       try:
-        port = 25
-        sender_email = "info@softcatala.org"
+        try:
+            port = 25
+            sender_email = "info@softcatala.org"
 
-        with smtplib.SMTP("mail.scnet", port) as server:
-            message = MIMEMultipart("alternative")
-            message["Subject"] = "Transcripció de Softcatalà"
-            message["From"] = sender_email
-            message["To"] = email
+            with smtplib.SMTP("mail.scnet", port) as server:
+                message = MIMEMultipart("alternative")
+                message["Subject"] = "Transcripció de Softcatalà"
+                message["From"] = sender_email
+                message["To"] = email
 
-            part = MIMEText(text, "plain")
-            message.attach(part)
+                part = MIMEText(text, "plain")
+                message.attach(part)
 
-            server.sendmail(sender_email, email, message.as_string())
-#        except Exception as e:
-#            msg = "Error '{0}' sending to {1}".format(e, email)
-#            logging.error(msg)
+                server.sendmail(sender_email, email, message.as_string())
+        except Exception as e:
+            msg = "Error '{0}' sending to {1}".format(e, email)
+            logging.error(msg)
 
