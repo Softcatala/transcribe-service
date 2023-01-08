@@ -21,10 +21,12 @@ import os
 import logging
 import shutil
 import uuid
+import time
+import fnmatch
 
 PROCESSED = '/srv/data/processed'
 
-class ProcessedFilesDB():
+class ProcessedFiles():
 
     def __init__(self, uuid):
         self.uuid = uuid
@@ -71,3 +73,34 @@ class ProcessedFilesDB():
 
         logging.debug(f"_get_binary {uuid} -> {filename}")
         return filename, ext
+        
+    def _find_files(directory, pattern):
+        filelist = []
+
+        for root, dirs, files in os.walk(directory):
+            for basename in files:
+                if fnmatch.fnmatch(basename, pattern):
+                    filename = os.path.join(root, basename)
+                    filelist.append(filename)
+
+        return filelist
+
+    def purge_files(days, directory = PROCESSED):
+        HOURS_DAY = 24
+        MINUTES_HOUR = 60
+        MINUTES_SEC = 60
+        deleted = 0
+
+        files = ProcessedFiles._find_files(directory, "*")
+        time_limit = time.time() - (HOURS_DAY * MINUTES_HOUR * MINUTES_SEC * days)
+        for file in files:
+            file_time = os.stat(file).st_mtime
+            if file_time < time_limit:
+                try:
+                    os.remove(file)
+                    logging.debug(f"Deleted file: {file}")
+                    deleted += 1
+                except Exception as e:
+                    logging.error(f"Error deleting file {file}: {e}") 
+
+        return deleted

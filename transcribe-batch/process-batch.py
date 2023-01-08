@@ -24,7 +24,7 @@ import logging
 import logging.handlers
 import os
 from batchfilesdb import BatchFilesDB
-from processedfilesdb import ProcessedFilesDB
+from processedfiles import ProcessedFiles
 from sendmail import Sendmail
 import datetime
 
@@ -58,7 +58,10 @@ def main():
     print("Process batch files to transcribe")
     init_logging()
     db = BatchFilesDB()
-    ProcessedFilesDB.ensure_dir()
+    ProcessedFiles.ensure_dir()
+    purge_last_time = time.time()
+    PURGE_INTERVAL_SECONDS = 60 * 10 * 24 # Every day
+    PURGE_OLDER_THAN_DAYS = 3
 
     while True:
         batchfiles = db.select()
@@ -92,7 +95,7 @@ def main():
             end_time = datetime.datetime.now() - start_time
 
             source_file_base = os.path.basename(source_file)
-            processed = ProcessedFilesDB(source_file_base)
+            processed = ProcessedFiles(source_file_base)
             target_file_srt = os.path.join(outdir, source_file_base + ".srt")
             target_file_txt = os.path.join(outdir, source_file_base + ".txt")
             extension = _get_extension(batchfile.original_filename)
@@ -107,6 +110,12 @@ def main():
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
             processed.move_file_bin(source_file, extension)
+
+        now = time.time()
+        if now > purge_last_time + PURGE_INTERVAL_SECONDS:
+            purge_last_time = now
+            logging.debug("Purging {datetime.datetime.now()}")
+            ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
 
         time.sleep(30)
 

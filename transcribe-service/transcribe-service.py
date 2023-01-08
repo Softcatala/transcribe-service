@@ -23,7 +23,7 @@ from flask import Flask, request, Response
 from flask_cors import CORS, cross_origin
 import json
 from batchfilesdb import BatchFilesDB
-from processedfilesdb import ProcessedFilesDB
+from processedfiles import ProcessedFiles
 import os
 import logging
 import logging.handlers
@@ -75,7 +75,7 @@ def uuid_exists():
         result['error'] = "No s'ha especificat el uuid"
         return json_answer(result, 404)
 
-    if not ProcessedFilesDB(uuid).is_valid_uuid():
+    if not ProcessedFiles(uuid).is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
@@ -126,8 +126,8 @@ def get_file():
         result['error'] = "No s'ha especificat el uuid"
         return json_answer(result, 404)
 
-    processedFilesDB = ProcessedFilesDB(uuid)
-    if not processedFilesDB.is_valid_uuid():
+    processedFiles = ProcessedFiles(uuid)
+    if not processedFiles.is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
@@ -138,7 +138,7 @@ def get_file():
         return json_answer(result, 404)
 
     if ext == "bin":
-        fullname, ext = processedFilesDB.get_binary(ALLOWED_EXTENSIONS)
+        fullname, ext = processedFiles.get_binary(ALLOWED_EXTENSIONS)
     else:
         fullname = os.path.join(PROCESSED_FOLDER, uuid)
         fullname = f"{fullname}.{ext}"
