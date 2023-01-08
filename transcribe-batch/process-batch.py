@@ -114,7 +114,7 @@ def main():
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
             purge_last_time = now
-            logging.debug("Purging {datetime.datetime.now()}")
+            logging.debug(f"Purging {datetime.datetime.now()}")
             ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
 
         time.sleep(30)
