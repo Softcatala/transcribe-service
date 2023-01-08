@@ -32,7 +32,7 @@ def init_logging():
 
     LOGDIR = os.environ.get('LOGDIR', '')
     LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
-    logfile = os.path.join(LOGDIR, 'process-batch.log")
+    logfile = os.path.join(LOGDIR, 'process-batch.log')
     logger = logging.getLogger()
     hdlr = logging.handlers.RotatingFileHandler(logfile, maxBytes=1024*1024, backupCount=1)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
