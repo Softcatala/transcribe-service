@@ -11,10 +11,11 @@ stages:
   - transcribe-batch
   - deploy
 
-before_script:
-  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 transcribe-service:
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
   image: docker:latest
   services:
     - docker:dind
@@ -27,6 +28,9 @@ transcribe-service:
     - docker push $IMAGE_NAME
 
 transcribe-batch:
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
   image: docker:latest
   services:
     - docker:dind
