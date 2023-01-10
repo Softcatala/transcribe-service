@@ -41,6 +41,11 @@ class ProcessedFiles():
     def ensure_dir():
         if not os.path.exists(PROCESSED):
             os.makedirs(PROCESSED)
+            
+    def _get_extension(self, filename):
+        split_tup = os.path.splitext(filename)
+        file_extension = split_tup[1]
+        return file_extension            
 
     def copy_file(self, full_filename):
         filename = os.path.basename(full_filename)
@@ -50,13 +55,14 @@ class ProcessedFiles():
 
     def move_file(self, full_filename):
         filename = os.path.basename(full_filename)
-        target = os.path.join(PROCESSED, filename)
+        ext = self._get_extension(filename)
+        target = os.path.join(PROCESSED, f"{self.uuid}{ext}")
         shutil.move(full_filename, target)
         logging.debug(f"Moved file {full_filename} to {target}")
 
     def move_file_bin(self, full_filename, extension):
         filename = os.path.basename(full_filename)
-        target = os.path.join(PROCESSED, f"{filename}{extension}")
+        target = os.path.join(PROCESSED, f"{self.uuid}{extension}")
         shutil.move(full_filename, target)
 
         logging.debug(f"Moved file {full_filename} to {target}")
@@ -71,7 +77,7 @@ class ProcessedFiles():
                 ext = _ext
                 break
 
-        logging.debug(f"_get_binary {uuid} -> {filename}")
+        logging.debug(f"_get_binary {self.uuid} -> {filename}")
         return filename, ext
         
     def _find_files(directory, pattern):

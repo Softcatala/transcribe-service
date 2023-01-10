@@ -1,6 +1,6 @@
 
 // https://api.softcatala.org/transcribe/v1/
-var URL='https://api.softcatala.org/transcribe-service/v1'
+var URL='http://localhost:8700'
 
 var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
@@ -38,7 +38,7 @@ function sendFile()
         }
 
         var formData = new FormData(document.getElementById('form-id'));
-        url = URL + `/translate_file/`;
+        url = URL + `/transcribe_file/`;
         xmlHttp.open("post", url);
         xmlHttp.send(formData); 
 }

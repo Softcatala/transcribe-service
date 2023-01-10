@@ -7,10 +7,26 @@ variables:
   PROJECT_TO_BE_DEPLOYED: 'docker/transcribe-service'
 
 stages:
+  - transcribe-models
   - transcribe-service
   - transcribe-batch
   - deploy
 
+transcribe-models:
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+  image: docker:latest
+  services:
+    - docker:dind
+
+  stage: transcribe-models
+  script:
+    - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-models
+    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
+    - export DOCKER_PATH=transcribe-batch/docker/Dockerfile-models
+    - docker build --cache-from $IMAGE_NAME --tag transcribe-models --tag $IMAGE_NAME . -f $DOCKER_PATH
+    - docker push $IMAGE_NAME
 
 transcribe-service:
   before_script:
