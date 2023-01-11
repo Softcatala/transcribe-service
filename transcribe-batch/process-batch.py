@@ -79,7 +79,7 @@ def _run_inference(source_file, model, converted_audio):
                 
     model_path = os.path.join(WHISPER_PATH, model)
     whisper_cmd = os.path.join(WHISPER_PATH, "main")
-    cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt "
+    cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
     os.system(cmd)
 
     end_time = datetime.datetime.now() - start_time
