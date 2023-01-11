@@ -43,7 +43,7 @@ class Sendmail():
 
             with smtplib.SMTP("mail.scnet", port) as server:
                 message = MIMEMultipart("alternative")
-                message["Subject"] = "Transcripció de Softcatalà"
+                message["Subject"] = "Servei de transcripció de Softcatalà"
                 message["From"] = sender_email
                 message["To"] = email
 
