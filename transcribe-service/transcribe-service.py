@@ -107,6 +107,10 @@ def _get_mimetype(extension):
         mimetype = "video/x-msvideo"
     elif extension == "mp4":
         mimetype = "video/mp4"
+    elif extension == "mkv":
+        mimetype = "video/x-matroska"
+    elif extension == "mov":
+        mimetype = "video/quicktime"
     elif extension == "txt":
         mimetype = "text/plain"
     else:
