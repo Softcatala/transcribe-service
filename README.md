@@ -18,4 +18,8 @@ Once the system is built, you can run it typing:
 docker-run
 ```
 
-And open http://localhost:8700/hello to test the service
+And open http://localhost:8700/hello to verify that the service works.
+
+Also in the [html-client](html-client) directory you have a simple HTML client to test the service.
+
+
