@@ -56,7 +56,7 @@ def init_logging():
     console.setLevel(LOGLEVEL)
     logger.addHandler(console)
 
-ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi', 'mp4']
+ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi', 'mp4', "mkv", "mov"]
 def _allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
