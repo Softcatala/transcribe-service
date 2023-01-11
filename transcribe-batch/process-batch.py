@@ -70,6 +70,7 @@ def _get_model_file(model_name):
 
 def _run_inference(source_file, model, converted_audio):
     WHISPER_PATH = "/srv/whisper.cpp/"
+    THREADS = os.environ.get('THREADS', 4)
     
     start_time = datetime.datetime.now()
     
@@ -77,9 +78,10 @@ def _run_inference(source_file, model, converted_audio):
     os.system(cmd)
                 
     model_path = os.path.join(WHISPER_PATH, model)
-    whisper_cmd = os.path.join(WHISPER_PATH, "main")            
-    cmd = f"{whisper_cmd} --threads 32 -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
+    whisper_cmd = os.path.join(WHISPER_PATH, "main")
+    cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt "
     os.system(cmd)
+
     end_time = datetime.datetime.now() - start_time
     
     logging.debug(f"Run {cmd} in {end_time}")
