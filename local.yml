@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  transcribe-service:
+    image: transcribe-service:latest
+    restart: always
+    ports:
+      - "8700:8700"
+
+    volumes:
+      - transcribe-files:/srv/data
+
+    environment:
+      LOGLEVEL: 'DEBUG'
+#      LOGDIR: "/srv/data/logs"
+
+  transcribe-batch:
+    image: transcribe-batch:latest
+    restart: always
+
+    volumes:
+      - transcribe-files:/srv/data
+
+    environment:
+      LOGLEVEL: 'DEBUG'
+#      LOGDIR: "/srv/data/logs"
+
+networks:
+  default:
+    external:
+      name: softcatala
+
+  
+volumes:
+  transcribe-files:

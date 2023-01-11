@@ -9,3 +9,6 @@ docker-build-transcribe-service:
 docker-build-transcribe-batch: docker-build-transcribe-models
 	docker build -t transcribe-batch . -f transcribe-batch/docker/Dockerfile;
 
+docker-run:
+	docker-compose -f local.yml up;
+
