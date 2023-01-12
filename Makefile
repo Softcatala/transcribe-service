@@ -12,3 +12,6 @@ docker-build-transcribe-batch: docker-build-transcribe-models
 docker-run:
 	docker-compose -f local.yml up;
 
+test:
+	cd transcribe-batch && python -m nose2
+

@@ -7,10 +7,21 @@ variables:
   PROJECT_TO_BE_DEPLOYED: 'docker/transcribe-service'
 
 stages:
+  - test
   - transcribe-models
   - transcribe-service
   - transcribe-batch
   - deploy
+
+test:
+  image: python:3.11.0-slim-bullseye
+  before_script:
+    - pip install nose2
+  stage: test
+  script:
+    - apt-get update && apt-get install make -y
+    - pip install -r transcribe-batch/requirements.txt
+    - make test
 
 transcribe-models:
   before_script:
