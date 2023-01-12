@@ -53,7 +53,7 @@ def _get_extension(original_filename):
         file_extension = ".bin"
 
     return file_extension
-    
+
 def _get_model_file(model_name):
     if model_name == "small":
         model = "ggml-small.bin"
@@ -71,22 +71,22 @@ def _get_model_file(model_name):
 def _run_inference(source_file, model, converted_audio):
     WHISPER_PATH = "/srv/whisper.cpp/"
     THREADS = os.environ.get('THREADS', 4)
-    
+
     start_time = datetime.datetime.now()
-    
+
     cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y 2> /dev/null > /dev/null"
     os.system(cmd)
-                
+
     model_path = os.path.join(WHISPER_PATH, model)
     whisper_cmd = os.path.join(WHISPER_PATH, "main")
     cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
     os.system(cmd)
 
     end_time = datetime.datetime.now() - start_time
-    
+
     logging.debug(f"Run {cmd} in {end_time}")
 
-    
+
 def main():
 
     print("Process batch files to transcribe")
@@ -113,17 +113,17 @@ def main():
             model = _get_model_file(batchfile.model_name)
 
             db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
-            
+
             converted_audio = os.path.join(out_dir, WAV_FILE)
             _run_inference(source_file, model, converted_audio)
 
             source_file_base = os.path.basename(source_file)
             processed = ProcessedFiles(source_file_base)
-            
+
             target_file_srt = converted_audio + ".srt"
             target_file_txt = converted_audio + ".txt"
             extension = _get_extension(batchfile.original_filename)
-            
+
             text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{model}'. El podeu baixar des de "
             text += f"https://web2015.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
             Sendmail().send(text, batchfile.email)

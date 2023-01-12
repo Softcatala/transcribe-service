@@ -103,7 +103,7 @@ ALLOWED_MIMEYPES = {"mp3": "audio/mpeg",
 def _allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_MIMEYPES.keys()
-    
+
 def _get_mimetype(extension):
 
     mimetype = ALLOWED_MIMEYPES.get(extension)
@@ -175,7 +175,7 @@ def upload_file():
     if email == "":
         result = {"error": "No s'ha especificat el correu"}
         return json_answer(result, 404)
-        
+
     if model_name == "":
         result = {"error": "No s'ha especificat el model"}
         return json_answer(result, 404)

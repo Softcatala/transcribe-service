@@ -41,11 +41,11 @@ class ProcessedFiles():
     def ensure_dir():
         if not os.path.exists(PROCESSED):
             os.makedirs(PROCESSED)
-            
+
     def _get_extension(self, filename):
         split_tup = os.path.splitext(filename)
         file_extension = split_tup[1]
-        return file_extension            
+        return file_extension
 
     def copy_file(self, full_filename):
         filename = os.path.basename(full_filename)
@@ -79,7 +79,7 @@ class ProcessedFiles():
 
         logging.debug(f"_get_binary {self.uuid} -> {filename}")
         return filename, ext
-        
+
     def _find_files(directory, pattern):
         filelist = []
 
@@ -107,6 +107,6 @@ class ProcessedFiles():
                     logging.debug(f"Deleted file: {file}")
                     deleted += 1
                 except Exception as e:
-                    logging.error(f"Error deleting file {file}: {e}") 
+                    logging.error(f"Error deleting file {file}: {e}")
 
         return deleted
