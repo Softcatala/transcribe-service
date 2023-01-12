@@ -56,11 +56,6 @@ def init_logging():
     console.setLevel(LOGLEVEL)
     logger.addHandler(console)
 
-ALLOWED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'avi', 'mp4', "mkv", "mov"]
-def _allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 def save_file_to_process(filename, email, model_name, original_filename):
     db = BatchFilesDB()
     db.create(filename, email, model_name, original_filename)
@@ -94,27 +89,30 @@ def uuid_exists():
 
     logging.debug(f"uuid_exists for {uuid} - {result_code}")
     return json_answer(result_msg, result_code)
+
+
+ALLOWED_MIMEYPES = {"mp3": "audio/mpeg",
+                    "wav": "audio/wav",
+                    "ogg": "application/ogg",
+                    "avi": "video/x-msvideo",
+                    "mp4": "video/mp4",
+                    "mkv": "video/x-matroska",
+                    "mov": "video/quicktime",
+}
+
+def _allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_MIMEYPES.keys()
     
 def _get_mimetype(extension):
 
-    if extension == "mp3":
-        mimetype = "audio/mpeg"
-    elif extension == "wav":
-        mimetype = "audio/wav"
-    elif extension == "ogg":
-        mimetype = "application/ogg"
-    elif extension == "avi":
-        mimetype = "video/x-msvideo"
-    elif extension == "mp4":
-        mimetype = "video/mp4"
-    elif extension == "mkv":
-        mimetype = "video/x-matroska"
-    elif extension == "mov":
-        mimetype = "video/quicktime"
-    elif extension == "txt":
-        mimetype = "text/plain"
-    else:
-        mimetype = "application/octet-stream"
+    mimetype = ALLOWED_MIMEYPES.get(extension)
+
+    if not mimetype:
+        if extension == "txt":
+            mimetype = "text/plain"
+        else:
+            mimetype = "application/octet-stream"
 
     logging.debug(f"_get_mimetype {extension} -> mime: {mimetype}")
     return mimetype
@@ -142,7 +140,7 @@ def get_file():
         return json_answer(result, 404)
 
     if ext == "bin":
-        fullname, ext = processedFiles.get_binary(ALLOWED_EXTENSIONS)
+        fullname, ext = processedFiles.get_binary(ALLOWED_MIMEYPES.keys())
     else:
         fullname = os.path.join(PROCESSED_FOLDER, uuid)
         fullname = f"{fullname}.{ext}"
@@ -196,7 +194,6 @@ def upload_file():
         result = {"error": "Hi ha massa fitxers a la cua de processament. Prova-ho en una estona"}
         return json_answer(result, 429)
 
-    db = BatchFilesDB()
     MAX_PER_EMAIL = 3
     if len(db.select(email = email)) >= MAX_PER_EMAIL:
         result = {"error": f"Ja tens {MAX_PER_EMAIL} fitxers a la cua. Espera't que es processin per enviar-ne de nous."}
