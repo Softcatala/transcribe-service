@@ -31,12 +31,12 @@ class Sendmail():
         with open(filename, mode='rb') as file:
             content = file.read()
 
-        attachment_name = os.path.basename(filename)          
+        attachment_name = os.path.basename(filename)
         part = MIMEApplication(content, Name=attachment_name)
         part['Content-Disposition'] = f'attachment; filename={attachment_name}'
         return part
 
-    def send(self, text, email, attachment):
+    def send(self, text, email):
         try:
             port = 25
             sender_email = "info@softcatala.org"
