@@ -77,7 +77,8 @@ def _run_inference(source_file, model, converted_audio):
     cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y 2> /dev/null > /dev/null"
     os.system(cmd)
 
-    model_path = os.path.join(WHISPER_PATH, model)
+    model_path = os.path.join(WHISPER_PATH, "sc-models", model)
+    print(f"model_path: {model_path}")    
     whisper_cmd = os.path.join(WHISPER_PATH, "main")
     cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
     os.system(cmd)

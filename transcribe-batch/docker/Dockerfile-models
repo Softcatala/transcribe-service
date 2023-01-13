@@ -1,10 +1,9 @@
 FROM python:3.11.0-slim-bullseye as get_models
-RUN apt-get update -y && apt-get upgrade -y && apt-get install git git-lfs -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install git git-lfs make -y
 
 # Get models
-RUN git clone --depth 1 https://gitlab.softcatala.org/jmas/whisper.cpp-models.git/ models
-WORKDIR models
-RUN git lfs pull
+COPY Makefile .
+RUN make whisper.cpp-models
 
 FROM python:3.11.0-slim-bullseye
-COPY --from=get_models /models/*.bin /models/
+COPY --from=get_models whisper.cpp/sc-models/*.bin /srv/whisper.cpp/sc-models/
