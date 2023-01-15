@@ -19,22 +19,11 @@
 
 import smtplib
 import logging
-import os
 from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 
 
 class Sendmail():
-
-    def _get_attachment_part(self, filename):
-        with open(filename, mode='rb') as file:
-            content = file.read()
-
-        attachment_name = os.path.basename(filename)
-        part = MIMEApplication(content, Name=attachment_name)
-        part['Content-Disposition'] = f'attachment; filename={attachment_name}'
-        return part
 
     def send(self, text, email):
         try:
