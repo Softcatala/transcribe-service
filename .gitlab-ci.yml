@@ -21,7 +21,7 @@ test:
   script:
     - apt-get update && apt-get install make -y
     - pip install -r transcribe-batch/requirements.txt
-    - make test
+    - cd transcribe-batch && nose2
 
 transcribe-models:
   before_script:
