@@ -94,7 +94,7 @@ def _send_mail(batchfile, inference_time, source_file_base):
     text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
     text += f"https://web2015.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
 
-    if "@softcatala.org" in batchfile.email:
+    if "@softcatala" in batchfile.email:
         THREADS = _get_threads()
         text += f"\nL'execució ha trigat {inference_time} amb {THREADS} threads."
 
