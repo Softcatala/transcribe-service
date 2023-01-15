@@ -68,9 +68,12 @@ def _get_model_file(model_name):
 
     return model
 
+def _get_threads():
+    return os.environ.get('THREADS', 4)
+
 def _run_inference(source_file, model, converted_audio):
     WHISPER_PATH = "/srv/whisper.cpp/"
-    THREADS = os.environ.get('THREADS', 4)
+    THREADS = _get_threads()
 
     start_time = datetime.datetime.now()
 
@@ -86,7 +89,17 @@ def _run_inference(source_file, model, converted_audio):
     end_time = datetime.datetime.now() - start_time
 
     logging.debug(f"Run {cmd} in {end_time}")
+    return end_time
 
+def _send_mail(batchfile, inference_time, source_file_base):
+    text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
+    text += f"https://web2015.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
+
+    if "@softcatala.org" in batchfile.email:
+        THREADS = _get_threads()
+        text += f"\nL'execució ha trigat {inference_time} amb {THREADS} threads."
+
+    Sendmail().send(text, batchfile.email)
 
 def main():
 
@@ -116,7 +129,7 @@ def main():
             db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
 
             converted_audio = os.path.join(out_dir, WAV_FILE)
-            _run_inference(source_file, model, converted_audio)
+            inference_time = _run_inference(source_file, model, converted_audio)
 
             source_file_base = os.path.basename(source_file)
             processed = ProcessedFiles(source_file_base)
@@ -124,10 +137,7 @@ def main():
             target_file_srt = converted_audio + ".srt"
             target_file_txt = converted_audio + ".txt"
             extension = _get_extension(batchfile.original_filename)
-
-            text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{model}'. El podeu baixar des de "
-            text += f"https://web2015.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
-            Sendmail().send(text, batchfile.email)
+            _send_mail(batchfile, inference_time, source_file_base)
 
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
