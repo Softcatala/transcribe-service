@@ -107,7 +107,7 @@ def main():
     db = BatchFilesDB()
     ProcessedFiles.ensure_dir()
     purge_last_time = time.time()
-    PURGE_INTERVAL_SECONDS = 60 * 60 * 24 # Every day
+    PURGE_INTERVAL_SECONDS = 60 * 6 * 24 # For times per day
     PURGE_OLDER_THAN_DAYS = 3
     WAV_FILE = "file.wav"
 
