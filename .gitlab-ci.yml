@@ -14,7 +14,7 @@ stages:
   - deploy
 
 test:
-  image: python:3.11.0-slim-bullseye
+  image: python:3.11.1-slim-bullseye
   before_script:
     - pip install nose2
   stage: test
