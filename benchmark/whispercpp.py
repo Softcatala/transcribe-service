@@ -25,7 +25,6 @@ import sys
 import json
 
 def inference(input_file, model):
-
     print(f"model: {model}")
     start_time = datetime.datetime.now()
     reference_file = os.path.splitext(input_file)[0] + ".txt"
@@ -52,11 +51,11 @@ def inference(input_file, model):
     _wer = load("wer")
     wer_score = _wer.compute(predictions=[prediction], references=[reference])
     wer_score = wer_score * 100
-    return f"{wer_score:.2f}", str(_time)
+    return wer_score, str(_time)
     
 def single_model(model):
     wer_score, time = inference("samples/15GdH9-curt.mp3", model)
-    print(f"time: {time}, wer: {wer_score}, model: {model}")
+    print(f"time: {time}, wer: {wer_score:.2f}, model: {model}")
                  
 def main():
     print("Benchmark whisper.cpp inference")
@@ -65,11 +64,22 @@ def main():
         return single_model(sys.argv[1])
 
     models = ["small", "sc-small", "medium", "sc-medium"]
+    audios = ["samples/15GdH9-curt.mp3", "samples/Ona_catalan-balear.mp3", "samples/Son_Goku_catalan_valencian_voice.ogg"]
     results = []
     for model in models:
-        wer, _time = inference("samples/15GdH9-curt.mp3", model)
-        result = {"wer" : wer, "time" : _time, "model": model}
-        results.append(result)
+        results_model = []
+        total_wer = 0
+        for audio in audios:
+            wer_score, _time = inference(audio, model)
+            result = {"audio" : audio, "wer" : f"{wer_score:.2f}", "time" : _time}
+            results_model.append(result)
+            total_wer += wer_score
+
+        avg_wer = total_wer / len(audios)
+        result = {"avg_wer" : f"{avg_wer:.2f}"}
+        results_model.append(result)
+        results.append({model : results_model})
+        
 
     json_data = json.dumps(results, indent=4)
     with open("results.json", "w") as outfile:

@@ -1,22 +1,90 @@
 [
     {
-        "wer": "88.61",
-        "time": "0:01:02.039344",
-        "model": "small"
+        "small": [
+            {
+                "audio": "samples/15GdH9-curt.mp3",
+                "wer": "88.61",
+                "time": "0:01:05.796606"
+            },
+            {
+                "audio": "samples/Ona_catalan-balear.mp3",
+                "wer": "40.16",
+                "time": "0:00:42.873999"
+            },
+            {
+                "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
+                "wer": "41.77",
+                "time": "0:01:34.271058"
+            },
+            {
+                "avg_wer": "56.85"
+            }
+        ]
     },
     {
-        "wer": "75.90",
-        "time": "0:02:38.928250",
-        "model": "sc-small"
+        "sc-small": [
+            {
+                "audio": "samples/15GdH9-curt.mp3",
+                "wer": "75.90",
+                "time": "0:03:13.314598"
+            },
+            {
+                "audio": "samples/Ona_catalan-balear.mp3",
+                "wer": "50.53",
+                "time": "0:01:51.329043"
+            },
+            {
+                "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
+                "wer": "54.43",
+                "time": "0:00:36.031162"
+            },
+            {
+                "avg_wer": "60.29"
+            }
+        ]
     },
     {
-        "wer": "35.86",
-        "time": "0:03:24.422386",
-        "model": "medium"
+        "medium": [
+            {
+                "audio": "samples/15GdH9-curt.mp3",
+                "wer": "35.86",
+                "time": "0:03:45.851535"
+            },
+            {
+                "audio": "samples/Ona_catalan-balear.mp3",
+                "wer": "11.70",
+                "time": "0:02:13.081397"
+            },
+            {
+                "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
+                "wer": "21.52",
+                "time": "0:01:34.849684"
+            },
+            {
+                "avg_wer": "23.03"
+            }
+        ]
     },
     {
-        "wer": "53.32",
-        "time": "0:15:50.543179",
-        "model": "sc-medium"
+        "sc-medium": [
+            {
+                "audio": "samples/15GdH9-curt.mp3",
+                "wer": "53.32",
+                "time": "0:16:21.216075"
+            },
+            {
+                "audio": "samples/Ona_catalan-balear.mp3",
+                "wer": "59.31",
+                "time": "0:20:39.718924"
+            },
+            {
+                "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
+                "wer": "67.72",
+                "time": "0:17:54.382249"
+            },
+            {
+                "avg_wer": "60.12"
+            }
+        ]
     }
 ]
