@@ -94,6 +94,7 @@ def uuid_exists():
 ALLOWED_MIMEYPES = {"mp3": "audio/mpeg",
                     "wav": "audio/wav",
                     "ogg": "application/ogg",
+                    "flac": "audio/flac",
                     "avi": "video/x-msvideo",
                     "mp4": "video/mp4",
                     "mkv": "video/x-matroska",
