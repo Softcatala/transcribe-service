@@ -22,8 +22,7 @@ Also in the [html-client](html-client) directory you have a simple HTML client t
 
 # Updating whisper.cpp dependency
 
-Updating whisper.cpp dependency to a newer version.
-
+Updating whisper.cpp dependency to a newer version or test new models.
 
 In the [Makefile](Makefile) file, update the *whisper.cpp* task with right tag to do *git clone*.
 
