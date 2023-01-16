@@ -43,7 +43,8 @@ class TestBatchFilesDB(unittest.TestCase):
 
     def test_create(self):
         db = self._create_db_object()
-        filename_dbrecord = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         record = db._read_record(filename_dbrecord)
         self.assertEquals(self.FILENAME, record.filename)
@@ -64,7 +65,8 @@ class TestBatchFilesDB(unittest.TestCase):
 
     def test_delete(self):
         db = self._create_db_object()
-        filename_dbrecord = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         records_org = db.select()
         db.delete(filename_dbrecord)

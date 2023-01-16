@@ -125,13 +125,14 @@ def main():
             print(f"batchfile.model_name: {batchfile.model_name}")
             model = _get_model_file(batchfile.model_name)
 
-            db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
+            #db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
+            source_file_base = os.path.basename(source_file)
+            processed = ProcessedFiles(source_file_base)
+            processed.move_file(batchfile.filename_dbrecord)
 
             converted_audio = os.path.join(out_dir, WAV_FILE)
             inference_time = _run_inference(source_file, model, converted_audio)
 
-            source_file_base = os.path.basename(source_file)
-            processed = ProcessedFiles(source_file_base)
 
             target_file_srt = converted_audio + ".srt"
             target_file_txt = converted_audio + ".txt"

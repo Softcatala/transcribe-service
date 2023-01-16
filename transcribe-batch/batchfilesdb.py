@@ -32,25 +32,34 @@ class BatchFile():
 
 class BatchFilesDB():
 
-    ENTRIES = '/srv/data/entries'
     SEPARATOR = "\t"
     g_check_directory = True
+    
+    def __init__(self, entries = '/srv/data/entries'):
+        self.ENTRIES = entries
 
+    def get_record_file_from_uuid(self, _uuid):
+        return os.path.join(self.ENTRIES, _uuid + ".dbrecord")
 
-    def create(self, filename, email, model_name, original_filename):
+    def get_new_uuid(self):
+        return str(uuid.uuid4())
+
+    def create(self, filename, email, model_name, original_filename, record_uuid = None):
         if self.g_check_directory:
             self.g_check_directory = False
             if not os.path.exists(self.ENTRIES):
                 os.makedirs(self.ENTRIES)
 
-        filename_dbrecord = str(uuid.uuid4())
-        filename_dbrecord = os.path.join(self.ENTRIES, filename_dbrecord)
+        if not record_uuid:
+            record_uuid = self.get_new_uuid()
+
+        filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
 
         with open(filename_dbrecord, "w") as fh:
             line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}"
             fh.write(line)
 
-        return filename_dbrecord
+        return record_uuid
 
     def _find(self, directory, pattern):
         filelist = []
@@ -63,12 +72,16 @@ class BatchFilesDB():
 
         return filelist
 
+    def _read_record_from_uuid(self, _uuid):
+        record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")
+        record = self._read_record(record_fullpath)
+        return record
+    
     def _read_record(self, filename_dbrecord):
         with open(filename_dbrecord, "r") as fh:
             line = fh.readline()
             components = line.split(self.SEPARATOR)
             return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3])
-
 
     def count(self):
         filenames = self._find(self.ENTRIES, "*")

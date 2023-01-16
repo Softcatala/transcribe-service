@@ -30,6 +30,9 @@ class ProcessedFiles():
 
     def __init__(self, uuid):
         self.uuid = uuid
+        
+    def get_processed_directory():
+        return PROCESSED
 
     def is_valid_uuid(self):
         try:
@@ -37,6 +40,18 @@ class ProcessedFiles():
             return True
         except ValueError:
             return False
+
+    def do_files_exists(self):
+        extensions = ["txt", "srt"]
+        for extension in extensions:
+            fullname = os.path.join(PROCESSED, self.uuid)
+            fullname = f"{fullname}.{extension}"
+
+            if not os.path.exists(fullname):
+                message = f"file {extension} does not exist"
+                return False, message
+
+        return True, ""
 
     def ensure_dir():
         if not os.path.exists(PROCESSED):
@@ -66,19 +81,6 @@ class ProcessedFiles():
         shutil.move(full_filename, target)
 
         logging.debug(f"Moved file {full_filename} to {target}")
-
-    def get_binary(self, allowed_extensions):
-        fullname = os.path.join(PROCESSED, self.uuid)
-        filename = ""
-        ext = ""
-        for _ext in allowed_extensions:
-            filename = f"{fullname}.{_ext}"
-            if os.path.exists(filename):
-                ext = _ext
-                break
-
-        logging.debug(f"_get_binary {self.uuid} -> {filename}")
-        return filename, ext
 
     def _find_files(directory, pattern):
         filelist = []

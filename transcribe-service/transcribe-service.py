@@ -56,10 +56,6 @@ def init_logging():
     console.setLevel(LOGLEVEL)
     logger.addHandler(console)
 
-def save_file_to_process(filename, email, model_name, original_filename):
-    db = BatchFilesDB()
-    db.create(filename, email, model_name, original_filename)
-
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/uuid_exists/', methods=['GET'])
 def uuid_exists():
@@ -70,23 +66,14 @@ def uuid_exists():
         result['error'] = "No s'ha especificat el uuid"
         return json_answer(result, 404)
 
-    if not ProcessedFiles(uuid).is_valid_uuid():
+    processedFiles = ProcessedFiles(uuid)
+    if not processedFiles.is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
 
-    extensions = ["txt", "srt"]
-    result_msg = []
-    result_code = 200
-    for extension in extensions:
-        fullname = os.path.join(PROCESSED_FOLDER, uuid)
-        fullname = f"{fullname}.{extension}"
-
-        if not os.path.exists(fullname):
-            result_msg = {"error": f"file {extension} does not exist"}
-            result_code = 404
-            break
-
+    exists, result_msg = processedFiles.do_files_exists()
+    result_code = 200 if exists else 404
     logging.debug(f"uuid_exists for {uuid} - {result_code}")
     return json_answer(result_msg, result_code)
 
@@ -115,8 +102,12 @@ def _get_mimetype(extension):
         else:
             mimetype = "application/octet-stream"
 
-    logging.debug(f"_get_mimetype {extension} -> mime: {mimetype}")
     return mimetype
+    
+def _get_record(_uuid):
+    processed_dir = ProcessedFiles.get_processed_directory()
+    db = BatchFilesDB(processed_dir)
+    return db._read_record_from_uuid(_uuid)
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/get_file/', methods=['GET'])
@@ -139,12 +130,15 @@ def get_file():
         result = {}
         result['error'] = "No s'ha especificat l'extensió"
         return json_answer(result, 404)
+        
+    record = _get_record(uuid)
+    original_name, original_ext = os.path.splitext(record.original_filename)
 
     if ext == "bin":
-        fullname, ext = processedFiles.get_binary(ALLOWED_MIMEYPES.keys())
-    else:
-        fullname = os.path.join(PROCESSED_FOLDER, uuid)
-        fullname = f"{fullname}.{ext}"
+        ext = original_ext[1:]
+    
+    fullname = os.path.join(PROCESSED_FOLDER, uuid)
+    fullname = f"{fullname}.{ext}"
 
     if not os.path.exists(fullname):
         result = {}
@@ -154,12 +148,13 @@ def get_file():
     with open(fullname, mode='rb') as file:
         content = file.read()
 
-    logging.debug(f"Send file {uuid} - {ext}")
-
-    resp = Response(content, mimetype=_get_mimetype(ext))
+    resp_filename = f"{original_name}.{ext}"
+    mime_type = _get_mimetype(ext)
+    resp = Response(content, mimetype=mime_type)
     resp.headers["Content-Length"] = len(content)
-    resp.headers["Content-Disposition"] = "attachment; filename=%s" % "file." + ext
+    resp.headers["Content-Disposition"] = f"attachment; filename={resp_filename}"
     resp.headers['Access-Control-Allow-Origin'] = '*'
+    logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
     return resp
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -200,11 +195,11 @@ def upload_file():
         result = {"error": f"Ja tens {MAX_PER_EMAIL} fitxers a la cua. Espera't que es processin per enviar-ne de nous."}
         return json_answer(result, 429)
 
-    filename = uuid.uuid4().hex
-    fullname = os.path.join(UPLOAD_FOLDER, filename)
+    _uuid = db.get_new_uuid()
+    fullname = os.path.join(UPLOAD_FOLDER, _uuid)
+    db.create(fullname, email, model_name, file.filename, record_uuid=_uuid)
     file.save(fullname)
 
-    save_file_to_process(fullname, email, model_name, file.filename)
     size = os.path.getsize(fullname)
     logging.debug(f"Saved file {file.filename} to {fullname} (size: {size})")
     result = []
