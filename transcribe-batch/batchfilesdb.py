@@ -70,6 +70,7 @@ class BatchFilesDB():
                     filename = os.path.join(root, basename)
                     filelist.append(filename)
 
+        filelist.sort(key=lambda filename: os.path.getmtime(filename))
         return filelist
 
     def _read_record_from_uuid(self, _uuid):

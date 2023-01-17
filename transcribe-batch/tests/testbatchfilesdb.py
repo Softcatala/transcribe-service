@@ -22,6 +22,7 @@ import unittest
 import os
 import tempfile
 import sys
+from time import sleep
 
 class TestBatchFilesDB(unittest.TestCase):
 
@@ -62,6 +63,20 @@ class TestBatchFilesDB(unittest.TestCase):
         self.assertEquals(self.FILENAME, record.filename)
         self.assertEquals(self.EMAIL, record.email)
         self.assertEquals(self.MODEL_NAME, record.model_name)
+
+    def test_selected_expected_order(self):
+        db = self._create_db_object()
+        MAX_FILES_IN_QUEUE = 5
+
+        for id in range(0, MAX_FILES_IN_QUEUE):
+            # Make sure that all files will get different time stamps. Since some
+            # machines are faster than the timer resolution of the filesystem
+            sleep(1)
+            db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename")
+
+        records = db.select()
+        for id in range(0, MAX_FILES_IN_QUEUE):
+            self.assertEquals(str(id), records[id].filename)
 
     def test_delete(self):
         db = self._create_db_object()
