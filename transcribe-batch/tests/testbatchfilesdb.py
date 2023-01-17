@@ -22,7 +22,7 @@ import unittest
 import os
 import tempfile
 import sys
-from time import sleep
+import time
 
 class TestBatchFilesDB(unittest.TestCase):
 
@@ -66,13 +66,14 @@ class TestBatchFilesDB(unittest.TestCase):
 
     def test_selected_expected_order(self):
         db = self._create_db_object()
-        MAX_FILES_IN_QUEUE = 5
+        MINUTES_SEC = 60
+        MAX_FILES_IN_QUEUE = 20
 
         for id in range(0, MAX_FILES_IN_QUEUE):
-            # Make sure that all files will get different time stamps. Since some
-            # machines are faster than the timer resolution of the filesystem
-            sleep(1)
-            db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename")
+            _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename")
+            filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+            future_time = time.time() + (MINUTES_SEC * id)
+            os.utime(filename_dbrecord, (future_time, future_time))
 
         records = db.select()
         for id in range(0, MAX_FILES_IN_QUEUE):
