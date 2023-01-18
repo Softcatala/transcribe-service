@@ -48,6 +48,9 @@ def inference(input_file, model):
     with open(prediction_file) as f:
         prediction = f.read()
     
+    # This is a very naive way to calculate WER, there is normalisation like
+    # it's done in the orginal Whisper paper since the main goal here is
+    # to check for regressions
     _wer = load("wer")
     wer_score = _wer.compute(predictions=[prediction], references=[reference])
     wer_score = wer_score * 100
