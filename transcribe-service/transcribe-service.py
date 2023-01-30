@@ -154,6 +154,7 @@ def get_file():
     resp.headers["Content-Length"] = len(content)
     resp.headers["Content-Disposition"] = f"attachment; filename={resp_filename}"
     resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Accept-Ranges'] = 'bytes'
     logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
     return resp
 
