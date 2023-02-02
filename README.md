@@ -1,6 +1,6 @@
 # Introduction
 
-Simple web service that receives files and has a batch proces to transcribe then.
+Simple web service that receives files and has a batch process to transcribe them.
 
 # Description of system
 
