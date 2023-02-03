@@ -115,6 +115,11 @@ def get_file():
     uuid = request.args.get('uuid')
     ext = request.args.get('ext')
 
+    if ext == '':
+        result = {}
+        result['error'] = "No s'ha especificat l'extensió"
+        return json_answer(result, 404)
+
     if uuid == '':
         result = {}
         result['error'] = "No s'ha especificat el uuid"
@@ -126,9 +131,9 @@ def get_file():
         result['error'] = "uuid no vàlid"
         return json_answer(result, 400)
 
-    if ext == '':
-        result = {}
-        result['error'] = "No s'ha especificat l'extensió"
+    exists, _ = processedFiles.do_files_exists()
+    if not exists:
+        result = {"error": "uuid no existeix"}
         return json_answer(result, 404)
         
     record = _get_record(uuid)
