@@ -30,36 +30,12 @@ class BatchFile():
         self.model_name = model_name
         self.original_filename = original_filename
 
-class BatchFilesDB():
-
-    SEPARATOR = "\t"
+# This is a disk based priority queue with works as filenames
+# as items to store
+class Queue(): # works with filenames
     g_check_directory = True
-    
     def __init__(self, entries = '/srv/data/entries'):
         self.ENTRIES = entries
-
-    def get_record_file_from_uuid(self, _uuid):
-        return os.path.join(self.ENTRIES, _uuid + ".dbrecord")
-
-    def get_new_uuid(self):
-        return str(uuid.uuid4())
-
-    def create(self, filename, email, model_name, original_filename, record_uuid = None):
-        if self.g_check_directory:
-            self.g_check_directory = False
-            if not os.path.exists(self.ENTRIES):
-                os.makedirs(self.ENTRIES)
-
-        if not record_uuid:
-            record_uuid = self.get_new_uuid()
-
-        filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
-
-        with open(filename_dbrecord, "w") as fh:
-            line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}"
-            fh.write(line)
-
-        return record_uuid
 
     def _find(self, directory, pattern):
         filelist = []
@@ -73,23 +49,47 @@ class BatchFilesDB():
         filelist.sort(key=lambda filename: os.path.getmtime(filename))
         return filelist
 
-    def _read_record_from_uuid(self, _uuid):
-        record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")
-        record = self._read_record(record_fullpath)
-        return record
-    
-    def _read_record(self, filename_dbrecord):
-        with open(filename_dbrecord, "r") as fh:
-            line = fh.readline()
-            components = line.split(self.SEPARATOR)
-            return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3])
-
     def count(self):
         filenames = self._find(self.ENTRIES, "*")
         return len(filenames)
 
+    def get_all(self):
+        return self._find(self.ENTRIES, "*")
+  
+    def put(self, filename_dbrecord, content):
+        if self.g_check_directory:
+            self.g_check_directory = False
+        if not os.path.exists(self.ENTRIES):
+            os.makedirs(self.ENTRIES)
+
+        with open(filename_dbrecord, "w") as fh:
+            fh.write(content)
+
+    def delete(self, filename):
+        os.remove(filename)
+
+class BatchFilesDB(Queue):
+
+    SEPARATOR = "\t"
+
+    def get_record_file_from_uuid(self, _uuid):
+        return os.path.join(self.ENTRIES, _uuid + ".dbrecord")
+
+    def get_new_uuid(self):
+        return str(uuid.uuid4())
+
+    def create(self, filename, email, model_name, original_filename, record_uuid = None):
+
+        if not record_uuid:
+            record_uuid = self.get_new_uuid()
+
+        filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
+        line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}"
+        self.put(filename_dbrecord ,line)
+        return record_uuid
+
     def select(self, email = None):
-        filenames = self._find(self.ENTRIES, "*")
+        filenames = self.get_all()
         records = []
         for filename in filenames:
             record = self._read_record(filename)
@@ -101,6 +101,16 @@ class BatchFilesDB():
 
         return records
 
-    def delete(self, filename):
-        os.remove(filename)
+    def _read_record_from_uuid(self, _uuid):
+        record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")
+        record = self._read_record(record_fullpath)
+        return record
+    
+    def _read_record(self, filename_dbrecord):
+        with open(filename_dbrecord, "r") as fh:
+            line = fh.readline()
+            components = line.split(self.SEPARATOR)
+            return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3])
+
+ 
 
