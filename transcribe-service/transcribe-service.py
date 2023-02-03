@@ -118,22 +118,26 @@ def get_file():
     if ext == '':
         result = {}
         result['error'] = "No s'ha especificat l'extensió"
+        logging.debug(f"/get_file/ {result['error']}")
         return json_answer(result, 404)
 
     if uuid == '':
         result = {}
         result['error'] = "No s'ha especificat el uuid"
+        logging.debug(f"/get_file/ {result['error']}")
         return json_answer(result, 404)
 
     processedFiles = ProcessedFiles(uuid)
     if not processedFiles.is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
+        logging.debug(f"/get_file/ {result['error']}")
         return json_answer(result, 400)
 
     exists, _ = processedFiles.do_files_exists()
     if not exists:
         result = {"error": "uuid no existeix"}
+        logging.debug(f"/get_file/ {result['error']}")
         return json_answer(result, 404)
         
     record = _get_record(uuid)
@@ -194,11 +198,13 @@ def upload_file():
     db = BatchFilesDB()
     if db.count() > 20:
         result = {"error": "Hi ha massa fitxers a la cua de processament. Prova-ho en una estona"}
+        logging.debug(f"/transcribe_file/ {result['error']}")
         return json_answer(result, 429)
 
     MAX_PER_EMAIL = 3
     if len(db.select(email = email)) >= MAX_PER_EMAIL:
         result = {"error": f"Ja tens {MAX_PER_EMAIL} fitxers a la cua. Espera't que es processin per enviar-ne de nous."}
+        logging.debug(f"/transcribe_file/ {result['error']}")
         return json_answer(result, 429)
 
     _uuid = db.get_new_uuid()

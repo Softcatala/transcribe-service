@@ -112,6 +112,7 @@ def _send_mail_error(batchfile, inference_time, source_file_base, message):
     text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. "
     text += message
 
+    logging.debug(f"_send_mail_error: {message} to {batchfile.email}")
     Sendmail().send(text, batchfile.email)
 
 def main():
@@ -156,7 +157,7 @@ def main():
                 continue
 
             if result != NO_ERROR:
-                _send_mail_error(batchfile, inference_time, source_file_base, f"Reviseu que sigui un d'àudio i vídeo vàlid.")
+                _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio i vídeo vàlid.")
                 continue
 
             target_file_srt = converted_audio + ".srt"
