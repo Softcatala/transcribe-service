@@ -157,6 +157,7 @@ def get_file():
     with open(fullname, mode='rb') as file:
         content = file.read()
 
+    original_name = original_name.encode("ascii", "ignore").decode("ascii")
     resp_filename = f"{original_name}.{ext}"
     mime_type = _get_mimetype(ext)
     resp = Response(content, mimetype=mime_type)
