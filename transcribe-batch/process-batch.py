@@ -26,6 +26,7 @@ import os
 from batchfilesdb import BatchFilesDB
 from processedfiles import ProcessedFiles
 from sendmail import Sendmail
+from command import Command
 import datetime
 import tempfile
 
@@ -71,24 +72,31 @@ def _get_model_file(model_name):
 def _get_threads():
     return os.environ.get('THREADS', 4)
 
-def _run_inference(source_file, model, converted_audio):
+def _get_timeout():
+    return os.environ.get('TIMEOUT_CMD', 90 * 60)
+
+def _run_inference(source_file, model, converted_audio, timeout):
     WHISPER_PATH = "/srv/whisper.cpp/"
     THREADS = _get_threads()
 
     start_time = datetime.datetime.now()
 
     cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y 2> /dev/null > /dev/null"
-    os.system(cmd)
+    Command(cmd).run(timeout=timeout)
 
     model_path = os.path.join(WHISPER_PATH, "sc-models", model)
     whisper_cmd = os.path.join(WHISPER_PATH, "main")
     cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
-    os.system(cmd)
+    result = Command(cmd).run(timeout=timeout)
 
     end_time = datetime.datetime.now() - start_time
 
-    logging.debug(f"Run {cmd} in {end_time}")
-    return end_time
+    logging.debug(f"Run {cmd} in {end_time} with result {result}")
+
+    if os.path.exists(converted_audio):
+        os.remove(converted_audio)
+
+    return end_time, result
 
 def _send_mail(batchfile, inference_time, source_file_base):
     text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
@@ -97,6 +105,12 @@ def _send_mail(batchfile, inference_time, source_file_base):
     if "@softcatala" in batchfile.email:
         THREADS = _get_threads()
         text += f"\nL'execució ha trigat {inference_time} amb {THREADS} threads."
+
+    Sendmail().send(text, batchfile.email)
+
+def _send_mail_error(batchfile, inference_time, source_file_base, message):
+    text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. "
+    text += message
 
     Sendmail().send(text, batchfile.email)
 
@@ -110,6 +124,8 @@ def main():
     PURGE_INTERVAL_SECONDS = 60 * 6 * 24 # For times per day
     PURGE_OLDER_THAN_DAYS = 3
     WAV_FILE = "file.wav"
+    NO_ERROR = 0
+    TIMEOUT_ERROR = -1
 
     temp_dir = tempfile.TemporaryDirectory()
     out_dir = temp_dir.name
@@ -131,8 +147,17 @@ def main():
             processed.move_file(batchfile.filename_dbrecord)
 
             converted_audio = os.path.join(out_dir, WAV_FILE)
-            inference_time = _run_inference(source_file, model, converted_audio)
+            timeout = _get_timeout()
+            inference_time, result = _run_inference(source_file, model, converted_audio, timeout)
 
+            if result == TIMEOUT_ERROR:
+                msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {timeout} segons de processament."
+                _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                continue
+
+            if result != NO_ERROR:
+                _send_mail_error(batchfile, inference_time, source_file_base, f"Reviseu que sigui un d'àudio i vídeo vàlid.")
+                continue
 
             target_file_srt = converted_audio + ".srt"
             target_file_txt = converted_audio + ".txt"
@@ -150,7 +175,6 @@ def main():
             ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
 
         time.sleep(30)
-
 
 if __name__ == "__main__":
     main()
