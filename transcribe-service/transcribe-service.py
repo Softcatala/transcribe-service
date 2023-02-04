@@ -28,6 +28,8 @@ import os
 import logging
 import logging.handlers
 import uuid
+from usage import Usage
+import datetime
 
 app = Flask(__name__)
 
@@ -39,6 +41,15 @@ PROCESSED_FOLDER = '/srv/data/processed/'
 @app.route('/hello', methods=['GET'])
 def hello_word():
     return "Hello!"
+
+@app.route('/stats/', methods=['GET'])
+def stats():
+    requested = request.args.get('date')
+    date_requested = datetime.datetime.strptime(requested, '%Y-%m-%d')
+    usage = Usage()
+    result = usage.get_stats(date_requested)
+
+    return json_answer(result)
 
 
 def init_logging():
@@ -166,6 +177,7 @@ def get_file():
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Accept-Ranges'] = 'bytes'
     logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
+    Usage().log("get_file")
     return resp
 
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -215,6 +227,7 @@ def upload_file():
 
     size = os.path.getsize(fullname)
     logging.debug(f"Saved file {file.filename} to {fullname} (size: {size})")
+    Usage().log("transcribe_file")
     result = []
     return json_answer(result)
 
