@@ -225,8 +225,8 @@ def upload_file():
     db.create(fullname, email, model_name, file.filename, record_uuid=_uuid)
     file.save(fullname)
 
-    size = os.path.getsize(fullname)
-    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size})")
+    size_mb = os.path.getsize(fullname) / 1024 / 1024
+    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB)")
     Usage().log("transcribe_file")
     result = []
     return json_answer(result)
