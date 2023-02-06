@@ -88,15 +88,11 @@ class BatchFilesDB(Queue):
         try:
             predictTime = PredictTime()
             predictTime.load()
-            estimation = predictTime.predict_time_from_filename(filename, original_filename)
-            if estimation:
-                return estimation
-            else:
-                return 0
+            return predictTime.predict_time_from_filename(filename, original_filename)
 
         except Exception as exception:
             logging.error("_estimate_time. Error:" + str(exception))
-            return 0
+            return PredictTime().CANNOT_PREDICT
 
     def create(self, filename, email, model_name, original_filename, record_uuid = None):
 
@@ -109,38 +105,20 @@ class BatchFilesDB(Queue):
         self.put(filename_dbrecord, line)
         return record_uuid
 
-    def _get_formatted_time(self, _time):
-        try:
-            HOUR_MIN_SECONDS = 3
-            components = _time.split(':')
-            if len(components) != HOUR_MIN_SECONDS:
-                return _time
-
-            hours = components[0]
-            minutes = components[1]
-            seconds = components[2]
-
-            if int(hours) == 0:
-                if int(minutes) == 0:
-                    return f"{seconds}s".lstrip("0")
-                else:
-                    return f"{minutes}m".lstrip("0")
-
-            return f"{hours}h {minutes}m".lstrip("0")
-
-        except Exception as exception:
-            logging.error(f"_get_formatted_time. Error: {exception}")
-            return _time
 
     def estimated_queue_waiting_time(self):
         filenames = self.get_all()
         waiting_time = 0
         for filename in filenames:
             record = self._read_record(filename)
+            
+            if record.estimated_time == PredictTime().CANNOT_PREDICT:
+                return ""
+            
             waiting_time += record.estimated_time
 
         delta = datetime.timedelta(seconds=waiting_time)
-        return self._get_formatted_time(str(delta))
+        return PredictTime().get_formatted_time(delta)
 
     def select(self, email = None):
         filenames = self.get_all()

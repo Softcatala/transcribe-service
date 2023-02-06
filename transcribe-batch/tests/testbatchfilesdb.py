@@ -105,6 +105,17 @@ class TestBatchFilesDB(unittest.TestCase):
 
         estimated_time = db.estimated_queue_waiting_time()
         self.assertEquals("5s", estimated_time)
+        
+    def test_estimated_queue_unknown_value(self):
+        db = BatchFilesDB()
+        db.ENTRIES = self.ENTRIES
+
+        _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+        _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename2.mp3")
+        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+
+        estimated_time = db.estimated_queue_waiting_time()
+        self.assertEquals("", estimated_time)
 
 if __name__ == '__main__':
     unittest.main()

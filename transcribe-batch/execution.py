@@ -48,8 +48,8 @@ class Execution(object):
         start_time = datetime.datetime.now()
         predicted_time = self.predictTime.predict_time_from_filename(source_file, original_filename)
         if predicted_time:
-            _time = datetime.timedelta(seconds=predicted_time)
-            logging.debug(f"Predicted time for {source_file} ({original_filename}): {_time}")
+            printable_time = PredictTime().get_formatted_time(predicted_time)
+            logging.debug(f"Predicted time for {source_file} ({original_filename}): {printable_time}")
 
         cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y 2> /dev/null > /dev/null"
         Command(cmd).run(timeout=timeout)

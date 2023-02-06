@@ -57,6 +57,7 @@ class PersitedList():
 class PredictTime(PersitedList):
 
     SEPARATOR = "\t"
+    CANNOT_PREDICT = -1
 
     def __init__(self, filename = "/srv/data/stats.txt"):
         PersitedList.__init__(self, filename)
@@ -122,13 +123,38 @@ class PredictTime(PersitedList):
     def load(self):
         super().load()
         self.format_time = {}
+        
+    def get_formatted_time(self, _time : int):
+        try:
+            _time = str(_time)
+            HOUR_MIN_SECONDS = 3
+            components = _time.split(':')
+            if len(components) != HOUR_MIN_SECONDS:
+                return _time
+
+            hours = components[0]
+            minutes = components[1]
+            seconds = components[2]
+
+            if int(hours) == 0:
+                if int(minutes) == 0:
+                    return f"{seconds}s".lstrip("0")
+                else:
+                    return f"{minutes}m".lstrip("0")
+
+            return f"{hours}h {minutes}m".lstrip("0")
+
+        except Exception as exception:
+            logging.error(f"get_formatted_time. Error: {exception}")
+            return _time
+        
 
     def predict_time_from_filename(self, filename: str, original_filename: str) -> int:
         try:
             _format = original_filename.rsplit('.', 1)[1].lower()
 
             if not os.path.exists(filename):
-                return 0
+                return self.CANNOT_PREDICT
 
             length = os.path.getsize(filename)
             prediction = self.predict_time(_format, length)
@@ -137,14 +163,14 @@ class PredictTime(PersitedList):
 
         except Exception as exception:
             logging.error("PredictTime. predict_time_from_filename. Error:" + str(exception))
-            return 0
+            return self.CANNOT_PREDICT
 
     def predict_time(self, _format: str, length: int) -> int:
         self._compute_time_size()
         ratio = self.format_time.get(_format)
         if not ratio:
             logging.debug(f"predict_time: no data for {_format} format")
-            return
+            return self.CANNOT_PREDICT
 
         prediction = int(length / 1024 / 1024 / ratio)
         return prediction

@@ -24,6 +24,7 @@ import tempfile
 import sys
 
 class TestPredictTime(unittest.TestCase):
+    MB_BYTES = 1024*1024
 
     def _get_list(self):
         predictTime = PredictTime(tempfile.NamedTemporaryFile().name)
@@ -61,21 +62,29 @@ class TestPredictTime(unittest.TestCase):
 
     def test_predict_time(self):
         predictTime = self._get_list()
-        MB_BYTES = 1024*1024
-        predictTime.append("mp3", str(MB_BYTES * 10), str(5))
-        predictTime.append("mp3", str(MB_BYTES * 20), str(10))
+        predictTime.append("mp3", str(self.MB_BYTES * 10), str(5))
+        predictTime.append("mp3", str(self.MB_BYTES * 20), str(10))
         
-        seconds = predictTime.predict_time("mp3", MB_BYTES * 2)
+        seconds = predictTime.predict_time("mp3", self.MB_BYTES * 2)
         self.assertEquals(1, seconds)
+
+    def test_predict_time_format_no_available(self):
+        predictTime = self._get_list()
+        seconds = predictTime.predict_time("mp3", 0)
+        self.assertEquals(-1, seconds)
+
+    def test_predict_time_from_filename_not_found(self):
+        predictTime = self._get_list()
+        seconds = predictTime.predict_time_from_filename("none.txt", "none.txt")
+        self.assertEquals(-1, seconds)
 
     def test_predict_time_multiple(self):
         predictTime = self._get_list()
-        MB_BYTES = 1024*1024
-        predictTime.append("mp3", str(MB_BYTES * 10), str(5))
-        predictTime.append("mp4", str(MB_BYTES * 20), str(20))
+        predictTime.append("mp3", str(self.MB_BYTES * 10), str(5))
+        predictTime.append("mp4", str(self.MB_BYTES * 20), str(20))
         
-        seconds_mp3 = predictTime.predict_time("mp3", MB_BYTES * 4)
-        seconds_mp4 = predictTime.predict_time("mp4", MB_BYTES * 4)
+        seconds_mp3 = predictTime.predict_time("mp3", self.MB_BYTES * 4)
+        seconds_mp4 = predictTime.predict_time("mp4", self.MB_BYTES * 4)
         self.assertEquals(2, seconds_mp3)
         self.assertEquals(4, seconds_mp4)
                 
