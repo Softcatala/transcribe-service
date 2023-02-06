@@ -158,7 +158,6 @@ class PredictTime(PersitedList):
 
             length = os.path.getsize(filename)
             prediction = self.predict_time(_format, length)
-            logging.debug(f"PredictTime. predict_time_from_filename: {prediction}")
             return prediction
 
         except Exception as exception:
