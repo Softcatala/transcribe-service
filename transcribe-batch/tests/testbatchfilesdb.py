@@ -73,10 +73,10 @@ class TestBatchFilesDB(unittest.TestCase):
         MINUTES_SEC = 60
         MAX_FILES_IN_QUEUE = 20
 
-        for id in range(0, MAX_FILES_IN_QUEUE):
-            _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+        for _id in range(0, MAX_FILES_IN_QUEUE):
+            _uuid = db.create(_id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
             filename_dbrecord = db.get_record_file_from_uuid(_uuid)
-            future_time = time.time() + (MINUTES_SEC * id)
+            future_time = time.time() + (MINUTES_SEC * _id)
             os.utime(filename_dbrecord, (future_time, future_time))
 
         records = db.select()
@@ -99,9 +99,8 @@ class TestBatchFilesDB(unittest.TestCase):
         db.ENTRIES = self.ENTRIES
         RECORDS = 5
 
-        for id in range(0, RECORDS):
-            _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
-            filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+        for _id in range(0, RECORDS):
+            _uuid = db.create(_id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
 
         estimated_time = db.estimated_queue_waiting_time()
         self.assertEquals("5s", estimated_time)
@@ -109,10 +108,8 @@ class TestBatchFilesDB(unittest.TestCase):
     def test_estimated_queue_unknown_value(self):
         db = BatchFilesDB()
         db.ENTRIES = self.ENTRIES
-
-        _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
-        _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename2.mp3")
-        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+        db.create("file.txt", self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+        db.create("file.txt", self.EMAIL, self.MODEL_NAME, "original_filename2.mp3")
 
         estimated_time = db.estimated_queue_waiting_time()
         self.assertEquals("", estimated_time)

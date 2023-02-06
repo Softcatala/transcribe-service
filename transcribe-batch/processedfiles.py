@@ -76,7 +76,6 @@ class ProcessedFiles():
         logging.debug(f"Moved file {full_filename} to {target}")
 
     def move_file_bin(self, full_filename, extension):
-        filename = os.path.basename(full_filename)
         target = os.path.join(PROCESSED, f"{self.uuid}{extension}")
         shutil.move(full_filename, target)
 
