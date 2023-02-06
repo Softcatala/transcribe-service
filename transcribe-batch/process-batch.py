@@ -26,7 +26,7 @@ import os
 from batchfilesdb import BatchFilesDB
 from processedfiles import ProcessedFiles
 from sendmail import Sendmail
-from command import Command
+from execution import Execution
 import datetime
 import tempfile
 
@@ -75,29 +75,6 @@ def _get_threads():
 def _get_timeout():
     return os.environ.get('TIMEOUT_CMD', 90 * 60)
 
-def _run_inference(source_file, model, converted_audio, timeout):
-    WHISPER_PATH = "/srv/whisper.cpp/"
-    THREADS = _get_threads()
-
-    start_time = datetime.datetime.now()
-
-    cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y 2> /dev/null > /dev/null"
-    Command(cmd).run(timeout=timeout)
-
-    model_path = os.path.join(WHISPER_PATH, "sc-models", model)
-    whisper_cmd = os.path.join(WHISPER_PATH, "main")
-    cmd = f"{whisper_cmd} --threads {THREADS} -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
-    result = Command(cmd).run(timeout=timeout)
-
-    end_time = datetime.datetime.now() - start_time
-
-    logging.debug(f"Run {cmd} in {end_time} with result {result}")
-
-    if os.path.exists(converted_audio):
-        os.remove(converted_audio)
-
-    return end_time, result
-
 def _send_mail(batchfile, inference_time, source_file_base):
     text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
     text += f"https://www.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
@@ -127,6 +104,7 @@ def main():
     WAV_FILE = "file.wav"
     NO_ERROR = 0
     TIMEOUT_ERROR = -1
+    execution = Execution(_get_threads())
 
     temp_dir = tempfile.TemporaryDirectory()
     out_dir = temp_dir.name
@@ -149,7 +127,7 @@ def main():
 
             converted_audio = os.path.join(out_dir, WAV_FILE)
             timeout = _get_timeout()
-            inference_time, result = _run_inference(source_file, model, converted_audio, timeout)
+            inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
             if result == TIMEOUT_ERROR:
                 msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {timeout} segons de processament."

@@ -24,6 +24,10 @@ import tempfile
 import sys
 import time
 
+class BatchFilesDBTest(BatchFilesDB):
+    def _estimate_time(self, filename, original_filename):
+        return 1
+
 class TestBatchFilesDB(unittest.TestCase):
 
     FILENAME = "fitxer.txt"
@@ -44,7 +48,7 @@ class TestBatchFilesDB(unittest.TestCase):
 
     def test_create(self):
         db = self._create_db_object()
-        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
         filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         record = db._read_record(filename_dbrecord)
@@ -54,7 +58,7 @@ class TestBatchFilesDB(unittest.TestCase):
 
     def test_select(self):
         db = self._create_db_object()
-        db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
 
         records = db.select()
         self.assertEquals(1, len(records))
@@ -70,7 +74,7 @@ class TestBatchFilesDB(unittest.TestCase):
         MAX_FILES_IN_QUEUE = 20
 
         for id in range(0, MAX_FILES_IN_QUEUE):
-            _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename")
+            _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
             filename_dbrecord = db.get_record_file_from_uuid(_uuid)
             future_time = time.time() + (MINUTES_SEC * id)
             os.utime(filename_dbrecord, (future_time, future_time))
@@ -81,7 +85,7 @@ class TestBatchFilesDB(unittest.TestCase):
 
     def test_delete(self):
         db = self._create_db_object()
-        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename")
+        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
         filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         records_org = db.select()
@@ -89,6 +93,18 @@ class TestBatchFilesDB(unittest.TestCase):
 
         records = len(records_org) - len(db.select())
         self.assertEquals(1, records)
+
+    def test_estimated_queue_waiting_time(self):
+        db = BatchFilesDBTest()
+        db.ENTRIES = self.ENTRIES
+        RECORDS = 5
+
+        for id in range(0, RECORDS):
+            _uuid = db.create(id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+            filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+
+        estimated_time = db.estimated_queue_waiting_time()
+        self.assertEquals("5s", estimated_time)
 
 if __name__ == '__main__':
     unittest.main()

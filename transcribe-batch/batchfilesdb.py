@@ -20,15 +20,19 @@
 import os
 import uuid
 import fnmatch
-
+import logging
+import datetime
+import time
+from predicttime import PredictTime
 
 class BatchFile():
-    def __init__(self, filename_dbrecord, filename, email, model_name, original_filename):
+    def __init__(self, filename_dbrecord, filename, email, model_name, original_filename, estimated_time):
         self.filename_dbrecord = filename_dbrecord
         self.filename = filename
         self.email = email
         self.model_name = model_name
         self.original_filename = original_filename
+        self.estimated_time = estimated_time
 
 # This is a disk based priority queue with works as filenames
 # as items to store
@@ -55,7 +59,7 @@ class Queue(): # works with filenames
 
     def get_all(self):
         return self._find(self.ENTRIES, "*")
-  
+
     def put(self, filename_dbrecord, content):
         if self.g_check_directory:
             self.g_check_directory = False
@@ -68,6 +72,8 @@ class Queue(): # works with filenames
     def delete(self, filename):
         os.remove(filename)
 
+
+
 class BatchFilesDB(Queue):
 
     SEPARATOR = "\t"
@@ -78,15 +84,63 @@ class BatchFilesDB(Queue):
     def get_new_uuid(self):
         return str(uuid.uuid4())
 
+    def _estimate_time(self, filename, original_filename):
+        try:
+            predictTime = PredictTime()
+            predictTime.load()
+            estimation = predictTime.predict_time_from_filename(filename, original_filename)
+            if estimation:
+                return estimation
+            else:
+                return 0
+
+        except Exception as exception:
+            logging.error("_estimate_time. Error:" + str(exception))
+            return 0
+
     def create(self, filename, email, model_name, original_filename, record_uuid = None):
 
         if not record_uuid:
             record_uuid = self.get_new_uuid()
 
         filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
-        line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}"
-        self.put(filename_dbrecord ,line)
+        _estimated_time = self._estimate_time(filename, original_filename)
+        line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
+        self.put(filename_dbrecord, line)
         return record_uuid
+
+    def _get_formatted_time(self, _time):
+        try:
+            HOUR_MIN_SECONDS = 3
+            components = _time.split(':')
+            if len(components) != HOUR_MIN_SECONDS:
+                return _time
+
+            hours = components[0]
+            minutes = components[1]
+            seconds = components[2]
+
+            if int(hours) == 0:
+                if int(minutes) == 0:
+                    return f"{seconds}s".lstrip("0")
+                else:
+                    return f"{minutes}m".lstrip("0")
+
+            return f"{hours}h {minutes}m".lstrip("0")
+
+        except Exception as exception:
+            logging.error(f"_get_formatted_time. Error: {exception}")
+            return _time
+
+    def estimated_queue_waiting_time(self):
+        filenames = self.get_all()
+        waiting_time = 0
+        for filename in filenames:
+            record = self._read_record(filename)
+            waiting_time += record.estimated_time
+
+        delta = datetime.timedelta(seconds=waiting_time)
+        return self._get_formatted_time(str(delta))
 
     def select(self, email = None):
         filenames = self.get_all()
@@ -105,12 +159,13 @@ class BatchFilesDB(Queue):
         record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")
         record = self._read_record(record_fullpath)
         return record
-    
+
     def _read_record(self, filename_dbrecord):
-        with open(filename_dbrecord, "r") as fh:
-            line = fh.readline()
-            components = line.split(self.SEPARATOR)
-            return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3])
-
- 
-
+        try:
+            with open(filename_dbrecord, "r") as fh:
+                line = fh.readline()
+                components = line.split(self.SEPARATOR)
+                return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3], int(components[4]))
+        except Exception as exception:
+            logging.error(f"_read_record. Unable to read {filename_dbrecord}. Error: {exception}")
+            return None

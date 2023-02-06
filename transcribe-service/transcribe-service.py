@@ -222,13 +222,14 @@ def upload_file():
 
     _uuid = db.get_new_uuid()
     fullname = os.path.join(UPLOAD_FOLDER, _uuid)
-    db.create(fullname, email, model_name, file.filename, record_uuid=_uuid)
     file.save(fullname)
+    db.create(fullname, email, model_name, file.filename, record_uuid=_uuid)
 
     size_mb = os.path.getsize(fullname) / 1024 / 1024
-    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB)")
+    waiting_time = db.estimated_queue_waiting_time()
+    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB), waiting time: {waiting_time}")
     Usage().log("transcribe_file")
-    result = []
+    result = {"waiting_time": str(waiting_time)}
     return json_answer(result)
 
 def json_answer(data, status = 200):
