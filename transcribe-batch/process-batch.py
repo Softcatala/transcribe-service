@@ -119,13 +119,9 @@ def main():
 
             logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
 
-            print(f"batchfile.model_name: {batchfile.model_name}")
             model = _get_model_file(batchfile.model_name)
-
-            #db.delete(batchfile.filename_dbrecord) # In case it fails, we will not retry
             source_file_base = os.path.basename(source_file)
             processed = ProcessedFiles(source_file_base)
-            processed.move_file(batchfile.filename_dbrecord)
 
             converted_audio = os.path.join(out_dir, WAV_FILE)
             timeout = _get_timeout()
@@ -145,6 +141,7 @@ def main():
             extension = _get_extension(batchfile.original_filename)
             _send_mail(batchfile, inference_time, source_file_base)
 
+            processed.move_file(batchfile.filename_dbrecord)
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
             processed.move_file_bin(source_file, extension)
