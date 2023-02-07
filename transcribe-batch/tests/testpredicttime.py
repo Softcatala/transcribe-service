@@ -28,6 +28,7 @@ class TestPredictTime(unittest.TestCase):
 
     def _get_list(self):
         predictTime = PredictTime(tempfile.NamedTemporaryFile().name)
+        predictTime.MAX_SAMPLES_PER_FORMAT = 5
         return predictTime
 
     def test_append(self):
