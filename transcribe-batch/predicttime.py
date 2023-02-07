@@ -61,7 +61,7 @@ class PredictTime(PersitedList):
 
     def __init__(self, filename = "/srv/data/stats.txt"):
         PersitedList.__init__(self, filename)
-        self.MAX_SAMPLES_PER_FORMAT = 5
+        self.MAX_SAMPLES_PER_FORMAT = 10
         self.format_time = {} # mb/s
 
     def _remove_samples_if_necessary(self, _format: str):
