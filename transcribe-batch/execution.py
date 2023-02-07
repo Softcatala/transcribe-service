@@ -21,8 +21,31 @@
 import datetime
 import logging
 import os
+import subprocess
+import threading
 from predicttime import PredictTime
-from command import Command
+
+class Command(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.process = None
+
+    def run(self, timeout):
+        def target():
+            self.process = subprocess.Popen(self.cmd, shell=True)
+            self.process.communicate()
+
+        thread = threading.Thread(target=target)
+        thread.start()
+
+        thread.join(timeout)
+        if thread.is_alive():
+            self.process.terminate()
+            thread.join()
+            return -1
+
+        return self.process.returncode
+
 
 class Execution(object):
 
@@ -31,7 +54,7 @@ class Execution(object):
         self.threads = threads
         self.predictTime = PredictTime()
         self.predictTime.load()
-        
+
     def _persist_execution_stats(self, source_file, original_filename, time):
         try:
             _format = original_filename.rsplit('.', 1)[1].lower()
