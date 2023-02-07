@@ -26,7 +26,7 @@ import os
 from batchfilesdb import BatchFilesDB
 from processedfiles import ProcessedFiles
 from sendmail import Sendmail
-from execution import Execution
+from execution import Execution, Command
 import datetime
 import tempfile
 
@@ -104,8 +104,6 @@ def main():
     PURGE_INTERVAL_SECONDS = 60 * 6 * 24 # For times per day
     PURGE_OLDER_THAN_DAYS = 3
     WAV_FILE = "file.wav"
-    NO_ERROR = 0
-    TIMEOUT_ERROR = -1
     execution = Execution(_get_threads())
 
     temp_dir = tempfile.TemporaryDirectory()
@@ -127,12 +125,12 @@ def main():
             timeout = _get_timeout()
             inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
-            if result == TIMEOUT_ERROR:
+            if result == Command().TIMEOUT_ERROR:
                 msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {timeout} segons de processament."
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
                 continue
 
-            if result != NO_ERROR:
+            if result != Command().NO_ERROR:
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio i vídeo vàlid.")
                 continue
 

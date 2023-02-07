@@ -26,6 +26,10 @@ import threading
 from predicttime import PredictTime
 
 class Command(object):
+
+    TIMEOUT_ERROR = -1
+    NO_ERROR = 0
+
     def __init__(self, cmd):
         self.cmd = cmd
         self.process = None
@@ -42,7 +46,7 @@ class Command(object):
         if thread.is_alive():
             self.process.terminate()
             thread.join()
-            return -1
+            return self.TIMEOUT_ERROR
 
         return self.process.returncode
 
