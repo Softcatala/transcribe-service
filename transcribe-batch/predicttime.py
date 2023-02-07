@@ -124,9 +124,11 @@ class PredictTime(PersitedList):
         super().load()
         self.format_time = {}
         
-    def get_formatted_time(self, _time : int):
+    def get_formatted_time(self, seconds : int):
         try:
-            _time = str(_time)
+
+            delta = datetime.timedelta(seconds=seconds)
+            _time = str(delta)
             HOUR_MIN_SECONDS = 3
             components = _time.split(':')
             if len(components) != HOUR_MIN_SECONDS:

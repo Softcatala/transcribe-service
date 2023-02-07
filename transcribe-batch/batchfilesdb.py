@@ -116,8 +116,7 @@ class BatchFilesDB(Queue):
             
             waiting_time += record.estimated_time
 
-        delta = datetime.timedelta(seconds=waiting_time)
-        return PredictTime().get_formatted_time(delta)
+        return PredictTime().get_formatted_time(waiting_time)
 
     def select(self, email = None):
         filenames = self.get_all()
