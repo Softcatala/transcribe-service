@@ -1,5 +1,5 @@
 
-// https://api.softcatala.org/transcribe/v1/
+// https://api.softcatala.org/transcribe-service/v1/
 var URL='http://localhost:8700'
 
 var HttpClient = function() {
