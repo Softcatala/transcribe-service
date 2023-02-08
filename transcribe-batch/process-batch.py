@@ -125,12 +125,12 @@ def main():
             timeout = _get_timeout()
             inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
-            if result == Command().TIMEOUT_ERROR:
+            if result == Command.TIMEOUT_ERROR:
                 msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {timeout} segons de processament."
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
                 continue
 
-            if result != Command().NO_ERROR:
+            if result != Command.NO_ERROR:
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
                 continue
 
