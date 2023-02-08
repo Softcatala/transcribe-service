@@ -30,10 +30,12 @@ class ProcessedFiles():
 
     def __init__(self, uuid):
         self.uuid = uuid
-        
+
+    @staticmethod
     def get_processed_directory():
         return PROCESSED
 
+    @staticmethod
     def is_valid_uuid(self):
         try:
             uuid.UUID(str(self.uuid))
@@ -53,6 +55,7 @@ class ProcessedFiles():
 
         return True, ""
 
+    @staticmethod
     def ensure_dir():
         if not os.path.exists(PROCESSED):
             os.makedirs(PROCESSED)
