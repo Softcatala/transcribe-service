@@ -88,6 +88,8 @@ class PredictTime(PersitedList):
         logging.debug(f"PredictTime.append: {line}")
         self.data.append(line)
         self.format_time = {}
+        # Better to recompute here than in predict_time* methods that in the web request critical path
+        self._compute_time_size()
 
     def _compute_time_size(self):
         if len(self.format_time) > 0:
