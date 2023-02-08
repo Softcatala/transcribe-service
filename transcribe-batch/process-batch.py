@@ -126,11 +126,13 @@ def main():
             inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
             if result == Command.TIMEOUT_ERROR:
+                db.delete(batchfile.filename_dbrecord)
                 msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {timeout} segons de processament."
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
                 continue
 
             if result != Command.NO_ERROR:
+                db.delete(batchfile.filename_dbrecord)
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
                 continue
 
