@@ -131,7 +131,7 @@ def main():
                 continue
 
             if result != Command().NO_ERROR:
-                _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio i vídeo vàlid.")
+                _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
                 continue
 
             target_file_srt = converted_audio + ".srt"
