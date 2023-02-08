@@ -124,10 +124,10 @@ class PredictTime(PersitedList):
         super().load()
         self.format_time = {}
         
-    def get_formatted_time(self, seconds : int):
+    def get_formatted_time(self, total_seconds : int):
         try:
 
-            delta = datetime.timedelta(seconds=seconds)
+            delta = datetime.timedelta(seconds=total_seconds)
             _time = str(delta)
             HOUR_MIN_SECONDS = 3
             components = _time.split(':')
