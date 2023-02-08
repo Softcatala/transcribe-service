@@ -124,7 +124,7 @@ class PredictTime(PersitedList):
         super().load()
         self.format_time = {}
         
-    def get_formatted_time(self, total_seconds : int):
+    def get_formatted_time(self, total_seconds : int) -> str:
         try:
 
             delta = datetime.timedelta(seconds=total_seconds)

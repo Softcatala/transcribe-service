@@ -105,7 +105,7 @@ class BatchFilesDB(Queue):
         return record_uuid
 
 
-    def estimated_queue_waiting_time(self):
+    def estimated_queue_waiting_time(self) -> str:
         filenames = self.get_all()
         waiting_time = 0
         for filename in filenames:
