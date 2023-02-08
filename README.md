@@ -26,7 +26,7 @@ Elements on the processed directory are purged after certain amound of time.
 
 ## Estimation
 
-The system keeps record of how much time each filetype (mp3, mp4, etc) was needed to transcribe. It builds a ratio of MB/s which the
+The system keeps record of how much time each filetype (mp3, mp4, etc) was needed to transcribe it. It builds a ratio of MB/s which the
 system can process than it's used to estimate future files. The sample data points used to calculated this are the last ones, then if
 the hardware, version of the transcription tool or other external factor changes, the system will self-adjust based on the time need
 to do recent transcriptions.
