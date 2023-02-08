@@ -77,8 +77,8 @@ class PredictTime(PersitedList):
                     first_idx = idx
 
         if count == self.MAX_SAMPLES_PER_FORMAT:
-            del self.data[first_idx]
             logging.debug("_remove_samples_if_necessary.removed: " + self.data[first_idx])
+            del self.data[first_idx]
 
     def append(self, _format: str, length: int, time: int):
         self._remove_samples_if_necessary(_format)
