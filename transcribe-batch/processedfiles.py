@@ -35,7 +35,6 @@ class ProcessedFiles():
     def get_processed_directory():
         return PROCESSED
 
-    @staticmethod
     def is_valid_uuid(self):
         try:
             uuid.UUID(str(self.uuid))
