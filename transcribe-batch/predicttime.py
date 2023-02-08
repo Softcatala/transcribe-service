@@ -58,6 +58,7 @@ class PredictTime(PersitedList):
 
     SEPARATOR = "\t"
     CANNOT_PREDICT = -1
+    MB_BYTES = 1024*1024
 
     def __init__(self, filename = "/srv/data/stats.txt"):
         PersitedList.__init__(self, filename)
@@ -116,7 +117,7 @@ class PredictTime(PersitedList):
 
         for _format in format_time_local:
             _time = format_time_local[_format]
-            length_mb = format_length[_format] / 1024 / 1024
+            length_mb = format_length[_format] / self.MB_BYTES
             ratio = length_mb / _time
             self.format_time[_format] = ratio
 
@@ -173,5 +174,5 @@ class PredictTime(PersitedList):
             logging.debug(f"predict_time: no data for {_format} format")
             return self.CANNOT_PREDICT
 
-        prediction = int(length / 1024 / 1024 / ratio)
+        prediction = int(length / self.MB_BYTES / ratio)
         return prediction
