@@ -127,7 +127,9 @@ def main():
 
             if result == Command.TIMEOUT_ERROR:
                 db.delete(batchfile.filename_dbrecord)
-                msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {timeout} segons de processament."
+                minutes = int(timeout / 60)
+                msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {minutes} minuts de processament."
+                msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
                 continue
 
