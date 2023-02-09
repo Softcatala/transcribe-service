@@ -49,6 +49,12 @@ def stats():
     usage = Usage()
     result = usage.get_stats(date_requested)
 
+    db = BatchFilesDB()
+    queue = {}
+    queue["waiting_time"] = db.estimated_queue_waiting_time()
+    queue["items"] = len(db.select())
+    result["queue"] = queue
+
     return json_answer(result)
 
 
