@@ -74,8 +74,8 @@ def _get_model_file(model_name):
 def _get_threads():
     return os.environ.get('THREADS', 4)
 
-def _get_timeout():
-    return os.environ.get('TIMEOUT_CMD', 90 * 60)
+def _get_timeout() -> int:
+    return int(os.environ.get('TIMEOUT_CMD', 60 * 60))
 
 def _send_mail(batchfile, inference_time, source_file_base):
     text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
@@ -128,7 +128,7 @@ def main():
             if result == Command.TIMEOUT_ERROR:
                 db.delete(batchfile.filename_dbrecord)
                 minutes = int(timeout / 60)
-                msg = f"Ha trigat massa temps en processar-se. Envieu un fitxer més curt. Aturem l'operació després de {minutes} minuts de processament."
+                msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
                 msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
                 continue
