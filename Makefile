@@ -18,7 +18,7 @@ test:
 	cd transcribe-batch && python -m nose2
 
 whisper.cpp:
-	if [ ! -d "whisper.cpp" ]; then git clone --branch 1.0.4 https://github.com/ggerganov/whisper.cpp; fi
+	if [ ! -d "whisper.cpp" ]; then git clone --branch v1.2.0 https://github.com/ggerganov/whisper.cpp; fi
 	cd whisper.cpp &&  make
 
 whisper.cpp-models:
