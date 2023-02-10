@@ -88,6 +88,21 @@ class TestPredictTime(unittest.TestCase):
         seconds_mp4 = predictTime.predict_time("mp4", self.MB_BYTES * 4)
         self.assertEquals(2, seconds_mp3)
         self.assertEquals(4, seconds_mp4)
-                
+
+    def test_get_formatted_time(self):
+        predictTime = self._get_list()
+
+        formatted = predictTime.get_formatted_time(3660)
+        self.assertEquals("1h 1m", formatted)
+
+        formatted = predictTime.get_formatted_time(60)
+        self.assertEquals("1m", formatted)
+
+        formatted = predictTime.get_formatted_time(50)
+        self.assertEquals("50s", formatted)
+
+        formatted = predictTime.get_formatted_time(0)
+        self.assertEquals("0s", formatted)
+
 if __name__ == '__main__':
     unittest.main()

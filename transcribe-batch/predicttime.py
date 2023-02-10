@@ -137,17 +137,17 @@ class PredictTime(PersitedList):
             if len(components) != HOUR_MIN_SECONDS:
                 return _time
 
-            hours = components[0]
-            minutes = components[1]
-            seconds = components[2]
+            hours = int(components[0])
+            minutes = int(components[1])
+            seconds = int(components[2])
 
-            if int(hours) == 0:
-                if int(minutes) == 0:
-                    return f"{seconds}s".lstrip("0")
+            if hours == 0:
+                if minutes == 0:
+                    return f"{seconds}s"
                 else:
-                    return f"{minutes}m".lstrip("0")
+                    return f"{minutes}m"
 
-            return f"{hours}h {minutes}m".lstrip("0")
+            return f"{hours}h {minutes}m"
 
         except Exception as exception:
             logging.error(f"get_formatted_time. Error: {exception}")
