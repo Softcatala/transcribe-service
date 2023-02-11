@@ -94,6 +94,13 @@ def _send_mail_error(batchfile, inference_time, source_file_base, message):
     logging.debug(f"_send_mail_error: {message} to {batchfile.email}")
     Sendmail().send(text, batchfile.email)
 
+def _delete_record(db, batchfile):
+    db.delete(batchfile.filename_dbrecord)
+
+    if os.path.isfile(batchfile.filename):
+        os.remove(batchfile.filename)
+        logging.debug(f"Deleted {batchfile.filename}")
+
 def main():
 
     print("Process batch files to transcribe")
@@ -126,7 +133,7 @@ def main():
             inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
             if result == Command.TIMEOUT_ERROR:
-                db.delete(batchfile.filename_dbrecord)
+                _delete_record(db, batchfile)
                 minutes = int(timeout / 60)
                 msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
                 msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
@@ -134,7 +141,7 @@ def main():
                 continue
 
             if result != Command.NO_ERROR:
-                db.delete(batchfile.filename_dbrecord)
+                _delete_record(db, batchfile)
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
                 continue
 
