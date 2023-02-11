@@ -150,13 +150,13 @@ def get_file():
     if not processedFiles.is_valid_uuid():
         result = {}
         result['error'] = "uuid no vàlid"
-        logging.debug(f"/get_file/ {result['error']}")
+        logging.debug(f"/get_file/ {result['error']} - uuid: '{uuid}'")
         return json_answer(result, 400)
 
     exists, _ = processedFiles.do_files_exists()
     if not exists:
         result = {"error": "uuid no existeix"}
-        logging.debug(f"/get_file/ {result['error']}")
+        logging.debug(f"/get_file/ {result['error']} - uuid: '{uuid}'")
         return json_answer(result, 404)
         
     record = _get_record(uuid)
