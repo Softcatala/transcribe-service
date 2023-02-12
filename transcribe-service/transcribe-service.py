@@ -184,6 +184,7 @@ def get_file():
     resp.headers["Content-Disposition"] = f"attachment; filename={resp_filename}"
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Accept-Ranges'] = 'bytes'
+    resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
     logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
     Usage().log("get_file")
     return resp
