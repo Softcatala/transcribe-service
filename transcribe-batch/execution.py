@@ -74,7 +74,7 @@ class Execution(object):
 
         start_time = datetime.datetime.now()
         predicted_time = self.predictTime.predict_time_from_filename(source_file, original_filename)
-        if predicted_time:
+        if predicted_time != PredictTime().CANNOT_PREDICT:
             printable_time = PredictTime().get_formatted_time(predicted_time)
             logging.debug(f"Predicted time for {source_file} ({original_filename}): {printable_time}")
 
