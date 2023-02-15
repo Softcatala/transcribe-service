@@ -75,7 +75,6 @@ def init_logging():
     console.setFormatter(formatter)
     logger.addHandler(console)
 
-@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/uuid_exists/', methods=['GET'])
 def uuid_exists():
     uuid = request.args.get('uuid')
@@ -128,7 +127,6 @@ def _get_record(_uuid):
     db = BatchFilesDB(processed_dir)
     return db._read_record_from_uuid(_uuid)
 
-@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/get_file/', methods=['GET'])
 def get_file():
     uuid = request.args.get('uuid')
@@ -189,7 +187,6 @@ def get_file():
     Usage().log("get_file")
     return resp
 
-@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 @app.route('/transcribe_file/', methods=['POST'])
 def upload_file():
     file = request.files['file'] if 'file' in request.files else ""
