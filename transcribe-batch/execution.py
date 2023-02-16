@@ -69,6 +69,13 @@ class Execution(object):
         except Exception as exception:
             logging.error("_persist_execution_stats. Error:" + str(exception))
 
+    def _log_predicted_vs_real(self, predicted, real):
+        if predicted == PredictTime().CANNOT_PREDICT or predicted == 0:
+            return
+
+        diff = (real / predicted * 100) - 100
+        logging.debug(f" _log_predicted_vs_real. Predicted: {predicted}, real: {real}, diff {diff:.0f}%")
+
     def run_inference(self, source_file, original_filename, model, converted_audio, timeout):
         WHISPER_PATH = "/srv/whisper.cpp/"
 
@@ -92,6 +99,7 @@ class Execution(object):
         if result == 0:
             self._persist_execution_stats(source_file, original_filename, end_time.seconds)
 
+        self._log_predicted_vs_real(predicted_time, end_time.seconds)
         if os.path.exists(converted_audio):
             os.remove(converted_audio)
 
