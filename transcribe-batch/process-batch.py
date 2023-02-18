@@ -75,7 +75,7 @@ def _get_threads():
     return os.environ.get('THREADS', 4)
 
 def _get_timeout() -> int:
-    return int(os.environ.get('TIMEOUT_CMD', 60 * 60))
+    return int(os.environ.get('TIMEOUT_CMD', 60 * 90))
 
 def _send_mail(batchfile, inference_time, source_file_base):
     text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
