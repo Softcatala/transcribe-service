@@ -27,7 +27,7 @@ whisper.cpp-models:
 
 benchmark-samples:
 	mkdir -p benchmark
-	if [ ! -d "benchmark/samples" ]; then git clone https://gitlab.softcatala.org/nous-projectes/catalan-audio-samples.git/ benchmark/samples; fi
+	if [ ! -d "benchmark/samples" ]; then git clone --depth 1 https://gitlab.softcatala.org/nous-projectes/catalan-audio-samples.git/ benchmark/samples; fi
 
 benchmark-run: whisper.cpp whisper.cpp-models benchmark-samples
 	cd benchmark && python3 whispercpp.py
