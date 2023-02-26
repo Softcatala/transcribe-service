@@ -23,6 +23,7 @@ import logging
 import os
 import subprocess
 import threading
+import tempfile
 from predicttime import PredictTime
 
 class Command(object):
@@ -76,6 +77,53 @@ class Execution(object):
         diff = (real / predicted * 100) - 100
         logging.debug(f" _log_predicted_vs_real. Predicted: {predicted}, real: {real}, diff {diff:.0f}%")
 
+    def _ffmpeg_errors(self, ffmpeg_errfile):
+        return_code = Command.NO_ERROR
+        try:
+            if os.path.getsize(ffmpeg_errfile) == 0:
+                return return_code
+
+            return_code = -1
+            with open(ffmpeg_errfile, "r") as fh:
+                for line in fh.readlines():
+                    logging.debug(f"ffmpeg_error: {line.rstrip()}")
+
+            return return_code
+        except Exception as exception:
+            logging.error(f"_ffmpeg_errors. Error: {exception}")
+            return return_code
+
+    def _run_ffmpeg(self, source_file, converted_audio, timeout):
+        ffmpeg_errfile = "ffmpeg-error.log"
+        cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y -loglevel error 2>{ffmpeg_errfile} > /dev/null"
+        Command(cmd).run(timeout=timeout)
+        result = self._ffmpeg_errors(ffmpeg_errfile)
+        logging.debug(f"Run {cmd} with result {result}")
+        return result
+
+    def _get_extension(self, filename):
+        extension = "mp4"
+        split_tup = os.path.splitext(filename)
+        if len(split_tup) > 0 and len(split_tup[1]) > 0:
+            extension = split_tup[1]
+            extension = extension[1:]
+
+        return extension
+
+    def run_conversion(self, original_filename, source_file, converted_audio, timeout):
+        result = self._run_ffmpeg(source_file, converted_audio, timeout)
+        if result != Command.NO_ERROR:
+            converted_audio_fix = tempfile.NamedTemporaryFile().name + ".wav"
+
+            _format = self._get_extension(original_filename)
+            cmd = f"sox -t {_format} {source_file} {converted_audio_fix}"
+            result = Command(cmd).run(timeout=timeout)
+            logging.debug(f"Run {cmd} with result {result}")
+
+            result = self._run_ffmpeg(converted_audio_fix, converted_audio, timeout)
+
+        return result
+
     def run_inference(self, source_file, original_filename, model, converted_audio, timeout):
         WHISPER_PATH = "/srv/whisper.cpp/"
 
@@ -84,9 +132,6 @@ class Execution(object):
         if predicted_time != PredictTime().CANNOT_PREDICT:
             printable_time = PredictTime().get_formatted_time(predicted_time)
             logging.debug(f"Predicted time for {source_file} ({original_filename}): {printable_time}")
-
-        cmd = f"ffmpeg -i {source_file} -ar 16000 -ac 1 -c:a pcm_s16le {converted_audio} -y 2> /dev/null > /dev/null"
-        Command(cmd).run(timeout=timeout)
 
         model_path = os.path.join(WHISPER_PATH, "sc-models", model)
         whisper_cmd = os.path.join(WHISPER_PATH, "main")
@@ -98,9 +143,9 @@ class Execution(object):
         logging.debug(f"Run {cmd} in {end_time} with result {result}")
         if result == 0:
             self._persist_execution_stats(source_file, original_filename, end_time.seconds)
-
-        self._log_predicted_vs_real(predicted_time, end_time.seconds)
+            
         if os.path.exists(converted_audio):
             os.remove(converted_audio)
 
+        self._log_predicted_vs_real(predicted_time, end_time.seconds)
         return end_time, result

@@ -88,18 +88,21 @@ def _send_mail(batchfile, inference_time, source_file_base):
     Sendmail().send(text, batchfile.email)
 
 def _send_mail_error(batchfile, inference_time, source_file_base, message):
-    text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. "
+    text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'.\n"
     text += message
 
     logging.debug(f"_send_mail_error: {message} to {batchfile.email}")
     Sendmail().send(text, batchfile.email)
 
-def _delete_record(db, batchfile):
+def _delete_record(db, batchfile, converted_audio):
     db.delete(batchfile.filename_dbrecord)
 
     if os.path.isfile(batchfile.filename):
         os.remove(batchfile.filename)
         logging.debug(f"Deleted {batchfile.filename}")
+
+    if os.path.exists(converted_audio):
+        os.remove(converted_audio)
 
 def main():
 
@@ -129,11 +132,22 @@ def main():
             processed = ProcessedFiles(source_file_base)
 
             converted_audio = os.path.join(out_dir, WAV_FILE)
+
             timeout = _get_timeout()
+            result = execution.run_conversion(batchfile.original_filename, source_file, converted_audio, timeout)
+            
+            if result != Command.NO_ERROR:
+                _delete_record(db, batchfile, converted_audio)
+                msg = f"No s'ha pogut llegir el fitxer. Normalment, això succeeix perquè el fitxer que heu enviat no és d'àudio o vídeo o és malmès.\n"
+                msg += "Si està malmés, podeu provar de convertir-lo a un altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
+                msg += "i tornar-nos a enviar la versió convertida."
+                _send_mail_error(batchfile, 0, source_file_base, msg)
+                continue
+            
             inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
             if result == Command.TIMEOUT_ERROR:
-                _delete_record(db, batchfile)
+                _delete_record(db, batchfile, converted_audio)
                 minutes = int(timeout / 60)
                 msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
                 msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
@@ -141,7 +155,7 @@ def main():
                 continue
 
             if result != Command.NO_ERROR:
-                _delete_record(db, batchfile)
+                _delete_record(db, batchfile, converted_audio)
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
                 continue
 
