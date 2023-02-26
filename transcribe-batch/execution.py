@@ -110,15 +110,41 @@ class Execution(object):
 
         return extension
 
+    def _sox_errors(self, sox_errfile):
+        return_code = Command.NO_ERROR
+        try:
+            if os.path.getsize(sox_errfile) == 0:
+                return return_code
+
+            return_code = -1
+            cnt = 0
+            with open(sox_errfile, "r") as fh:
+                for line in fh.readlines():
+                    if cnt > 5:
+                        break
+
+                    logging.debug(f"sox_errfile: {line.rstrip()}")
+                    cnt += 1
+
+            return return_code
+        except Exception as exception:
+            logging.error(f"_sox_errors. Error: {exception}")
+            return return_code
+
     def run_conversion(self, original_filename, source_file, converted_audio, timeout):
         result = self._run_ffmpeg(source_file, converted_audio, timeout)
         if result != Command.NO_ERROR:
             converted_audio_fix = tempfile.NamedTemporaryFile().name + ".wav"
 
             _format = self._get_extension(original_filename)
-            cmd = f"sox -t {_format} {source_file} {converted_audio_fix}"
-            result = Command(cmd).run(timeout=timeout)
+            sox_errfile = "sox-error.log"
+
+            cmd = f"sox -t {_format} {source_file} {converted_audio_fix} 2> {sox_errfile}"
+            Command(cmd).run(timeout=timeout)
+            result = self._sox_errors(sox_errfile)
             logging.debug(f"Run {cmd} with result {result}")
+            if result != Command.NO_ERROR:
+                return result
 
             result = self._run_ffmpeg(converted_audio_fix, converted_audio, timeout)
 
