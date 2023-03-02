@@ -98,8 +98,8 @@ def _delete_record(db, batchfile, converted_audio):
     db.delete(batchfile.filename_dbrecord)
 
     if os.path.isfile(batchfile.filename):
-        os.remove(batchfile.filename)
-        logging.debug(f"Deleted {batchfile.filename}")
+        #os.remove(batchfile.filename)
+        logging.debug(f"Kept file {batchfile.filename}")
 
     if os.path.exists(converted_audio):
         os.remove(converted_audio)
