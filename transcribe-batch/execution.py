@@ -25,6 +25,8 @@ import subprocess
 import threading
 import tempfile
 from predicttime import PredictTime
+import signal
+import psutil
 
 class Command(object):
 
@@ -34,6 +36,18 @@ class Command(object):
     def __init__(self, cmd):
         self.cmd = cmd
         self.process = None
+
+    # Make sure that you kill also the process started in the Shell
+    def _kill_child_processes(self, parent_pid, sig=signal.SIGTERM):
+        try:
+            parent = psutil.Process(parent_pid)
+        except psutil.NoSuchProcess:
+            logging.error(f"_kill_child_processes.Cannot kill process {parent_pid}")
+            return
+
+        children = parent.children(recursive=True)
+        for process in children:
+            process.send_signal(sig)
 
     def run(self, timeout):
         def target():
@@ -45,8 +59,7 @@ class Command(object):
 
         thread.join(timeout)
         if thread.is_alive():
-            self.process.terminate()
-            thread.join()
+            self._kill_child_processes(self.process.pid)
             return self.TIMEOUT_ERROR
 
         return self.process.returncode
