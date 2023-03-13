@@ -43,7 +43,7 @@ class ProcessedFiles():
             return False
 
     def do_files_exists(self):
-        extensions = ["txt", "srt"]
+        extensions = ["txt", "srt", "dbrecord"]
         for extension in extensions:
             fullname = os.path.join(PROCESSED, self.uuid)
             fullname = f"{fullname}.{extension}"
