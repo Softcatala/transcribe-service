@@ -43,7 +43,7 @@ class LockFile():
         if os.path.exists(self.filename):
             try:
                 os.remove(self.filename)
-                logging.debug(f"LockFile.delete. Removing lock: {self.filename}")
+                logging.debug(f"LockFile.delete. Removed lock: {self.filename}")
             except Exception as e:
                 logging.error(f"LockFile.delete. Error deleting file {self.filename}: {e}")
 
