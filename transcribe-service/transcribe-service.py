@@ -218,6 +218,7 @@ def upload_file():
     if db.count() > 20:
         result = {"error": "Hi ha massa fitxers a la cua de processament. Prova-ho en una estona"}
         logging.debug(f"/transcribe_file/ {result['error']} - {email}")
+        Usage().log("queue_full_response")
         return json_answer(result, 429)
 
     MAX_PER_EMAIL = 3
