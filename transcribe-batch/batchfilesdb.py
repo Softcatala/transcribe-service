@@ -53,11 +53,11 @@ class Queue(): # works with filenames
         return filelist
 
     def count(self):
-        filenames = self._find(self.ENTRIES, "*")
+        filenames = self._find(self.ENTRIES, "*.dbrecord")
         return len(filenames)
 
     def get_all(self):
-        return self._find(self.ENTRIES, "*")
+        return self._find(self.ENTRIES, "*.dbrecord")
 
     def put(self, filename_dbrecord, content):
         if self.g_check_directory:

@@ -14,7 +14,7 @@ services:
       LOGLEVEL: 'DEBUG'
 #      LOGDIR: "/srv/data/logs"
 
-  transcribe-batch:
+  transcribe-batch_1:
     image: transcribe-batch:latest
     restart: always
 
@@ -23,7 +23,20 @@ services:
 
     environment:
       LOGLEVEL: 'DEBUG'
-#      LOGDIR: "/srv/data/logs"
+      LOGID: '1'
+      LOGDIR: "/srv/data/logs"
+
+  transcribe-batch_2:
+    image: transcribe-batch:latest
+    restart: always
+
+    volumes:
+      - transcribe-files:/srv/data
+
+    environment:
+      LOGLEVEL: 'DEBUG'
+      LOGID: '2'      
+      LOGDIR: "/srv/data/logs"
 
 networks:
   default:

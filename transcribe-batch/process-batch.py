@@ -27,14 +27,16 @@ from batchfilesdb import BatchFilesDB
 from processedfiles import ProcessedFiles
 from sendmail import Sendmail
 from execution import Execution, Command
+from lockfile import LockFile
 import datetime
 import tempfile
 
 def init_logging():
 
     LOGDIR = os.environ.get('LOGDIR', '')
+    LOGID = os.environ.get('LOGID', '0')
     LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
-    logfile = os.path.join(LOGDIR, 'process-batch.log')
+    logfile = os.path.join(LOGDIR, f'process-batch-{LOGID}.log')
     logger = logging.getLogger()
     hdlr = logging.handlers.RotatingFileHandler(logfile, maxBytes=1024*1024, backupCount=1)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -120,9 +122,18 @@ def main():
     out_dir = temp_dir.name
     while True:
         batchfiles = db.select()
+        for idx in range(len(batchfiles) - 1, -1, -1):
+            batchfile = batchfiles[idx]
+            if LockFile(batchfile.filename_dbrecord).has_lock():
+                batchfiles.remove(batchfile)
+            
         if len(batchfiles) > 0:
 
             batchfile = batchfiles[0]
+            if not LockFile(batchfile.filename_dbrecord).create():
+                time.sleep(5)
+                continue
+
             source_file = batchfile.filename
 
             logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
@@ -168,6 +179,7 @@ def main():
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
             processed.move_file_bin(source_file, extension)
+            LockFile(batchfile.filename_dbrecord).delete()
 
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
