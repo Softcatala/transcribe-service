@@ -21,7 +21,6 @@ import os
 import uuid
 import fnmatch
 import logging
-import datetime
 from predicttime import PredictTime
 
 class BatchFile():
