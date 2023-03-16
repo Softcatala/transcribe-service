@@ -106,6 +106,8 @@ def _delete_record(db, batchfile, converted_audio):
     if os.path.exists(converted_audio):
         os.remove(converted_audio)
 
+    LockFile(batchfile.filename_dbrecord).delete()
+
 def main():
 
     print("Process batch files to transcribe")
