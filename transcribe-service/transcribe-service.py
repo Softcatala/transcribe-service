@@ -187,6 +187,8 @@ def get_file():
     Usage().log("get_file")
     return resp
 
+QUEUE_CAPACITY = int(os.environ.get('QUEUE_CAPACITY', '20'))
+
 @app.route('/transcribe_file/', methods=['POST'])
 def upload_file():
     file = request.files['file'] if 'file' in request.files else ""
@@ -215,7 +217,7 @@ def upload_file():
         return json_answer(result, 413)
 
     db = BatchFilesDB()
-    if db.count() > 20:
+    if db.count() >= QUEUE_CAPACITY:
         result = {"error": "Hi ha massa fitxers a la cua de processament. Prova-ho en una estona"}
         logging.debug(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_full_response")
