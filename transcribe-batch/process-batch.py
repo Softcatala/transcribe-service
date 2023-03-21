@@ -157,7 +157,7 @@ def main():
                 _send_mail_error(batchfile, 0, source_file_base, msg)
                 continue
             
-            inference_time, result = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
+            inference_time, result, target_file_txt, target_file_srt = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
 
             if result == Command.TIMEOUT_ERROR:
                 _delete_record(db, batchfile, converted_audio)
@@ -172,8 +172,6 @@ def main():
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
                 continue
 
-            target_file_srt = converted_audio + ".srt"
-            target_file_txt = converted_audio + ".txt"
             extension = _get_extension(batchfile.original_filename)
             _send_mail(batchfile, inference_time, source_file_base)
 

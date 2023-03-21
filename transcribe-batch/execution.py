@@ -187,4 +187,6 @@ class Execution(object):
             os.remove(converted_audio)
 
         self._log_predicted_vs_real(predicted_time, end_time.seconds)
-        return end_time, result
+        target_file_txt = converted_audio + ".txt"
+        target_file_srt = converted_audio + ".srt"
+        return end_time, result, target_file_txt, target_file_srt
