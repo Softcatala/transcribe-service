@@ -17,13 +17,12 @@ docker-run:
 test:
 	cd transcribe-batch && python -m nose2
 
-whisper.cpp:
-	if [ ! -d "whisper.cpp" ]; then git clone --branch v1.2.1 https://github.com/ggerganov/whisper.cpp; fi
-	cd whisper.cpp &&  make
-
-whisper.cpp-models:
-	if [ ! -d "whisper.cpp/sc-models" ]; then git clone --depth 1 https://gitlab.softcatala.org/jmas/whisper.cpp-models.git/ whisper.cpp/sc-models; fi
-	cd whisper.cpp/sc-models && git lfs pull
+whisper-models:
+	if [ ! -d "models" ]; then \
+		git clone --depth 1 https://huggingface.co/datasets/jordimas/whisper-ct2-v2 models ;\
+		cd models && git lfs pull ;\
+		rm *-en* -r -f && rm *large* -r -f && rm *base* -r -f && rm *tiny* -r -f && rm .git/* -r -f ;\
+	fi
 
 benchmark-samples:
 	mkdir -p benchmark

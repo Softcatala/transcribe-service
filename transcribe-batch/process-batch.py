@@ -61,15 +61,15 @@ def _get_extension(original_filename):
 
 def _get_model_file(model_name):
     if model_name == "small":
-        model = "ggml-small.bin"
+        model = "small"
     elif model_name == "medium":
-        model = "ggml-medium.bin"
+        model = "medium"
     elif model_name == "sc-small":
-        model = "ggml-sc-small.bin"
+        model = "small"
     elif model_name == "sc-medium":
-        model = "ggml-sc-medium.bin"
+        model = "medium"
     else: # default
-        model = "ggml-small.bin"
+        model = "small"
 
     return model
 

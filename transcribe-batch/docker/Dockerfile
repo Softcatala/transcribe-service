@@ -1,12 +1,5 @@
 FROM python:3.11.1-slim-bullseye as copied_files
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install git ffmpeg make g++ -y
-
-COPY Makefile .
-RUN make whisper.cpp
-RUN mkdir -p /srv/whisper.cpp/
-RUN cp whisper.cpp/main /srv/whisper.cpp/
-
 COPY transcribe-batch/*.py /srv/
 COPY transcribe-batch/docker/entry-point.sh /srv/
 COPY transcribe-batch/requirements.txt /srv/
@@ -21,7 +14,7 @@ WORKDIR /srv
 COPY --from=copied_files /srv/ /srv/
 RUN pip3 install -r /srv/requirements.txt
 
-COPY --from=models /srv/whisper.cpp/sc-models/ /srv/whisper.cpp/sc-models/
+COPY --from=models /srv/models/ /root/.cache/whisper-ctranslate2/
 
 ENTRYPOINT /srv/entry-point.sh
 

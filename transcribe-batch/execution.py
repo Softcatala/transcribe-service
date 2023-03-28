@@ -164,7 +164,8 @@ class Execution(object):
         return result
 
     def run_inference(self, source_file, original_filename, model, converted_audio, timeout):
-        WHISPER_PATH = "/srv/whisper.cpp/"
+        WHISPER_PATH = "whisper-ctranslate2"
+        OUTPUT_DIR = "output_dir/"
 
         start_time = datetime.datetime.now()
         predicted_time = self.predictTime.predict_time_from_filename(source_file, original_filename)
@@ -172,9 +173,10 @@ class Execution(object):
             printable_time = PredictTime().get_formatted_time(predicted_time)
             logging.debug(f"Predicted time for {source_file} ({original_filename}): {printable_time}")
 
-        model_path = os.path.join(WHISPER_PATH, "sc-models", model)
-        whisper_cmd = os.path.join(WHISPER_PATH, "main")
-        cmd = f"{whisper_cmd} --threads {self.threads} -m {model_path} -f {converted_audio} -l ca -otxt -osrt 2> /dev/null > /dev/null"
+        compute_type = os.environ.get('COMPUTE_TYPE', "int16")
+        verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
+        redirect = " > /dev/null" if verbose == "false" else ""
+        cmd = f"{WHISPER_PATH} --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect}"
         result = Command(cmd).run(timeout=timeout)
 
         end_time = datetime.datetime.now() - start_time
@@ -187,6 +189,9 @@ class Execution(object):
             os.remove(converted_audio)
 
         self._log_predicted_vs_real(predicted_time, end_time.seconds)
-        target_file_txt = converted_audio + ".txt"
-        target_file_srt = converted_audio + ".srt"
+        filename = os.path.basename(converted_audio).rsplit(".", 1)[0]
+        target_file_txt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".txt"))
+        target_file_srt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".srt"))
+        logging.debug(f"target_file_txt: {target_file_txt}")
+        
         return end_time, result, target_file_txt, target_file_srt

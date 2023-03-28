@@ -3,7 +3,7 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install git git-lfs make 
 
 # Get models
 COPY Makefile .
-RUN make whisper.cpp-models
+RUN make whisper-models
 
 FROM python:3.11.1-slim-bullseye
-COPY --from=get_models whisper.cpp/sc-models/*.bin /srv/whisper.cpp/sc-models/
+COPY --from=get_models models/ /srv/models/
