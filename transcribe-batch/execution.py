@@ -176,7 +176,7 @@ class Execution(object):
         compute_type = os.environ.get('COMPUTE_TYPE', "int16")
         verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
         redirect = " > /dev/null" if verbose == "false" else ""
-        cmd = f"{WHISPER_PATH} --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect}"
+        cmd = f"{WHISPER_PATH} --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect}"
         result = Command(cmd).run(timeout=timeout)
 
         end_time = datetime.datetime.now() - start_time

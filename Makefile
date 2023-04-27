@@ -18,11 +18,7 @@ test:
 	cd transcribe-batch && python -m nose2
 
 whisper-models:
-	if [ ! -d "models" ]; then \
-		git clone --depth 1 https://huggingface.co/datasets/jordimas/whisper-ct2-v2 models ;\
-		cd models && git lfs pull ;\
-		rm *-en* -r -f && rm *large* -r -f && rm *base* -r -f && rm *tiny* -r -f && rm .git/* -r -f ;\
-	fi
+	python3 -c 'from faster_whisper import WhisperModel; WhisperModel("small");  WhisperModel("medium")'
 
 benchmark-samples:
 	mkdir -p benchmark

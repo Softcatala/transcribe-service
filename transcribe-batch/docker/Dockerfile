@@ -14,7 +14,7 @@ WORKDIR /srv
 COPY --from=copied_files /srv/ /srv/
 RUN pip3 install -r /srv/requirements.txt
 
-COPY --from=models /srv/models/ /root/.cache/whisper-ctranslate2/
+COPY --from=models /srv/models/ /root/.cache/huggingface/
 
 ENTRYPOINT /srv/entry-point.sh
 

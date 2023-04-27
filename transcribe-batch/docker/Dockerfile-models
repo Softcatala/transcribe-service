@@ -3,7 +3,8 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install git git-lfs make 
 
 # Get models
 COPY Makefile .
+RUN pip install faster-whisper
 RUN make whisper-models
 
 FROM python:3.11.1-slim-bullseye
-COPY --from=get_models models/ /srv/models/
+COPY --from=get_models /root/.cache/huggingface/  /srv/models/
