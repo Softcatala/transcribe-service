@@ -19,9 +19,7 @@
 
 from predicttime import PredictTime
 import unittest
-import os
 import tempfile
-import sys
 
 class TestPredictTime(unittest.TestCase):
     MB_BYTES = 1024*1024

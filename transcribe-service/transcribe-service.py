@@ -20,14 +20,13 @@
 
 from __future__ import print_function
 from flask import Flask, request, Response
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import json
 from batchfilesdb import BatchFilesDB
 from processedfiles import ProcessedFiles
 import os
 import logging
 import logging.handlers
-import uuid
 from usage import Usage
 import datetime
 

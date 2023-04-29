@@ -21,7 +21,6 @@ from batchfilesdb import BatchFilesDB
 import unittest
 import os
 import tempfile
-import sys
 import time
 
 class BatchFilesDBTest(BatchFilesDB):
