@@ -76,7 +76,7 @@ def init_logging():
 
 @app.route('/uuid_exists/', methods=['GET'])
 def uuid_exists():
-    uuid = request.args.get('uuid')
+    uuid = request.args.get('uuid', '')
 
     if uuid == '':
         result = {}
@@ -128,8 +128,8 @@ def _get_record(_uuid):
 
 @app.route('/get_file/', methods=['GET'])
 def get_file():
-    uuid = request.args.get('uuid')
-    ext = request.args.get('ext')
+    uuid = request.args.get('uuid', '')
+    ext = request.args.get('ext', '')
 
     if ext == '':
         result = {}
