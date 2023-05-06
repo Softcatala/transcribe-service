@@ -33,17 +33,15 @@ class LockFile():
             fh.write("")
             fh.close()
         except Exception as e:
-            logging.debug(f"LockFile.create. Failed to create lock for {self.filename} - {str(e)}")
+            logging.error(f"LockFile.create. Failed to create lock for {self.filename} - {str(e)}")
             return False
 
-        logging.debug(f"LockFile.create. Created {self.filename}")
         return True
 
     def delete(self):
         if os.path.exists(self.filename):
             try:
                 os.remove(self.filename)
-                logging.debug(f"LockFile.delete. Removed lock: {self.filename}")
             except Exception as e:
                 logging.error(f"LockFile.delete. Error deleting file {self.filename}: {e}")
 
