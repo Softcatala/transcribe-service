@@ -50,11 +50,20 @@ def stats():
 
     db = BatchFilesDB()
     queue = {}
+    records = db.select()
+
+    # number of files per email
+    who = {record.email: sum(1 for r in records if r.email == record.email) for record in records}
+
+    # hide real emails
+    print_who = {"".join(list(map(lambda c: '-' if c in ['a', 'e', 'i'] else c, key))): value for key, value in who.items()}
+
     queue["waiting_time"] = db.estimated_queue_waiting_time()
-    queue["items"] = len(db.select())
+    queue["items"] = len(records)
+    queue["who"] = print_who
     result["queue"] = queue
 
-    return json_answer(result)
+    return json_answer  (result)
 
 
 def init_logging():
