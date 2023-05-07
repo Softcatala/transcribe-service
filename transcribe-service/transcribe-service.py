@@ -100,7 +100,7 @@ def uuid_exists():
 
     exists, result_msg = processedFiles.do_files_exists()
     result_code = 200 if exists else 404
-    logging.debug(f"uuid_exists for {uuid} - {result_code}")
+#    logging.debug(f"uuid_exists for {uuid} - {result_code}")
     return json_answer(result_msg, result_code)
 
 
@@ -191,7 +191,7 @@ def get_file():
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Accept-Ranges'] = 'bytes'
     resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
-    logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
+#    logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
     Usage().log("get_file")
     return resp
 
