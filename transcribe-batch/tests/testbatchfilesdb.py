@@ -55,6 +55,20 @@ class TestBatchFilesDB(unittest.TestCase):
         self.assertEquals(self.EMAIL, record.email)
         self.assertEquals(self.MODEL_NAME, record.model_name)
 
+    def _test_create_extraparams_None(self):
+        db = self._create_db_object()
+        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+
+        record = db._read_record(filename_dbrecord)
+        self.assertEquals(self.FILENAME, record.filename)
+        self.assertEquals(self.EMAIL, record.email)
+        self.assertEquals(self.MODEL_NAME, record.model_name)
+        
+        self.assertEquals(None, record.highlight_words)
+        self.assertEquals(None, record.num_chars)
+        self.assertEquals(None, record.num_sentences)
+
     def test_select(self):
         db = self._create_db_object()
         db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
@@ -112,6 +126,25 @@ class TestBatchFilesDB(unittest.TestCase):
 
         estimated_time = db.estimated_queue_waiting_time()
         self.assertEquals("", estimated_time)
+
+    def test_create_extraparams_values(self):
+        db = self._create_db_object()
+
+        HIGHLIGHT_WORDS = True
+        NUM_CHARS = 20
+        NUM_SENTENCES = 2
+        
+        _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3", HIGHLIGHT_WORDS, NUM_CHARS, NUM_SENTENCES)
+        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+
+        record = db._read_record(filename_dbrecord)
+        self.assertEquals(self.FILENAME, record.filename)
+        self.assertEquals(self.EMAIL, record.email)
+        self.assertEquals(self.MODEL_NAME, record.model_name)
+        
+        self.assertEquals(HIGHLIGHT_WORDS, record.highlight_words)
+        self.assertEquals(NUM_CHARS, record.num_chars)
+        self.assertEquals(NUM_SENTENCES, record.num_sentences)
 
 if __name__ == '__main__':
     unittest.main()

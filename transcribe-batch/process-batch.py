@@ -157,7 +157,9 @@ def main():
                 _send_mail_error(batchfile, 0, source_file_base, msg)
                 continue
             
-            inference_time, result, target_file_txt, target_file_srt = execution.run_inference(source_file, batchfile.original_filename, model, converted_audio, timeout)
+            inference_time, result, target_file_txt, target_file_srt, target_file_json = execution.run_inference(source_file, batchfile.original_filename, model,
+                                                                                                                converted_audio, timeout, batchfile.highlight_words,
+                                                                                                                batchfile.num_chars, batchfile.num_sentences)
 
             if result == Command.TIMEOUT_ERROR:
                 _delete_record(db, batchfile, converted_audio)
@@ -178,6 +180,7 @@ def main():
             processed.move_file(batchfile.filename_dbrecord)
             processed.move_file(target_file_srt)
             processed.move_file(target_file_txt)
+            processed.move_file(target_file_json)
             processed.move_file_bin(source_file, extension)
             LockFile(batchfile.filename_dbrecord).delete()
 

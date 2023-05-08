@@ -27,6 +27,7 @@ import tempfile
 from predicttime import PredictTime
 import signal
 import psutil
+from typing import Optional
 
 class Command(object):
 
@@ -144,7 +145,12 @@ class Execution(object):
             logging.error(f"_sox_errors. Error: {exception}")
             return return_code
 
-    def run_conversion(self, original_filename, source_file, converted_audio, timeout):
+    def run_conversion(self,
+                       original_filename: str,
+                       source_file: str,
+                       converted_audio: str,
+                       timeout: int):
+
         result = self._run_ffmpeg(source_file, converted_audio, timeout)
         if result != Command.NO_ERROR:
             converted_audio_fix = tempfile.NamedTemporaryFile().name + ".wav"
@@ -163,10 +169,37 @@ class Execution(object):
 
         return result
 
-    def run_inference(self, source_file, original_filename, model, converted_audio, timeout):
+    def run_inference(self,
+                    source_file: str,
+                    original_filename: str,
+                    model: str,
+                    converted_audio: str,
+                    timeout: int,
+                    highlight_words: Optional[int] = None,
+                    num_chars: Optional[int] = None,
+                    num_sentences: Optional[int] = None):
+
         WHISPER_PATH = "whisper-ctranslate2"
         OUTPUT_DIR = "output_dir/"
+        options = ""
+        word_timestamps = False
 
+        if highlight_words:
+            options += " --highlight_words True"
+            word_timestamps = True
+ 
+        if num_chars:
+            options += f" --max_line_width {num_chars}"
+            word_timestamps = True
+
+        if num_sentences:
+            options += f" --max_line_count {num_sentences}"
+            word_timestamps = True
+
+        if word_timestamps:
+            options += f" --word_timestamps True"
+
+        logging.debug(f"Options: {options}")
         start_time = datetime.datetime.now()
         predicted_time = self.predictTime.predict_time_from_filename(source_file, original_filename)
         if predicted_time != PredictTime().CANNOT_PREDICT:
@@ -176,7 +209,7 @@ class Execution(object):
         compute_type = os.environ.get('COMPUTE_TYPE', "int16")
         verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
         redirect = " > /dev/null" if verbose == "false" else ""
-        cmd = f"{WHISPER_PATH} --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect}"
+        cmd = f"{WHISPER_PATH} {options} --pretty_json True --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect}"
         result = Command(cmd).run(timeout=timeout)
 
         end_time = datetime.datetime.now() - start_time
@@ -192,6 +225,5 @@ class Execution(object):
         filename = os.path.basename(converted_audio).rsplit(".", 1)[0]
         target_file_txt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".txt"))
         target_file_srt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".srt"))
-        logging.debug(f"target_file_txt: {target_file_txt}")
-        
-        return end_time, result, target_file_txt, target_file_srt
+        target_file_json = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".json"))
+        return end_time, result, target_file_txt, target_file_srt, target_file_json

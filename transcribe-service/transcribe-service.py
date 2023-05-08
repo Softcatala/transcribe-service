@@ -56,7 +56,7 @@ def stats():
     who = {record.email: sum(1 for r in records if r.email == record.email) for record in records}
 
     # hide real emails
-    print_who = {"".join(list(map(lambda c: '-' if c in ['a', 'e', 'i'] else c, key))): value for key, value in who.items()}
+    print_who = {"".join(list(map(lambda c: '-' if c in ['a'] else c, key))): value for key, value in who.items()}
 
     queue["waiting_time"] = db.estimated_queue_waiting_time()
     queue["items"] = len(records)
@@ -125,6 +125,8 @@ def _get_mimetype(extension):
     if not mimetype:
         if extension == "txt":
             mimetype = "text/plain"
+        elif extension == "json":
+            mimetype = "application/json"
         else:
             mimetype = "application/octet-stream"
 
@@ -202,6 +204,9 @@ def upload_file():
     file = request.files['file'] if 'file' in request.files else ""
     email = request.values['email'] if 'email' in request.values else ""
     model_name = request.values['model_name'] if 'model_name' in request.values else ""
+    highlight_words = True if request.values.get('highlight_words', None) else False
+    num_chars = request.values.get('num_chars', "")
+    num_sentences = request.values.get('num_sentences', "")
 
     if file == "" or file.filename == "":
         result = {"error": "No s'ha especificat el fitxer"}
@@ -240,7 +245,14 @@ def upload_file():
     _uuid = db.get_new_uuid()
     fullname = os.path.join(UPLOAD_FOLDER, _uuid)
     file.save(fullname)
-    db.create(fullname, email, model_name, file.filename, record_uuid=_uuid)
+    db.create(fullname,
+                email=email,
+                model_name=model_name,
+                original_filename=file.filename,
+                highlight_words=highlight_words,
+                num_chars=num_chars,
+                num_sentences=num_sentences,
+                record_uuid=_uuid)
 
     size_mb = os.path.getsize(fullname) / 1024 / 1024
     waiting_time = db.estimated_queue_waiting_time()

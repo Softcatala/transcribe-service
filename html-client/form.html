@@ -19,7 +19,18 @@
      <input type="email" id="email" name="email"> 
     <p>
       <input type=file  name=file>
-      <input type=submit value="Demana transcripció" onclick="sendFile();return false;">
+    <p>
+     <div class="form-group" style="margin:10px 0 10px 0">
+            <label for="num_sentences">Nombre màxim de caràcters abans de saltar de línia:</label>
+            <input type="number" style="width:50px" id="num_chars" name="num_chars" min="5" max="1000" value="">
+        </div>
+        <div class="form-group" style="margin:10px 0 10px 0">
+            <label for="num_sentences">Nombre màxim de línies per subtítol: </label>
+            <input type="number" style="width:50px" id="num_sentences" name="num_sentences" min="1" max="10" value="">
+        </div>
+    </div>
+    <p><label><input type="checkbox" id="highlight_words" name="highlight_words"/>Ressalta les paraules</label></p>
+    <input type=submit value="Demana transcripció" onclick="sendFile();return false;">
     </form>
 </body>
 </html>

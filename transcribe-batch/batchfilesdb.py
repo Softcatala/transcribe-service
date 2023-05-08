@@ -22,15 +22,29 @@ import uuid
 import fnmatch
 import logging
 from predicttime import PredictTime
+from typing import Optional
 
 class BatchFile():
-    def __init__(self, filename_dbrecord, filename, email, model_name, original_filename, estimated_time):
+    def __init__(self,
+                 filename_dbrecord: str,
+                 filename: str,
+                 email: str,
+                 model_name: str,
+                 original_filename: str,
+                 estimated_time: int,
+                 highlight_words: Optional[int] = None,
+                 num_chars: Optional[int] = None,
+                 num_sentences: Optional[int] = None):
+                 
         self.filename_dbrecord = filename_dbrecord
         self.filename = filename
         self.email = email
         self.model_name = model_name
         self.original_filename = original_filename
         self.estimated_time = estimated_time
+        self.highlight_words = highlight_words
+        self.num_chars = num_chars
+        self.num_sentences = num_sentences
 
 # This is a disk based priority queue with works as filenames
 # as items to store
@@ -82,6 +96,12 @@ class BatchFilesDB(Queue):
     def get_new_uuid(self):
         return str(uuid.uuid4())
 
+    def _optional_int(self, string):
+        return None if string == "None" or len(string) == 0 else int(string)
+
+    def _optional_bool(self, string):
+        return None if string == "None" or len(string) == 0 else string == "True"
+
     def _estimate_time(self, filename, original_filename):
         try:
             predictTime = PredictTime()
@@ -92,17 +112,18 @@ class BatchFilesDB(Queue):
             logging.error("_estimate_time. Error:" + str(exception))
             return PredictTime().CANNOT_PREDICT
 
-    def create(self, filename, email, model_name, original_filename, record_uuid = None):
+    def create(self, filename, email, model_name, original_filename, highlight_words = None,
+                  num_chars = None, num_sentences = None, record_uuid = None):
 
         if not record_uuid:
             record_uuid = self.get_new_uuid()
 
         filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
         _estimated_time = self._estimate_time(filename, original_filename)
-        line = f"{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
+        line =  f"v2{self.SEPARATOR}{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
+        line += f"{self.SEPARATOR}{highlight_words}{self.SEPARATOR}{num_chars}{self.SEPARATOR}{num_sentences}"
         self.put(filename_dbrecord, line)
         return record_uuid
-
 
     def estimated_queue_waiting_time(self) -> str:
         filenames = self.get_all()
@@ -140,7 +161,19 @@ class BatchFilesDB(Queue):
             with open(filename_dbrecord, "r") as fh:
                 line = fh.readline()
                 components = line.split(self.SEPARATOR)
-                return BatchFile(filename_dbrecord, components[0], components[1], components[2], components[3], int(components[4]))
+                if components[0] == "v2":
+                     return BatchFile(filename_dbrecord = filename_dbrecord,
+                                     filename = components[1],
+                                     email = components[2],
+                                     model_name = components[3],
+                                     original_filename = components[4],
+                                     estimated_time = int(components[5]),
+                                     highlight_words = self._optional_bool(components[6]),
+                                     num_chars = self._optional_int(components[7]),
+                                     num_sentences = self._optional_int(components[8]))
+                else:
+                    raise RuntimeError("dbrecord version not supported")
+
         except Exception as exception:
             logging.error(f"_read_record. Unable to read {filename_dbrecord}. Error: {exception}")
             return None

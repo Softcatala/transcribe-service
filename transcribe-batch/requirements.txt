@@ -1,4 +1,4 @@
 psutil
 ctranslate2==3.13
 faster-whisper==0.5.1
-whisper-ctranslate2==0.2.2
+whisper-ctranslate2==0.2.4
