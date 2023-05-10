@@ -144,7 +144,7 @@ class BatchFilesDB(Queue):
         for filename in filenames:
             record = self._read_record(filename)
 
-            if email and record.email != email:
+            if email and record.email.lower() != email.lower():
                 continue
 
             records.append(record)

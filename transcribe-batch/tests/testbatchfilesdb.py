@@ -31,6 +31,8 @@ class TestBatchFilesDB(unittest.TestCase):
 
     FILENAME = "fitxer.txt"
     EMAIL = "jmas@softcatala.org"
+    EMAIL2 = "jordi@softcatala.org"
+    EMAIL3 = "JMAS@softcatala.org"
     MODEL_NAME = "eng-cat"
 
     def setUp(self):
@@ -75,6 +77,33 @@ class TestBatchFilesDB(unittest.TestCase):
 
         records = db.select()
         self.assertEquals(1, len(records))
+
+        record = records[0]
+        self.assertEquals(self.FILENAME, record.filename)
+        self.assertEquals(self.EMAIL, record.email)
+        self.assertEquals(self.MODEL_NAME, record.model_name)
+
+    def test_select_email(self):
+        db = self._create_db_object()
+        db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+        db.create(self.FILENAME, self.EMAIL2, self.MODEL_NAME, "original_filename.mp3")
+
+        records = db.select(email = self.EMAIL)
+        self.assertEquals(1, len(records))
+
+        record = records[0]
+        self.assertEquals(self.FILENAME, record.filename)
+        self.assertEquals(self.EMAIL, record.email)
+        self.assertEquals(self.MODEL_NAME, record.model_name)
+
+    def test_select_email_uppercase(self):
+        db = self._create_db_object()
+        db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
+        db.create(self.FILENAME, self.EMAIL2, self.MODEL_NAME, "original_filename.mp3")
+        db.create(self.FILENAME, self.EMAIL3, self.MODEL_NAME, "original_filename.mp3")
+
+        records = db.select(email = self.EMAIL)
+        self.assertEquals(2, len(records))
 
         record = records[0]
         self.assertEquals(self.FILENAME, record.filename)
