@@ -241,6 +241,7 @@ def upload_file():
     if len(db.select(email = email)) >= MAX_PER_EMAIL:
         result = {"error": f"Ja tens {MAX_PER_EMAIL} fitxers a la cua. Espera't que es processin per enviar-ne de nous."}
         logging.debug(f"/transcribe_file/ {result['error']} - {email}")
+        Usage().log("queue_max_per_mail")
         return json_answer(result, 429)
 
     _uuid = db.get_new_uuid()
