@@ -94,6 +94,10 @@ class ProcessedFiles():
 
         return filelist
 
+    def get_num_of_files_stored():
+        files = ProcessedFiles._find_files(PROCESSED, "*")
+        return len(files)
+
     def purge_files(days, directory = PROCESSED):
         HOURS_DAY = 24
         MINUTES_HOUR = 60

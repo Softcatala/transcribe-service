@@ -43,7 +43,7 @@ def hello_word():
 
 @app.route('/stats/', methods=['GET'])
 def stats():
-    requested = request.args.get('date')
+    requested = request.args.get('date', datetime.datetime.today().strftime('%Y-%m-%d'))
     date_requested = datetime.datetime.strptime(requested, '%Y-%m-%d')
     usage = Usage()
     result = usage.get_stats(date_requested)
@@ -58,6 +58,7 @@ def stats():
     # hide real emails
     print_who = {"".join(list(map(lambda c: '-' if c in ['a'] else c, key))): value for key, value in who.items()}
 
+    result["files_stored"] = ProcessedFiles.get_num_of_files_stored()
     queue["waiting_time"] = db.estimated_queue_waiting_time()
     queue["items"] = len(records)
     queue["who"] = print_who
