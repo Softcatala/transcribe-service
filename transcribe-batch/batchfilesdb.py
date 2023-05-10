@@ -136,6 +136,8 @@ class BatchFilesDB(Queue):
             
             waiting_time += record.estimated_time
 
+        clients = int(os.environ.get('CLIENTS', 1))
+        waiting_time = waiting_time / clients
         return PredictTime().get_formatted_time(waiting_time)
 
     def select(self, email = None):
