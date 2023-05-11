@@ -57,7 +57,7 @@ class TestBatchFilesDB(unittest.TestCase):
         self.assertEquals(self.EMAIL, record.email)
         self.assertEquals(self.MODEL_NAME, record.model_name)
 
-    def _test_create_extraparams_None(self):
+    def test_create_extraparams_None(self):
         db = self._create_db_object()
         _uuid = db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
         filename_dbrecord = db.get_record_file_from_uuid(_uuid)
