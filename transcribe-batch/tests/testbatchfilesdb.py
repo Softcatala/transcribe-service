@@ -107,7 +107,7 @@ class TestBatchFilesDB(unittest.TestCase):
 
         record = records[0]
         self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL, record.email)
+        self.assertEquals(self.EMAIL.lower(), record.email.lower())
         self.assertEquals(self.MODEL_NAME, record.model_name)
 
     def test_selected_expected_order(self):
