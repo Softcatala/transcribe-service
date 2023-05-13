@@ -232,14 +232,14 @@ def upload_file():
 
     db = BatchFilesDB()
     if db.count() >= QUEUE_CAPACITY:
-        result = {"error": "Hi ha massa fitxers a la cua de processament. Prova-ho en una estona"}
+        result = {"error": "Hi ha massa fitxers a la cua de processament. Proveu-ho en una estona"}
         logging.debug(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_full_response")
         return json_answer(result, 429)
 
     MAX_PER_EMAIL = 3
     if len(db.select(email = email)) >= MAX_PER_EMAIL:
-        result = {"error": f"Ja tens {MAX_PER_EMAIL} fitxers a la cua. Espera't que es processin per enviar-ne de nous."}
+        result = {"error": f"Ja teniu {MAX_PER_EMAIL} fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous."}
         logging.debug(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_max_per_mail")
         return json_answer(result, 429)
