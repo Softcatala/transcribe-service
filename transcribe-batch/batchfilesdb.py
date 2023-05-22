@@ -23,6 +23,7 @@ import fnmatch
 import logging
 from predicttime import PredictTime
 from typing import Optional
+from similarusers import SimilarUsers
 
 class BatchFile():
     def __init__(self,
@@ -152,6 +153,12 @@ class BatchFilesDB(Queue):
             records.append(record)
 
         return records
+        
+    def get_count_of_files_for_similar_users(self, email):
+        records = self.select()
+        email_list = list(map(lambda record: record.email, records))
+        similar_users = SimilarUsers()
+        return similar_users.get_count_of_files_for_similar_users(email_list, email)
 
     def _read_record_from_uuid(self, _uuid):
         record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")

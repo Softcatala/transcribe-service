@@ -244,6 +244,15 @@ def upload_file():
         Usage().log("queue_max_per_mail")
         return json_answer(result, 429)
 
+    count, emails = db.get_count_of_files_for_similar_users(email = email)
+    if count >= MAX_PER_EMAIL:
+        message = f"Ja teniu {MAX_PER_EMAIL} fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous.\n"
+        message += "Heu intentat saltar-vos el límit de fitxers. Us preguem que desistiu per evitar bloquejar-vos l'ús del servei."
+        result = {"error": message}
+        logging.debug(f"/transcribe_file/ {result['error']} - {email} - ({emails})")
+        Usage().log("queue_max_per_mail_cheating")
+        return json_answer(result, 429)
+
     _uuid = db.get_new_uuid()
     fullname = os.path.join(UPLOAD_FOLDER, _uuid)
     file.save(fullname)
