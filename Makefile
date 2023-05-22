@@ -1,4 +1,4 @@
-.PHONY: docker-build-transcribe-models docker-build-transcribe-service docker-build-transcribe-batch docker-run test whisper.cpp whisper.cpp-models benchmark-run benchmark-run
+.PHONY: docker-build-transcribe-models docker-build-transcribe-service docker-build-transcribe-batch docker-run test whisper-models benchmark-run
 
 build-all: docker-build-transcribe-models docker-build-transcribe-service docker-build-transcribe-batch
 
@@ -24,5 +24,5 @@ benchmark-samples:
 	mkdir -p benchmark
 	if [ ! -d "benchmark/samples" ]; then git clone --depth 1 https://gitlab.softcatala.org/nous-projectes/catalan-audio-samples.git/ benchmark/samples; fi
 
-benchmark-run: whisper.cpp whisper.cpp-models benchmark-samples
+benchmark-run: whisper-models benchmark-samples
 	cd benchmark && python3 whispercpp.py
