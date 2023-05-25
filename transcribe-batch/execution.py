@@ -100,7 +100,7 @@ class Execution(object):
             return_code = -1
             with open(ffmpeg_errfile, "r") as fh:
                 for line in fh.readlines():
-                    logging.debug(f"ffmpeg_error: {line.rstrip()}")
+                    logging.debug(f"_ffmpeg_errors: {line.rstrip()}")
 
             return return_code
         except Exception as exception:
@@ -137,7 +137,7 @@ class Execution(object):
                     if cnt > 5:
                         break
 
-                    logging.debug(f"sox_errfile: {line.rstrip()}")
+                    logging.debug(f"_sox_errors: {line.rstrip()}")
                     cnt += 1
 
             return return_code
