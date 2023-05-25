@@ -169,6 +169,20 @@ class Execution(object):
 
         return result
 
+
+    def _whisper_errors(self, whisper_errfile):
+        try:
+            if os.path.getsize(whisper_errfile) == 0:
+                return
+
+            with open(whisper_errfile, "r") as fh:
+                for line in fh.readlines():
+                    logging.debug(f"_whisper_errors: {line.rstrip()}")
+
+        except Exception as exception:
+            logging.error(f"whisper_errfile. Error: {exception}")
+
+
     def run_inference(self,
                     source_file: str,
                     original_filename: str,
@@ -209,8 +223,11 @@ class Execution(object):
         compute_type = os.environ.get('COMPUTE_TYPE', "int16")
         verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
         redirect = " > /dev/null" if verbose == "false" else ""
-        cmd = f"{WHISPER_PATH} {options} --pretty_json True --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect}"
+
+        whisper_errfile = "whisper_error.log"
+        cmd = f"{WHISPER_PATH} {options} --pretty_json True --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect} 2> {whisper_errfile}"
         result = Command(cmd).run(timeout=timeout)
+        self._whisper_errors(whisper_errfile)
 
         end_time = datetime.datetime.now() - start_time
 
