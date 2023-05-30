@@ -152,7 +152,7 @@ def main():
             if result != Command.NO_ERROR:
                 _delete_record(db, batchfile, converted_audio)
                 msg = "No s'ha pogut llegir el fitxer. Normalment, això succeeix perquè el fitxer que heu enviat no és d'àudio o vídeo o és malmès.\n"
-                msg += "Si està malmés, podeu provar de convertir-lo a un altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
+                msg += "Si està malmès, podeu provar de convertir-lo a un altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
                 msg += "i tornar-nos a enviar la versió convertida."
                 _send_mail_error(batchfile, 0, source_file_base, msg)
                 continue
