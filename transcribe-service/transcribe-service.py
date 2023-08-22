@@ -113,6 +113,7 @@ ALLOWED_MIMEYPES = {"mp3": "audio/mpeg",
                     "mp4": "video/mp4",
                     "mkv": "video/x-matroska",
                     "mov": "video/quicktime",
+                    "mts": "video/mts",
 }
 
 def _allowed_file(filename):
