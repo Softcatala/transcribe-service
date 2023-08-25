@@ -200,6 +200,7 @@ def get_file():
     return resp
 
 QUEUE_CAPACITY = int(os.environ.get('QUEUE_CAPACITY', '20'))
+MAX_SIZE = int(os.environ.get('MAX_SIZE', 1024*1024*1024)) # 1GB by default
 
 @app.route('/transcribe_file/', methods=['POST'])
 def upload_file():
@@ -226,9 +227,9 @@ def upload_file():
         result = {"error": "Tipus de fitxer no vàlid"}
         return json_answer(result, 415)
 
-    MAX_SIZE = 1024*1024*1024 # 1GB
     if request.content_length and request.content_length > MAX_SIZE:
         result = {"error": "El fitxer és massa gran"}
+        logging.debug(f"/transcribe_file/ {result['error']} - {email}")
         return json_answer(result, 413)
 
     db = BatchFilesDB()
