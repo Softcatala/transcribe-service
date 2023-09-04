@@ -1,5 +1,5 @@
 psutil
-ctranslate2==3.17
-faster-whisper==0.7.0
-whisper-ctranslate2==0.2.7
+ctranslate2==3.19
+faster-whisper==0.8.0
+whisper-ctranslate2==0.2.8
 numpy
