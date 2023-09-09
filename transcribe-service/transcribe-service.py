@@ -29,8 +29,6 @@ import logging
 import logging.handlers
 from usage import Usage
 import datetime
-from urllib.parse import quote
-import unicodedata
 
 app = Flask(__name__)
 
@@ -141,20 +139,6 @@ def _get_record(_uuid):
     db = BatchFilesDB(processed_dir)
     return db._read_record_from_uuid(_uuid)
 
-def _get_download_names(download_name, ext):
-    try:
-        download_name.encode("ascii")
-    except UnicodeEncodeError:
-        simple = unicodedata.normalize("NFKD", download_name)
-        simple = simple.encode("ascii", "ignore").decode("ascii")
-        # safe = RFC 5987 attr-char
-        quoted = quote(download_name, safe="!#$&+-.^_`|~")
-        names = f"filename={simple}.{ext}; filename*=UTF-8''{quoted}.{ext}"
-    else:
-        names = f"filename={simple}.{ext}"
-
-    return names
-
 @app.route('/get_file/', methods=['GET'])
 def get_file():
     uuid = request.args.get('uuid', '')
@@ -202,13 +186,12 @@ def get_file():
     with open(fullname, mode='rb') as file:
         content = file.read()
 
-    filenames = _get_download_names(original_name, ext)
-    logging.info(f"filenames: {filenames}")
+    original_name = original_name.encode("ascii", "ignore").decode("ascii")
     resp_filename = f"{original_name}.{ext}"
     mime_type = _get_mimetype(ext)
     resp = Response(content, mimetype=mime_type)
     resp.headers["Content-Length"] = len(content)
-    resp.headers["Content-Disposition"] = f"attachment; {filenames}"
+    resp.headers["Content-Disposition"] = f"attachment; filename={resp_filename}"
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Accept-Ranges'] = 'bytes'
     resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
