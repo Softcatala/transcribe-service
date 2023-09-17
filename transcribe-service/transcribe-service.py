@@ -198,8 +198,6 @@ def get_file():
         content = file.read()
 
     filenames = _get_download_names(original_name, ext)
-    logging.info(f"get_file: filenames: {filenames}")
-#    resp_filename = f"{original_name}.{ext}"
     mime_type = _get_mimetype(ext)
     resp = Response(content, mimetype=mime_type)
     resp.headers["Content-Length"] = len(content)
