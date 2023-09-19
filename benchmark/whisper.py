@@ -24,30 +24,31 @@ from evaluate import load
 import sys
 import json
 
-def inference(input_file, model):
+
+def inference(input_file, model, inference_dir):
     print(f"model: {model}")
+    input_file = os.path.abspath(input_file)
     start_time = datetime.datetime.now()
     reference_file = os.path.splitext(input_file)[0] + ".txt"
-    
-    output_wav = os.path.splitext(input_file)[0] + "-" + model + ".wav"
-    prediction_file = output_wav + ".txt"
-    
-    cmd = f"ffmpeg -i {input_file} -ar 16000 -ac 1 -c:a pcm_s16le {output_wav} -y 2> /dev/null > /dev/null"
+
+    _file = os.path.basename(input_file)
+    _file = os.path.splitext(_file)[0]
+    prediction_file = os.path.join(inference_dir, _file + ".txt")
+    print(f"inference_dir: {inference_dir}")
+    print(f"prediction_file: {prediction_file}")
+
+    cmd = f"whisper-ctranslate2 --temperature_increment_on_fallback None --threads 10 --output_dir {inference_dir} --model {model} {input_file}"
     print(cmd)
-    os.system(cmd)
-    
-    cmd = f"../whisper.cpp/main --threads 8  -m ../whisper.cpp/sc-models/ggml-{model}.bin -f {output_wav} -l ca -otxt"
-    print(cmd)    
     os.system(cmd)
 
     _time = datetime.datetime.now() - start_time
-    
+
     with open(reference_file) as f:
         reference = f.read()
 
     with open(prediction_file) as f:
         prediction = f.read()
-    
+
     # This is a very naive way to calculate WER, there is normalisation like
     # it's done in the orginal Whisper paper since the main goal here is
     # to check for regressions
@@ -55,40 +56,46 @@ def inference(input_file, model):
     wer_score = _wer.compute(predictions=[prediction], references=[reference])
     wer_score = wer_score * 100
     return wer_score, str(_time)
-    
-def single_model(model):
-    wer_score, time = inference("samples/15GdH9-curt.mp3", model)
-    print(f"time: {time}, wer: {wer_score:.2f}, model: {model}")
-                 
+
+
 def main():
-    print("Benchmark whisper.cpp inference")
+    print("Benchmark whisper inference")
 
-    if len(sys.argv) > 1:
-        return single_model(sys.argv[1])
+    inference_dir = os.path.join(os.getcwd(), "inference/")
+    isExist = os.path.exists(inference_dir)
+    if not isExist:
+        os.makedirs(inference_dir)
 
-    models = ["small", "sc-small", "medium", "sc-medium"]
-    audios = ["samples/15GdH9-curt.mp3", "samples/Ona_catalan-balear.mp3", "samples/Son_Goku_catalan_valencian_voice.ogg"]
+    models = ["small"]
+    audios = ["samples/15GdH9-curt.mp3"]
+
+    models = ["small", "medium"]
+    audios = [
+        "samples/15GdH9-curt.mp3",
+        "samples/Ona_catalan-balear.mp3",
+        "samples/Son_Goku_catalan_valencian_voice.ogg",
+    ]
     results = []
     for model in models:
         results_model = []
         total_wer = 0
         for audio in audios:
-            wer_score, _time = inference(audio, model)
-            result = {"audio" : audio, "wer" : f"{wer_score:.2f}", "time" : _time}
+            wer_score, _time = inference(audio, model, inference_dir)
+            result = {"audio": audio, "wer": f"{wer_score:.2f}", "time": _time}
             results_model.append(result)
             total_wer += wer_score
 
         avg_wer = total_wer / len(audios)
-        result = {"avg_wer" : f"{avg_wer:.2f}"}
+        result = {"avg_wer": f"{avg_wer:.2f}"}
         results_model.append(result)
-        results.append({model : results_model})
-        
+        results.append({model: results_model})
 
     json_data = json.dumps(results, indent=4)
     with open("results.json", "w") as outfile:
         outfile.write(json_data)
 
     print(results)
+
 
 if __name__ == "__main__":
     main()
