@@ -25,5 +25,5 @@ benchmark-samples:
 	if [ ! -d "benchmark/samples" ]; then git clone --depth 1 https://gitlab.softcatala.org/nous-projectes/catalan-audio-samples.git/ benchmark/samples; fi
 
 benchmark-run: whisper-models benchmark-samples
-#	pip install evaluate
+#	pip install evaluate jiwer
 	cd benchmark && python3 whisper.py
