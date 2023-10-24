@@ -279,7 +279,7 @@ def upload_file():
 
     size_mb = os.path.getsize(fullname) / 1024 / 1024
     waiting_time = db.estimated_queue_waiting_time()
-    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB), waiting time: {waiting_time}")
+    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting time: {waiting_time}")
     Usage().log("transcribe_file")
     result = {"waiting_time": str(waiting_time)}
     return json_answer(result)
