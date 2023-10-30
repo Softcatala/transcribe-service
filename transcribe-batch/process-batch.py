@@ -81,7 +81,8 @@ def _get_timeout() -> int:
 
 def _send_mail(batchfile, inference_time, source_file_base):
     text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
-    text += f"https://www.softcatala.org/transcripcio/resultats/?uuid={source_file_base}"
+    text += f"https://www.softcatala.org/transcripcio/resultats/?uuid={source_file_base} \n"
+    text += "No compartiu aquesta adreça amb altres persones si no voleu que tinguin accés al fitxer."
 
     if "@softcatala" in batchfile.email:
         THREADS = _get_threads()
