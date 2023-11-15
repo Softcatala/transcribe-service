@@ -94,9 +94,24 @@ class ProcessedFiles():
 
         return filelist
 
-    def get_num_of_files_stored():
-        files = ProcessedFiles._find_files(PROCESSED, "*")
+    def get_num_of_files_stored(directory = PROCESSED):
+        files = ProcessedFiles._find_files(directory, "*")
         return len(files)
+
+    def get_num_of_files_stored_size(directory = PROCESSED):
+        files = ProcessedFiles._find_files(directory, "*")
+        total_size = 0
+        for _file in files:
+            total_size += os.stat(_file).st_size
+
+        GB_IN_BYTES = 1024 * 1024 * 1024
+        if total_size > GB_IN_BYTES:
+            gbs = total_size / GB_IN_BYTES
+            size = f"{gbs:.2f} GB"
+        else:
+            size = f"{total_size} bytes"
+
+        return size
 
     def purge_files(days, directory = PROCESSED):
         HOURS_DAY = 24

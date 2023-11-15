@@ -61,6 +61,7 @@ def stats():
     print_who = {"".join(list(map(lambda c: '-' if c in ['a'] else c, key))): value for key, value in who.items()}
 
     result["files_stored"] = ProcessedFiles.get_num_of_files_stored()
+    result["files_stored_size"] = ProcessedFiles.get_num_of_files_stored_size()
     queue["waiting_time"] = db.estimated_queue_waiting_time()
     queue["items"] = len(records)
     queue["who"] = print_who

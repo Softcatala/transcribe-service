@@ -32,7 +32,7 @@ class TestProcessedFiles(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def test_create(self):
+    def test_purge_files(self):
         HOURS_DAY = 24
         MINUTES_HOUR = 60
         MINUTES_SEC = 60
@@ -46,6 +46,25 @@ class TestProcessedFiles(unittest.TestCase):
 
         deleted = ProcessedFiles.purge_files(3, self.temp_dir.name)
         self.assertEquals(7, deleted)
+
+    def test_get_get_num_of_files_stored(self):
+        TOTAL_FILES = 10
+        for day in range(0, TOTAL_FILES):
+            filename = os.path.join(self.temp_dir.name, f"file-{day}")
+            with open(filename, "w") as file:
+                file.write("Hello")
+
+        num = ProcessedFiles.get_num_of_files_stored(self.temp_dir.name)
+        self.assertEquals(TOTAL_FILES, num)
+
+    def test_get_num_of_files_stored_size(self):
+        for day in range(0, 2):
+            filename = os.path.join(self.temp_dir.name, f"file-{day}")
+            with open(filename, "w") as file:
+                file.write("Hello")
+
+        size = ProcessedFiles.get_num_of_files_stored_size(self.temp_dir.name)
+        self.assertEquals("10 bytes", size)
 
 if __name__ == '__main__':
     unittest.main()
