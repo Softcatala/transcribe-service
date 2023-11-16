@@ -47,7 +47,7 @@ class TestProcessedFiles(unittest.TestCase):
         deleted = ProcessedFiles.purge_files(3, self.temp_dir.name)
         self.assertEquals(7, deleted)
 
-    def test_get_get_num_of_files_stored(self):
+    def test_get_num_of_files_stored(self):
         TOTAL_FILES = 10
         for day in range(0, TOTAL_FILES):
             filename = os.path.join(self.temp_dir.name, f"file-{day}")
