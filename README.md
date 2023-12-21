@@ -52,11 +52,9 @@ And open http://localhost:8700/hello to verify that the service works.
 
 Also in the [html-client](html-client) directory you have a simple HTML client to test the service.
 
-# Updating whisper.cpp dependency
+# Updating faster-whisper dependency
 
-Updating whisper.cpp dependency to a newer version or test new models.
-
-In the [Makefile](Makefile) file, update the *whisper.cpp* task with right tag to do *git clone*.
+Updating dependencies to a newer version or test new models.
 
 Then run the benchmark:
 
