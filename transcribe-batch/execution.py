@@ -220,7 +220,7 @@ class Execution(object):
             printable_time = PredictTime().get_formatted_time(predicted_time)
             logging.debug(f"Predicted time for {source_file} ({original_filename}): {printable_time}")
 
-        compute_type = os.environ.get('COMPUTE_TYPE', "int16")
+        compute_type = os.environ.get('COMPUTE_TYPE', "int8")
         verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
         redirect = " > /dev/null" if verbose == "false" else ""
 
