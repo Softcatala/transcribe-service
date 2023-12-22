@@ -37,7 +37,7 @@ def inference(input_file, model, inference_dir):
     print(f"inference_dir: {inference_dir}")
     print(f"prediction_file: {prediction_file}")
 
-    cmd = f"whisper-ctranslate2 --temperature_increment_on_fallback None --threads 10 --output_dir {inference_dir} --model {model} {input_file}"
+    cmd = f"whisper-ctranslate2 --device cpu --temperature_increment_on_fallback None --threads 10 --output_dir {inference_dir} --model {model} {input_file}"
     print(cmd)
     os.system(cmd)
 
