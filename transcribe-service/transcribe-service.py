@@ -266,6 +266,7 @@ def upload_file():
         Usage().log("queue_max_per_mail_cheating")
         return json_answer(result, 429)
 
+    waiting_queue = len(db.select())
     _uuid = db.get_new_uuid()
     fullname = os.path.join(UPLOAD_FOLDER, _uuid)
     file.save(fullname)
@@ -280,7 +281,6 @@ def upload_file():
 
     size_mb = os.path.getsize(fullname) / 1024 / 1024
     waiting_time = db.estimated_queue_waiting_time()
-    waiting_queue = len(db.select())
     logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting time: {waiting_time}, waiting_queue: {waiting_queue}")
     Usage().log("transcribe_file")
     result = {
