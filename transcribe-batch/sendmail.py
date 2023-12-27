@@ -19,6 +19,7 @@
 
 import smtplib
 import logging
+import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -27,10 +28,19 @@ class Sendmail():
 
     def send(self, text, email):
         try:
-            port = 25
+            mail_server = os.environ.get('MAIL_SERVER', "mail.scnet")
+            mail_port = os.environ.get('MAIL_PORT', 25)
+            mail_username = os.environ.get('MAIL_USERNAME', "")
+            mail_password = os.environ.get('MAIL_PASSWORD', "")
+
+            port = int(mail_port)
             sender_email = "serveis@softcatala.org"
 
-            with smtplib.SMTP("mail.scnet", port) as server:
+            with smtplib.SMTP(mail_server, port) as server:
+                if len(mail_username) > 0 and len(mail_password) > 0:
+                    server.starttls()
+                    server.login(mail_username, mail_password)
+
                 message = MIMEMultipart("alternative")
                 message["Subject"] = "Servei de transcripció de Softcatalà"
                 message["From"] = sender_email
