@@ -222,10 +222,12 @@ class Execution(object):
 
         compute_type = os.environ.get('COMPUTE_TYPE', "int8")
         verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
+        device = os.environ.get("DEVICE", "cpu")
+        device_index = os.environ.get("DEVICE_INDEX", "0")
         redirect = " > /dev/null" if verbose == "false" else ""
 
         whisper_errfile = "whisper_error.log"
-        cmd = f"{WHISPER_PATH} {options} --pretty_json True --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca {converted_audio} {redirect} 2> {whisper_errfile}"
+        cmd = f"{WHISPER_PATH} {options} --pretty_json True --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca --device {device} --device_index {device_index} {converted_audio} {redirect} 2> {whisper_errfile}"
         result = Command(cmd).run(timeout=timeout)
         self._whisper_errors(whisper_errfile)
 
