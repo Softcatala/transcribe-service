@@ -1,5 +1,5 @@
 FROM python:3.11.1-slim-bullseye as get_models
-RUN apt-get update -y && apt-get upgrade -y && apt-get install git git-lfs make -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install make -y
 
 # Get models
 COPY Makefile .
