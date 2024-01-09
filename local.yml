@@ -12,7 +12,7 @@ services:
 
     environment:
       LOGLEVEL: 'DEBUG'
-#      LOGDIR: "/srv/data/logs"
+      LOGDIR: "/srv/data/logs"
 
   transcribe-batch_1:
     image: transcribe-batch:latest
