@@ -19,7 +19,7 @@
 # Boston, MA 02111-1307, USA.
 
 from __future__ import print_function
-from flask import Flask, request, Response
+from flask import Flask, request, Response, send_file, make_response
 from flask_cors import CORS
 import json
 from batchfilesdb import BatchFilesDB
@@ -195,17 +195,14 @@ def get_file():
         result['error'] = "No existeix aquest fitxer. Potser ja s'esborrat."
         return json_answer(result, 404)
 
-    with open(fullname, mode='rb') as file:
-        content = file.read()
-
     filenames = _get_download_names(original_name, ext)
     mime_type = _get_mimetype(ext)
-    resp = Response(content, mimetype=mime_type)
-    resp.headers["Content-Length"] = len(content)
+    resp = make_response(send_file(fullname, as_attachment=True, mimetype=mime_type))
     resp.headers["Content-Disposition"] = f"attachment; {filenames}"
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Accept-Ranges'] = 'bytes'
     resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
+
 #    logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
     Usage().log("get_file")
     return resp
