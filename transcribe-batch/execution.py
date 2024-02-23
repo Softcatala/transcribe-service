@@ -216,7 +216,7 @@ class Execution(object):
             word_timestamps = True
 
         if word_timestamps:
-            options += f" --word_timestamps True"
+            options += " --word_timestamps True"
 
         logging.debug(f"Options: {options}")
         start_time = datetime.datetime.now()
