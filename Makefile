@@ -27,3 +27,6 @@ benchmark-samples:
 benchmark-run: whisper-models benchmark-samples
 #	pip install evaluate jiwer
 	cd benchmark && python3 whisper.py
+	@python3 -c 'import faster_whisper; print(f"faster_whisper: {faster_whisper.__version__}")'
+	@python3 -c 'import ctranslate2; print(f"ctranslate2: {ctranslate2.__version__}")'
+	@whisper-ctranslate2 --version

@@ -4,20 +4,30 @@
             {
                 "audio": "samples/15GdH9-curt.mp3",
                 "wer": "72.57",
-                "time": "0:01:28.714013"
+                "time": 86
             },
             {
-                "audio": "samples/Ona_catalan-balear.mp3",
-                "wer": "46.81",
-                "time": "0:00:37.751144"
+                "audio": "samples/EloiBadiaCat.mp3",
+                "wer": "22.26",
+                "time": 69
             },
             {
                 "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
                 "wer": "51.90",
-                "time": "0:00:32.563683"
+                "time": 32
             },
             {
-                "avg_wer": "57.09"
+                "audio": "samples/Universal_Declaration_of_Human_Rights_-_cat_-_nv.ogg",
+                "wer": "39.51",
+                "time": 202
+            },
+            {
+                "audio": "samples/Ona_catalan-balear.mp3",
+                "wer": "46.81",
+                "time": 37
+            },
+            {
+                "avg_wer": "46.61"
             }
         ]
     },
@@ -26,21 +36,37 @@
             {
                 "audio": "samples/15GdH9-curt.mp3",
                 "wer": "35.43",
-                "time": "0:03:03.041759"
+                "time": 174
             },
             {
-                "audio": "samples/Ona_catalan-balear.mp3",
-                "wer": "22.87",
-                "time": "0:01:32.332372"
+                "audio": "samples/EloiBadiaCat.mp3",
+                "wer": "15.05",
+                "time": 167
             },
             {
                 "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
                 "wer": "25.32",
-                "time": "0:00:56.206991"
+                "time": 50
             },
             {
-                "avg_wer": "27.87"
+                "audio": "samples/Universal_Declaration_of_Human_Rights_-_cat_-_nv.ogg",
+                "wer": "36.50",
+                "time": 513
+            },
+            {
+                "audio": "samples/Ona_catalan-balear.mp3",
+                "wer": "22.87",
+                "time": 88
+            },
+            {
+                "avg_wer": "27.03"
             }
         ]
+    },
+    {
+        "totals": {
+            "wer": "36.82",
+            "time": "1418"
+        }
     }
 ]

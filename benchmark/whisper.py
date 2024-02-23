@@ -37,11 +37,11 @@ def inference(input_file, model, inference_dir):
     print(f"inference_dir: {inference_dir}")
     print(f"prediction_file: {prediction_file}")
 
-    cmd = f"whisper-ctranslate2 --device cpu --temperature_increment_on_fallback None --threads 10 --output_dir {inference_dir} --model {model} {input_file}"
+    cmd = f"whisper-ctranslate2 --language ca --device cpu --temperature_increment_on_fallback None --threads 10 --output_dir {inference_dir} --model {model} {input_file}"
     print(cmd)
     os.system(cmd)
 
-    _time = datetime.datetime.now() - start_time
+    _time = round((datetime.datetime.now() - start_time).total_seconds())
 
     with open(reference_file) as f:
         reference = f.read()
@@ -55,7 +55,7 @@ def inference(input_file, model, inference_dir):
     _wer = load("wer")
     wer_score = _wer.compute(predictions=[prediction], references=[reference])
     wer_score = wer_score * 100
-    return wer_score, str(_time)
+    return wer_score, _time
 
 
 def main():
@@ -72,30 +72,39 @@ def main():
     models = ["small", "medium"]
     audios = [
         "samples/15GdH9-curt.mp3",
-        "samples/Ona_catalan-balear.mp3",
+        "samples/EloiBadiaCat.mp3",
         "samples/Son_Goku_catalan_valencian_voice.ogg",
+        "samples/Universal_Declaration_of_Human_Rights_-_cat_-_nv.ogg",
+        "samples/Ona_catalan-balear.mp3"
     ]
     results = []
+    total_time = 0
+    total_wer = 0
     for model in models:
         results_model = []
-        total_wer = 0
+        model_wer = 0
         for audio in audios:
             wer_score, _time = inference(audio, model, inference_dir)
+            total_wer += wer_score
+            total_time += _time
             result = {"audio": audio, "wer": f"{wer_score:.2f}", "time": _time}
             results_model.append(result)
-            total_wer += wer_score
+            model_wer += wer_score
 
-        avg_wer = total_wer / len(audios)
+        avg_wer = model_wer / len(audios)
         result = {"avg_wer": f"{avg_wer:.2f}"}
         results_model.append(result)
         results.append({model: results_model})
+
+    processed = len(audios) * len(models)
+    totals = {"wer": f"{total_wer / processed:.2f}", "time": f"{total_time}"}
+    results.append({"totals": totals})
 
     json_data = json.dumps(results, indent=4)
     with open("results.json", "w") as outfile:
         outfile.write(json_data)
 
-    print(results)
-
+    print(totals)
 
 if __name__ == "__main__":
     main()
