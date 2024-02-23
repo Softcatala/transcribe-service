@@ -98,9 +98,14 @@ class Execution(object):
                 return return_code
 
             return_code = -1
+            cnt = 0
             with open(ffmpeg_errfile, "r") as fh:
                 for line in fh.readlines():
                     logging.debug(f"_ffmpeg_errors: {line.rstrip()}")
+                    if cnt > 5:
+                        break
+
+                    cnt += 1
 
             return return_code
         except Exception as exception:
