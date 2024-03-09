@@ -21,7 +21,6 @@ import os
 import uuid
 import fnmatch
 import logging
-from predicttime import PredictTime
 from typing import Optional
 from similarusers import SimilarUsers
 
@@ -103,16 +102,6 @@ class BatchFilesDB(Queue):
     def _optional_bool(self, string):
         return None if string == "None" or len(string) == 0 else string == "True"
 
-    def _estimate_time(self, filename, original_filename):
-        try:
-            predictTime = PredictTime()
-            predictTime.load()
-            return predictTime.predict_time_from_filename(filename, original_filename)
-
-        except Exception as exception:
-            logging.error("_estimate_time. Error:" + str(exception))
-            return PredictTime().CANNOT_PREDICT
-
     def create(self, filename, email, model_name, original_filename, highlight_words = None,
                   num_chars = None, num_sentences = None, record_uuid = None):
 
@@ -120,26 +109,11 @@ class BatchFilesDB(Queue):
             record_uuid = self.get_new_uuid()
 
         filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
-        _estimated_time = self._estimate_time(filename, original_filename)
+        _estimated_time = 0 # Old field no longer used
         line =  f"v2{self.SEPARATOR}{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
         line += f"{self.SEPARATOR}{highlight_words}{self.SEPARATOR}{num_chars}{self.SEPARATOR}{num_sentences}"
         self.put(filename_dbrecord, line)
         return record_uuid
-
-    def estimated_queue_waiting_time(self) -> str:
-        filenames = self.get_all()
-        waiting_time = 0
-        for filename in filenames:
-            record = self._read_record(filename)
-            
-            if record.estimated_time == PredictTime().CANNOT_PREDICT:
-                return ""
-            
-            waiting_time += record.estimated_time
-
-        clients = int(os.environ.get('CLIENTS', 1))
-        waiting_time = int(waiting_time / clients)
-        return PredictTime().get_formatted_time(waiting_time)
 
     def select(self, email = None):
         filenames = self.get_all()

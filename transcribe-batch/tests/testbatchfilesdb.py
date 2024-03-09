@@ -23,10 +23,6 @@ import os
 import tempfile
 import time
 
-class BatchFilesDBTest(BatchFilesDB):
-    def _estimate_time(self, filename, original_filename):
-        return 1
-
 class TestBatchFilesDB(unittest.TestCase):
 
     FILENAME = "fitxer.txt"
@@ -135,26 +131,6 @@ class TestBatchFilesDB(unittest.TestCase):
 
         records = len(records_org) - len(db.select())
         self.assertEquals(1, records)
-
-    def test_estimated_queue_waiting_time(self):
-        db = BatchFilesDBTest()
-        db.ENTRIES = self.ENTRIES
-        RECORDS = 5
-
-        for _id in range(0, RECORDS):
-            _uuid = db.create(_id, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
-
-        estimated_time = db.estimated_queue_waiting_time()
-        self.assertEquals("5s", estimated_time)
-        
-    def test_estimated_queue_unknown_value(self):
-        db = BatchFilesDB()
-        db.ENTRIES = self.ENTRIES
-        db.create("file.txt", self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
-        db.create("file.txt", self.EMAIL, self.MODEL_NAME, "original_filename2.mp3")
-
-        estimated_time = db.estimated_queue_waiting_time()
-        self.assertEquals("", estimated_time)
 
     def test_create_extraparams_values(self):
         db = self._create_db_object()

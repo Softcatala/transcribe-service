@@ -62,7 +62,6 @@ def stats():
 
     result["files_stored"] = ProcessedFiles.get_num_of_files_stored()
     result["files_stored_size"] = ProcessedFiles.get_num_of_files_stored_size()
-    queue["waiting_time"] = db.estimated_queue_waiting_time()
     queue["items"] = len(records)
     queue["who"] = print_who
     result["queue"] = queue
@@ -277,11 +276,9 @@ def upload_file():
                 record_uuid=_uuid)
 
     size_mb = os.path.getsize(fullname) / 1024 / 1024
-    waiting_time = db.estimated_queue_waiting_time()
-    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting time: {waiting_time}, waiting_queue: {waiting_queue}")
+    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting_queue: {waiting_queue}")
     Usage().log("transcribe_file")
     result = {
-        "waiting_time": str(waiting_time),
         "waiting_queue": str(waiting_queue)
       }
     return json_answer(result)

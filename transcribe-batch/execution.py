@@ -24,7 +24,6 @@ import os
 import subprocess
 import threading
 import tempfile
-from predicttime import PredictTime
 import signal
 import psutil
 from typing import Optional
@@ -71,25 +70,6 @@ class Execution(object):
 
     def __init__(self, threads):
         self.threads = threads
-        self.predictTime = PredictTime()
-        self.predictTime.load()
-
-    def _persist_execution_stats(self, source_file, original_filename, time):
-        try:
-            _format = original_filename.rsplit('.', 1)[1].lower()
-            length = os.path.getsize(source_file)
-            self.predictTime.append(_format, length, time)
-            self.predictTime.save()
-
-        except Exception as exception:
-            logging.error("_persist_execution_stats. Error:" + str(exception))
-
-    def _log_predicted_vs_real(self, predicted, real):
-        if predicted == PredictTime().CANNOT_PREDICT or predicted == 0:
-            return
-
-        diff = (real / predicted * 100) - 100
-        logging.debug(f" _log_predicted_vs_real. Predicted: {predicted}, real: {real}, diff {diff:.0f}%")
 
     def _ffmpeg_errors(self, ffmpeg_errfile):
         return_code = Command.NO_ERROR
@@ -220,11 +200,6 @@ class Execution(object):
 
         logging.debug(f"Options: {options}")
         start_time = datetime.datetime.now()
-        predicted_time = self.predictTime.predict_time_from_filename(source_file, original_filename)
-        if predicted_time != PredictTime().CANNOT_PREDICT:
-            printable_time = PredictTime().get_formatted_time(predicted_time)
-            logging.debug(f"Predicted time for {source_file} ({original_filename}): {printable_time}")
-
         compute_type = os.environ.get('COMPUTE_TYPE', "int8")
         verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
         device = os.environ.get("DEVICE", "cpu")
@@ -239,13 +214,10 @@ class Execution(object):
         end_time = datetime.datetime.now() - start_time
 
         logging.debug(f"Run {cmd} in {end_time} with result {result}")
-        if result == 0:
-            self._persist_execution_stats(source_file, original_filename, end_time.seconds)
             
         if os.path.exists(converted_audio):
             os.remove(converted_audio)
 
-        self._log_predicted_vs_real(predicted_time, end_time.seconds)
         filename = os.path.basename(converted_audio).rsplit(".", 1)[0]
         target_file_txt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".txt"))
         target_file_srt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".srt"))
