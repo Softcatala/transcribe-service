@@ -206,7 +206,7 @@ def get_file():
     Usage().log("get_file")
     return resp
 
-QUEUE_CAPACITY = int(os.environ.get('QUEUE_CAPACITY', '20'))
+QUEUE_CAPACITY = int(os.environ.get('QUEUE_CAPACITY', '150'))
 MAX_SIZE = int(os.environ.get('MAX_SIZE', 1024*1024*1024)) # 1GB by default
 
 @app.route('/transcribe_file/', methods=['POST'])
