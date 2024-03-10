@@ -30,6 +30,7 @@ from execution import Execution, Command
 from lockfile import LockFile
 import datetime
 import tempfile
+from usage import Usage
 
 def init_logging():
 
@@ -155,6 +156,7 @@ def main():
                 msg = "No s'ha pogut llegir el fitxer. Normalment, això succeeix perquè el fitxer que heu enviat no és d'àudio o vídeo o és malmès.\n"
                 msg += "Si està malmès, podeu provar de convertir-lo a un altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
                 msg += "i tornar-nos a enviar la versió convertida."
+                Usage().log("conversion_error")
                 _send_mail_error(batchfile, 0, source_file_base, msg)
                 continue
             
@@ -167,12 +169,14 @@ def main():
                 minutes = int(timeout / 60)
                 msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
                 msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
+                Usage().log("whisper_timeout")
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
                 continue
 
             if result != Command.NO_ERROR:
                 _delete_record(db, batchfile, converted_audio)
                 _send_mail_error(batchfile, inference_time, source_file_base, "Reviseu que sigui un d'àudio o vídeo vàlid.")
+                Usage().log("whisper_returns_error")
                 continue
 
             extension = _get_extension(batchfile.original_filename)
