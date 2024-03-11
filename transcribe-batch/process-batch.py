@@ -140,7 +140,7 @@ def main():
 
             source_file = batchfile.filename
 
-            logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
+            logging.info(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
 
             model = _get_model_file(batchfile.model_name)
             source_file_base = os.path.basename(source_file)
@@ -192,8 +192,8 @@ def main():
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
             purge_last_time = now
-            logging.debug(f"Purging {datetime.datetime.now()}")
-            ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
+            purged = ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
+            logging.info(f"Purging {datetime.datetime.now()}, {purged} files deleted")
 
         time.sleep(30)
 
