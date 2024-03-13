@@ -95,7 +95,7 @@ def _send_mail_error(batchfile, inference_time, source_file_base, message):
     text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'.\n"
     text += message
 
-    logging.debug(f"_send_mail_error: {message} to {batchfile.email}")
+    logging.info(f"_send_mail_error: {message} to {batchfile.email}")
     Sendmail().send(text, batchfile.email)
 
 def _delete_record(db, batchfile, converted_audio):
