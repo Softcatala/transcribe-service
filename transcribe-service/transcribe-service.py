@@ -103,7 +103,6 @@ def uuid_exists():
 
     exists, result_msg = processedFiles.do_files_exists()
     result_code = 200 if exists else 404
-#    logging.debug(f"uuid_exists for {uuid} - {result_code}")
     return json_answer(result_msg, result_code)
 
 
@@ -202,7 +201,6 @@ def get_file():
     resp.headers['Accept-Ranges'] = 'bytes'
     resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
 
-#    logging.debug(f"Send file {uuid}, ext: {ext}, mimetype: {mime_type} filename: {resp_filename}")
     Usage().log("get_file")
     return resp
 
@@ -236,20 +234,20 @@ def upload_file():
 
     if request.content_length and request.content_length > MAX_SIZE:
         result = {"error": "El fitxer és massa gran"}
-        logging.debug(f"/transcribe_file/ {result['error']} - {email}")
+        logging.info(f"/transcribe_file/ {result['error']} - {email}")
         return json_answer(result, 413)
 
     db = BatchFilesDB()
     if db.count() >= QUEUE_CAPACITY:
         result = {"error": "Hi ha massa fitxers a la cua de processament. Proveu-ho en una estona"}
-        logging.debug(f"/transcribe_file/ {result['error']} - {email}")
+        logging.info(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_full_response")
         return json_answer(result, 429)
 
     MAX_PER_EMAIL = 3
     if len(db.select(email = email)) >= MAX_PER_EMAIL:
         result = {"error": f"Ja teniu {MAX_PER_EMAIL} fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous."}
-        logging.debug(f"/transcribe_file/ {result['error']} - {email}")
+        logging.info(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_max_per_mail")
         return json_answer(result, 429)
 
@@ -258,7 +256,7 @@ def upload_file():
         message = f"Ja teniu {MAX_PER_EMAIL} fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous.\n"
         message += "Heu intentat saltar-vos el límit de fitxers. Us preguem que desistiu per evitar bloquejar-vos l'ús del servei."
         result = {"error": message}
-        logging.debug(f"/transcribe_file/ {result['error']} - {email} - ({emails})")
+        logging.info(f"/transcribe_file/ {result['error']} - {email} - ({emails})")
         Usage().log("queue_max_per_mail_cheating")
         return json_answer(result, 429)
 
@@ -276,7 +274,7 @@ def upload_file():
                 record_uuid=_uuid)
 
     size_mb = os.path.getsize(fullname) / 1024 / 1024
-    logging.debug(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting_queue: {waiting_queue}")
+    logging.info(f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting_queue: {waiting_queue}")
     Usage().log("transcribe_file")
     result = {
         "waiting_queue": str(waiting_queue)
