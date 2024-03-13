@@ -109,8 +109,13 @@ class Usage(object):
 
         copyfile(self.FILE, temp_file)
 
+        discarted = 0
         with open(temp_file, "r") as temp:
             with open(self.FILE, "w") as new:
                 for line in temp:
                     if self._is_old_line(line) is False:
                         new.write(line)
+                    else:
+                        discarted += 1
+
+        logging.info("Log rotation. Discarted: {discarted}")
