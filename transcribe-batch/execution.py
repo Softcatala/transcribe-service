@@ -214,7 +214,7 @@ class Execution(object):
 
         end_time = datetime.datetime.now() - start_time
 
-        logging.info(f"Run {cmd} in {end_time} with result {result}")
+        logging.debug(f"Run {cmd} in {end_time} with result {result}")
             
         if os.path.exists(converted_audio):
             os.remove(converted_audio)

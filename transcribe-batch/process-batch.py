@@ -190,6 +190,7 @@ def main():
 
             extension = _get_extension(batchfile.original_filename)
             _send_mail(batchfile, inference_time, source_file_base)
+            logging.info(f"File for {batchfile.email} completat en {inference_time}")
 
             processed.move_file(batchfile.filename_dbrecord)
             processed.move_file(target_file_srt)
