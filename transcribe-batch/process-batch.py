@@ -184,6 +184,7 @@ def main():
                 _delete_record(db, batchfile, converted_audio)
                 msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                logging.info(f"Non-Catalan language detected: '{language}' for '{batchfile.original_filename}'")
                 Usage().log("whisper_not_catalan")
                 continue
 
