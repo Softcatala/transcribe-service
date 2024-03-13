@@ -108,14 +108,15 @@ class Usage(object):
         return line_datetime < self._get_time_now() - datetime.timedelta(days = self.DAYS_TO_KEEP)
 
     def _rotate_file(self):
-        TEMP = "usage.bak"
+        NEW = "usage.new"
         directory = os.path.dirname(os.path.abspath(self.FILE))
-        temp_file = os.path.join(directory, TEMP)
+        new_file = os.path.join(directory, NEW)
 
-        copyfile(self.FILE, temp_file)
-
-        with open(temp_file, "r") as temp:
-            with open(self.FILE, "w") as new:
+        with open(self.FILE, "r") as temp:
+            with open(new_file, "w") as new:
                 for line in temp:
                     if self._is_old_line(line) is False:
                         new.write(line)
+
+        copyfile(new_file, self.FILE)
+        os.remove(new_file)
