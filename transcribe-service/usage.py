@@ -22,12 +22,16 @@ import os
 import datetime
 from shutil import copyfile
 import logging
+import threading
+
+lock = threading.Lock()
 
 '''
     This class keeps a log of the usage of a service
         - For usage write a line on the file with the date
         - At the number of days specified cleans old entries
 '''
+
 class Usage(object):
 
     FILE = "/srv/data/usage.txt"
@@ -45,12 +49,13 @@ class Usage(object):
 
     def log(self, action):
         try:
-            with open(self.FILE, "a+") as file_out:
-                current_time = self._get_time_now().strftime('%Y-%m-%d %H:%M:%S')
-                file_out.write(f'{current_time}\t{action}\n')
+            with lock:
+                with open(self.FILE, "a+") as file_out:
+                    current_time = self._get_time_now().strftime('%Y-%m-%d %H:%M:%S')
+                    file_out.write(f'{current_time}\t{action}\n')
 
-            if self.rotate and self._is_old_line(self._read_first_line()):
-                self._rotate_file()
+                if self.rotate and self._is_old_line(self._read_first_line()):
+                    self._rotate_file()
         except Exception as exception:
             logging.error("log. Error:" + str(exception))
             pass
