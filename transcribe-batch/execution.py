@@ -27,6 +27,7 @@ import tempfile
 import signal
 import psutil
 from typing import Optional
+from langdetect import detect_langs
 
 class Command(object):
 
@@ -223,3 +224,23 @@ class Execution(object):
         target_file_srt = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".srt"))
         target_file_json = os.path.abspath(os.path.join(OUTPUT_DIR, filename + ".json"))
         return end_time, result, target_file_txt, target_file_srt, target_file_json
+
+    def get_transcription_language(self, file_txt):
+        language = "ca"
+
+        try:
+            ONE_KB = 1024
+            size = os.path.getsize(file_txt)
+            if size >= 512 and size <= 1024 * ONE_KB:
+                with open(file_txt, "r") as fh:
+                    all_text = fh.read()
+                    _lang = detect_langs(all_text)[0]
+                    language = _lang.lang
+                    prob = _lang.prob
+                    logging.debug(f"get_transcription_language. language: {language}, prob: {prob}")
+
+            logging.debug(f"get_transcription_language. size: {size}, lang: {language}")
+            return language
+        except Exception as e:
+            logging.error(f"get_transcription_language. Exception {e}")
+            return language

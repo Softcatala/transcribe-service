@@ -179,6 +179,14 @@ def main():
                 Usage().log("whisper_returns_error")
                 continue
 
+            language = execution.get_transcription_language(target_file_txt)
+            if language in ["es", "en", "fr"]:
+                _delete_record(db, batchfile, converted_audio)
+                msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
+                _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                Usage().log("whisper_not_catalan")
+                continue
+
             extension = _get_extension(batchfile.original_filename)
             _send_mail(batchfile, inference_time, source_file_base)
 
