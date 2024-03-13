@@ -118,4 +118,4 @@ class Usage(object):
                     else:
                         discarted += 1
 
-        logging.info("Log rotation. Discarted: {discarted}")
+        logging.info(f"Log rotation. Discarted: {discarted}")
