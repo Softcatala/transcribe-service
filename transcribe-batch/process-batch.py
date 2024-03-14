@@ -95,7 +95,7 @@ def _send_mail_error(batchfile, inference_time, source_file_base, message):
     text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'.\n"
     text += message
 
-    logging.debug(f"_send_mail_error: {message} to {batchfile.email}")
+    logging.info(f"_send_mail_error: {message} to {batchfile.email}")
     Sendmail().send(text, batchfile.email)
 
 def _delete_record(db, batchfile, converted_audio):
@@ -140,7 +140,7 @@ def main():
 
             source_file = batchfile.filename
 
-            logging.debug(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
+            logging.info(f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}")
 
             model = _get_model_file(batchfile.model_name)
             source_file_base = os.path.basename(source_file)
@@ -184,11 +184,13 @@ def main():
                 _delete_record(db, batchfile, converted_audio)
                 msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
                 _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                logging.info(f"Non-Catalan language detected: '{language}' for '{batchfile.original_filename}'")
                 Usage().log("whisper_not_catalan")
                 continue
 
             extension = _get_extension(batchfile.original_filename)
             _send_mail(batchfile, inference_time, source_file_base)
+            logging.info(f"File for {batchfile.email} completed in {inference_time}")
 
             processed.move_file(batchfile.filename_dbrecord)
             processed.move_file(target_file_srt)
@@ -200,8 +202,8 @@ def main():
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
             purge_last_time = now
-            logging.debug(f"Purging {datetime.datetime.now()}")
-            ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
+            purged = ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
+            logging.info(f"Purging {datetime.datetime.now()}, {purged} files deleted")
 
         time.sleep(30)
 
