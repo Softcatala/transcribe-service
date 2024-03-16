@@ -206,6 +206,7 @@ def get_file():
 
 QUEUE_CAPACITY = int(os.environ.get('QUEUE_CAPACITY', '150'))
 MAX_SIZE = int(os.environ.get('MAX_SIZE', 1024*1024*1024)) # 1GB by default
+MAX_PER_EMAIL = int(os.environ.get('MAX_PER_EMAIL', '3'))
 
 @app.route('/transcribe_file/', methods=['POST'])
 def upload_file():
@@ -244,7 +245,6 @@ def upload_file():
         Usage().log("queue_full_response")
         return json_answer(result, 429)
 
-    MAX_PER_EMAIL = 3
     if len(db.select(email = email)) >= MAX_PER_EMAIL:
         result = {"error": f"Ja teniu {MAX_PER_EMAIL} fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous."}
         logging.info(f"/transcribe_file/ {result['error']} - {email}")
