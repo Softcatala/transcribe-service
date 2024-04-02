@@ -46,7 +46,11 @@ def hello_word():
 @app.route('/stats/', methods=['GET'])
 def stats():
     requested = request.args.get('date', datetime.datetime.today().strftime('%Y-%m-%d'))
-    date_requested = datetime.datetime.strptime(requested, '%Y-%m-%d')
+    try:
+        date_requested = datetime.datetime.strptime(requested, '%Y-%m-%d')
+    except Exception as e:
+        return json_answer({}, 400)
+
     usage = Usage()
     result = usage.get_stats(date_requested)
 
@@ -66,7 +70,7 @@ def stats():
     queue["who"] = print_who
     result["queue"] = queue
 
-    return json_answer  (result)
+    return json_answer(result)
 
 
 def init_logging():
