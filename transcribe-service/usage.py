@@ -57,7 +57,7 @@ class Usage(object):
                 if self.rotate and self._is_old_line(self._read_first_line()):
                     self._rotate_file()
         except Exception as exception:
-            logging.error("log. Error:" + str(exception))
+            logging.error("Usage.log. Error:" + str(exception))
             pass
 
     def _get_line_components(self, line):
@@ -70,7 +70,6 @@ class Usage(object):
             with open(self.FILE, "r") as file_in:
                 for line in file_in:
                     date_component, action = self._get_line_components(line)
-
                     
                     datetime_no_newline = date_component
                     line_datetime = datetime.datetime.strptime(datetime_no_newline, '%Y-%m-%d %H:%M:%S')
@@ -86,7 +85,7 @@ class Usage(object):
                     results[action] = cnt
 
         except Exception as exception:
-            logging.error("get_stats. Error:" + str(exception))
+            logging.error("Usage.get_stats. Error:" + str(exception))
             pass
 
         return results
