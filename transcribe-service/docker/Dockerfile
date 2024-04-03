@@ -1,10 +1,10 @@
-FROM python:3.11.1-slim-bullseye as copied_files
+FROM python:3.12.2-slim-bullseye as copied_files
 
 COPY transcribe-service/*.py /srv/
 COPY transcribe-service/docker/entry-point.sh /srv/
 
 
-FROM python:3.11.1-slim-bullseye
+FROM python:3.12.2-slim-bullseye
 
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install python3-pip -y --no-install-recommends
