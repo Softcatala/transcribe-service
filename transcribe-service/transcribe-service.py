@@ -39,10 +39,6 @@ CORS(app)
 UPLOAD_FOLDER = '/srv/data/files/'
 PROCESSED_FOLDER = '/srv/data/processed/'
 
-@app.route('/hello', methods=['GET'])
-def hello_word():
-    return "Hello!"
-
 @app.route('/stats/', methods=['GET'])
 def stats():
     requested = request.args.get('date', datetime.datetime.today().strftime('%Y-%m-%d'))
