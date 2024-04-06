@@ -34,7 +34,8 @@ import unicodedata
 
 app = Flask(__name__)
 
-CORS(app)
+# Access-Control-Allow-Origin header is defined here for all endpoints
+CORS(app, resources={r"/*": {"origins": f"*"}})
 
 UPLOAD_FOLDER = '/srv/data/files/'
 PROCESSED_FOLDER = '/srv/data/processed/'
@@ -197,7 +198,6 @@ def get_file():
     mime_type = _get_mimetype(ext)
     resp = make_response(send_file(fullname, as_attachment=True, mimetype=mime_type))
     resp.headers["Content-Disposition"] = f"attachment; {filenames}"
-    resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Accept-Ranges'] = 'bytes'
     resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
 
@@ -284,7 +284,6 @@ def upload_file():
 def json_answer(data, status = 200):
     json_data = json.dumps(data, indent=4, separators=(',', ': '))
     resp = Response(json_data, mimetype='application/json', status = status)
-    resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
 if __name__ == '__main__':
