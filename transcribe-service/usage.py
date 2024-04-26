@@ -48,10 +48,10 @@ class Usage(object):
          return line.split("\t", 1)[0]
 
     def log(self, action):
+        current_time = self._get_time_now().strftime('%Y-%m-%d %H:%M:%S')
         try:
             with lock:
                 with open(self.FILE, "a+") as file_out:
-                    current_time = self._get_time_now().strftime('%Y-%m-%d %H:%M:%S')
                     file_out.write(f'{current_time}\t{action}\n')
 
                 if self.rotate and self._is_old_line(self._read_first_line()):
@@ -102,9 +102,17 @@ class Usage(object):
         if line is None:
             return False
 
-        line = self.get_date_from_line(line)
-        line_datetime = datetime.datetime.strptime(line, '%Y-%m-%d %H:%M:%S')
-        return line_datetime < self._get_time_now() - datetime.timedelta(days = self.DAYS_TO_KEEP)
+        invalid = False
+
+        try:
+            line = self.get_date_from_line(line)
+            line_datetime = datetime.datetime.strptime(line, '%Y-%m-%d %H:%M:%S')
+
+        except Exception as exception:
+            logging.error("Usage._is_old_line. Error:" + str(exception))
+            invalid = True
+
+        return invalid or line_datetime < self._get_time_now() - datetime.timedelta(days = self.DAYS_TO_KEEP)
 
     def _rotate_file(self):
         NEW = "usage.new"
