@@ -23,18 +23,20 @@ import fnmatch
 import logging
 from typing import Optional
 
-class BatchFile():
-    def __init__(self,
-                 filename_dbrecord: str,
-                 filename: str,
-                 email: str,
-                 model_name: str,
-                 original_filename: str,
-                 estimated_time: int,
-                 highlight_words: Optional[int] = None,
-                 num_chars: Optional[int] = None,
-                 num_sentences: Optional[int] = None):
-                 
+
+class BatchFile:
+    def __init__(
+        self,
+        filename_dbrecord: str,
+        filename: str,
+        email: str,
+        model_name: str,
+        original_filename: str,
+        estimated_time: int,
+        highlight_words: Optional[int] = None,
+        num_chars: Optional[int] = None,
+        num_sentences: Optional[int] = None,
+    ):
         self.filename_dbrecord = filename_dbrecord
         self.filename = filename
         self.email = email
@@ -45,11 +47,13 @@ class BatchFile():
         self.num_chars = num_chars
         self.num_sentences = num_sentences
 
+
 # This is a disk based priority queue with works as filenames
 # as items to store
-class Queue(): # works with filenames
+class Queue:  # works with filenames
     g_check_directory = True
-    def __init__(self, entries = '/srv/data/entries'):
+
+    def __init__(self, entries="/srv/data/entries"):
         self.ENTRIES = entries
 
     def _find(self, directory, pattern):
@@ -84,9 +88,7 @@ class Queue(): # works with filenames
         os.remove(filename)
 
 
-
 class BatchFilesDB(Queue):
-
     SEPARATOR = "\t"
 
     def get_record_file_from_uuid(self, _uuid):
@@ -101,20 +103,28 @@ class BatchFilesDB(Queue):
     def _optional_bool(self, string):
         return None if string == "None" or len(string) == 0 else string == "True"
 
-    def create(self, filename, email, model_name, original_filename, highlight_words = None,
-                  num_chars = None, num_sentences = None, record_uuid = None):
-
+    def create(
+        self,
+        filename,
+        email,
+        model_name,
+        original_filename,
+        highlight_words=None,
+        num_chars=None,
+        num_sentences=None,
+        record_uuid=None,
+    ):
         if not record_uuid:
             record_uuid = self.get_new_uuid()
 
         filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
-        _estimated_time = 0 # Old field no longer used
-        line =  f"v2{self.SEPARATOR}{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
+        _estimated_time = 0  # Old field no longer used
+        line = f"v2{self.SEPARATOR}{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
         line += f"{self.SEPARATOR}{highlight_words}{self.SEPARATOR}{num_chars}{self.SEPARATOR}{num_sentences}"
         self.put(filename_dbrecord, line)
         return record_uuid
 
-    def select(self, email = None):
+    def select(self, email=None):
         filenames = self.get_all()
         records = []
         for filename in filenames:
@@ -126,7 +136,7 @@ class BatchFilesDB(Queue):
             records.append(record)
 
         return records
-        
+
     def _read_record_from_uuid(self, _uuid):
         record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")
         record = self._read_record(record_fullpath)
@@ -138,18 +148,22 @@ class BatchFilesDB(Queue):
                 line = fh.readline()
                 components = line.split(self.SEPARATOR)
                 if components[0] == "v2":
-                     return BatchFile(filename_dbrecord = filename_dbrecord,
-                                     filename = components[1],
-                                     email = components[2],
-                                     model_name = components[3],
-                                     original_filename = components[4],
-                                     estimated_time = int(components[5]),
-                                     highlight_words = self._optional_bool(components[6]),
-                                     num_chars = self._optional_int(components[7]),
-                                     num_sentences = self._optional_int(components[8]))
+                    return BatchFile(
+                        filename_dbrecord=filename_dbrecord,
+                        filename=components[1],
+                        email=components[2],
+                        model_name=components[3],
+                        original_filename=components[4],
+                        estimated_time=int(components[5]),
+                        highlight_words=self._optional_bool(components[6]),
+                        num_chars=self._optional_int(components[7]),
+                        num_sentences=self._optional_int(components[8]),
+                    )
                 else:
                     raise RuntimeError("dbrecord version not supported")
 
         except Exception as exception:
-            logging.error(f"_read_record. Unable to read {filename_dbrecord}. Error: {exception}")
+            logging.error(
+                f"_read_record. Unable to read {filename_dbrecord}. Error: {exception}"
+            )
             return None

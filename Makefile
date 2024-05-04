@@ -1,4 +1,4 @@
-.PHONY: docker-build-transcribe-models docker-build-transcribe-service docker-build-transcribe-batch docker-run test whisper-models benchmark-run
+.PHONY: docker-build-transcribe-models docker-build-transcribe-service docker-build-transcribe-batch docker-run test whisper-models benchmark-run install-dev-tools run-check-code
 
 build-all: docker-build-transcribe-models docker-build-transcribe-service docker-build-transcribe-batch
 
@@ -30,3 +30,10 @@ benchmark-run: whisper-models benchmark-samples
 	@python3 -c 'import faster_whisper; print(f"faster_whisper: {faster_whisper.__version__}")'
 	@python3 -c 'import ctranslate2; print(f"ctranslate2: {ctranslate2.__version__}")'
 	@whisper-ctranslate2 --version
+
+install-dev-tools:
+	pip install -r requirements-dev.txt
+
+run-check-code:
+	python -m black --check transcribe-batch/ transcribe-service/
+	python -m flake8 --ignore E501,W503 transcribe-batch/ transcribe-service/

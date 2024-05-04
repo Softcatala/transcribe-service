@@ -24,10 +24,10 @@ import uuid
 import time
 import fnmatch
 
-PROCESSED = '/srv/data/processed'
+PROCESSED = "/srv/data/processed"
 
-class ProcessedFiles():
 
+class ProcessedFiles:
     def __init__(self, uuid):
         self.uuid = uuid
 
@@ -94,11 +94,11 @@ class ProcessedFiles():
 
         return filelist
 
-    def get_num_of_files_stored(directory = PROCESSED):
+    def get_num_of_files_stored(directory=PROCESSED):
         files = ProcessedFiles._find_files(directory, "*")
         return len(files)
 
-    def get_num_of_files_stored_size(directory = PROCESSED):
+    def get_num_of_files_stored_size(directory=PROCESSED):
         files = ProcessedFiles._find_files(directory, "*")
         total_size = 0
         for _file in files:
@@ -113,7 +113,7 @@ class ProcessedFiles():
 
         return size
 
-    def purge_files(days, directory = PROCESSED):
+    def purge_files(days, directory=PROCESSED):
         HOURS_DAY = 24
         MINUTES_HOUR = 60
         MINUTES_SEC = 60

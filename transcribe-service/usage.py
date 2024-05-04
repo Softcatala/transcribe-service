@@ -26,14 +26,14 @@ import threading
 
 lock = threading.Lock()
 
-'''
+"""
     This class keeps a log of the usage of a service
         - For usage write a line on the file with the date
         - At the number of days specified cleans old entries
-'''
+"""
+
 
 class Usage(object):
-
     FILE = "/srv/data/usage.txt"
     DAYS_TO_KEEP = 7
     rotate = True
@@ -45,14 +45,14 @@ class Usage(object):
         return datetime.datetime.utcnow()
 
     def get_date_from_line(self, line):
-         return line.split("\t", 1)[0]
+        return line.split("\t", 1)[0]
 
     def log(self, action):
-        current_time = self._get_time_now().strftime('%Y-%m-%d %H:%M:%S')
+        current_time = self._get_time_now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with lock:
                 with open(self.FILE, "a+") as file_out:
-                    file_out.write(f'{current_time}\t{action}\n')
+                    file_out.write(f"{current_time}\t{action}\n")
 
                 if self.rotate and self._is_old_line(self._read_first_line()):
                     self._rotate_file()
@@ -70,9 +70,11 @@ class Usage(object):
             with open(self.FILE, "r") as file_in:
                 for line in file_in:
                     date_component, action = self._get_line_components(line)
-                    
+
                     datetime_no_newline = date_component
-                    line_datetime = datetime.datetime.strptime(datetime_no_newline, '%Y-%m-%d %H:%M:%S')
+                    line_datetime = datetime.datetime.strptime(
+                        datetime_no_newline, "%Y-%m-%d %H:%M:%S"
+                    )
                     if line_datetime.date() != date_requested.date():
                         continue
 
@@ -80,8 +82,8 @@ class Usage(object):
                     if cnt:
                         cnt += 1
                     else:
-                       cnt = 1
-                       
+                        cnt = 1
+
                     results[action] = cnt
 
         except Exception as exception:
@@ -106,13 +108,15 @@ class Usage(object):
 
         try:
             line = self.get_date_from_line(line)
-            line_datetime = datetime.datetime.strptime(line, '%Y-%m-%d %H:%M:%S')
+            line_datetime = datetime.datetime.strptime(line, "%Y-%m-%d %H:%M:%S")
 
         except Exception as exception:
             logging.error("Usage._is_old_line. Error:" + str(exception))
             invalid = True
 
-        return invalid or line_datetime < self._get_time_now() - datetime.timedelta(days = self.DAYS_TO_KEEP)
+        return invalid or line_datetime < self._get_time_now() - datetime.timedelta(
+            days=self.DAYS_TO_KEEP
+        )
 
     def _rotate_file(self):
         NEW = "usage.new"

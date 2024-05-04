@@ -23,8 +23,8 @@ import os
 import tempfile
 import time
 
-class TestProcessedFiles(unittest.TestCase):
 
+class TestProcessedFiles(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.ENTRIES = self.temp_dir.name
@@ -66,5 +66,6 @@ class TestProcessedFiles(unittest.TestCase):
         size = ProcessedFiles.get_num_of_files_stored_size(self.temp_dir.name)
         self.assertEquals("10 bytes", size)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -51,5 +51,6 @@ class TestExecution(unittest.TestCase):
             language = execution.get_transcription_language(temp_file.name)
             self.assertEquals("ca", language)
 
+
 if __name__ == "__main__":
     unittest.main()

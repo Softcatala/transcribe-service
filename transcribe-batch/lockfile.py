@@ -22,8 +22,8 @@ import logging
 import os
 import time
 
-class LockFile():
 
+class LockFile:
     def __init__(self, filename):
         self.filename = filename + ".lock"
 
@@ -33,7 +33,9 @@ class LockFile():
             fh.write("")
             fh.close()
         except Exception as e:
-            logging.error(f"LockFile.create. Failed to create lock for {self.filename} - {str(e)}")
+            logging.error(
+                f"LockFile.create. Failed to create lock for {self.filename} - {str(e)}"
+            )
             return False
 
         return True
@@ -43,7 +45,9 @@ class LockFile():
             try:
                 os.remove(self.filename)
             except Exception as e:
-                logging.error(f"LockFile.delete. Error deleting file {self.filename}: {e}")
+                logging.error(
+                    f"LockFile.delete. Error deleting file {self.filename}: {e}"
+                )
 
     def has_lock(self):
         has_lock = False
@@ -61,4 +65,3 @@ class LockFile():
             has_lock = True
 
         return has_lock
-

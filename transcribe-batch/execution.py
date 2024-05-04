@@ -29,8 +29,8 @@ import psutil
 from typing import Optional
 from langdetect import detect_langs
 
-class Command(object):
 
+class Command(object):
     TIMEOUT_ERROR = -1
     NO_ERROR = 0
 
@@ -67,8 +67,6 @@ class Command(object):
 
 
 class Execution(object):
-
-
     def __init__(self, threads):
         self.threads = threads
 
@@ -131,12 +129,13 @@ class Execution(object):
             logging.error(f"_sox_errors. Error: {exception}")
             return return_code
 
-    def run_conversion(self,
-                       original_filename: str,
-                       source_file: str,
-                       converted_audio: str,
-                       timeout: int):
-
+    def run_conversion(
+        self,
+        original_filename: str,
+        source_file: str,
+        converted_audio: str,
+        timeout: int,
+    ):
         result = self._run_ffmpeg(source_file, converted_audio, timeout)
         if result != Command.NO_ERROR:
             converted_audio_fix = tempfile.NamedTemporaryFile().name + ".wav"
@@ -144,7 +143,9 @@ class Execution(object):
             _format = self._get_extension(original_filename)
             sox_errfile = "sox-error.log"
 
-            cmd = f"sox -t {_format} {source_file} {converted_audio_fix} 2> {sox_errfile}"
+            cmd = (
+                f"sox -t {_format} {source_file} {converted_audio_fix} 2> {sox_errfile}"
+            )
             Command(cmd).run(timeout=timeout)
             result = self._sox_errors(sox_errfile)
             logging.debug(f"Run {cmd} with result {result}")
@@ -154,7 +155,6 @@ class Execution(object):
             result = self._run_ffmpeg(converted_audio_fix, converted_audio, timeout)
 
         return result
-
 
     def _whisper_errors(self, whisper_errfile):
         try:
@@ -168,17 +168,17 @@ class Execution(object):
         except Exception as exception:
             logging.error(f"whisper_errfile. Error: {exception}")
 
-
-    def run_inference(self,
-                    source_file: str,
-                    original_filename: str,
-                    model: str,
-                    converted_audio: str,
-                    timeout: int,
-                    highlight_words: Optional[int] = None,
-                    num_chars: Optional[int] = None,
-                    num_sentences: Optional[int] = None):
-
+    def run_inference(
+        self,
+        source_file: str,
+        original_filename: str,
+        model: str,
+        converted_audio: str,
+        timeout: int,
+        highlight_words: Optional[int] = None,
+        num_chars: Optional[int] = None,
+        num_sentences: Optional[int] = None,
+    ):
         WHISPER_PATH = "whisper-ctranslate2"
         OUTPUT_DIR = "output_dir/"
         options = ""
@@ -187,7 +187,7 @@ class Execution(object):
         if highlight_words:
             options += " --highlight_words True"
             word_timestamps = True
- 
+
         if num_chars:
             options += f" --max_line_width {num_chars}"
             word_timestamps = True
@@ -201,8 +201,8 @@ class Execution(object):
 
         logging.debug(f"Options: {options}")
         start_time = datetime.datetime.now()
-        compute_type = os.environ.get('COMPUTE_TYPE', "int8")
-        verbose = os.environ.get('WHISPER_VERBOSE', "false").lower()
+        compute_type = os.environ.get("COMPUTE_TYPE", "int8")
+        verbose = os.environ.get("WHISPER_VERBOSE", "false").lower()
         device = os.environ.get("DEVICE", "cpu")
         device_index = os.environ.get("DEVICE_INDEX", "0")
         redirect = " > /dev/null" if verbose == "false" else ""
@@ -215,7 +215,7 @@ class Execution(object):
         end_time = datetime.datetime.now() - start_time
 
         logging.debug(f"Run {cmd} in {end_time} with result {result}")
-            
+
         if os.path.exists(converted_audio):
             os.remove(converted_audio)
 
@@ -237,7 +237,9 @@ class Execution(object):
                     _lang = detect_langs(all_text)[0]
                     language = _lang.lang
                     prob = _lang.prob
-                    logging.debug(f"get_transcription_language. language: {language}, prob: {prob}")
+                    logging.debug(
+                        f"get_transcription_language. language: {language}, prob: {prob}"
+                    )
 
             logging.debug(f"get_transcription_language. size: {size}, lang: {language}")
             return language

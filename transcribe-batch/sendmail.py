@@ -24,14 +24,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-class Sendmail():
-
+class Sendmail:
     def send(self, text, email):
         try:
-            mail_server = os.environ.get('MAIL_SERVER', "mail.scnet")
-            mail_port = os.environ.get('MAIL_PORT', 25)
-            mail_username = os.environ.get('MAIL_USERNAME', "")
-            mail_password = os.environ.get('MAIL_PASSWORD', "")
+            mail_server = os.environ.get("MAIL_SERVER", "mail.scnet")
+            mail_port = os.environ.get("MAIL_PORT", 25)
+            mail_username = os.environ.get("MAIL_USERNAME", "")
+            mail_password = os.environ.get("MAIL_PASSWORD", "")
 
             port = int(mail_port)
             sender_email = "serveis@softcatala.org"
@@ -53,4 +52,3 @@ class Sendmail():
         except Exception as e:
             msg = "Error '{0}' sending to {1}".format(e, email)
             logging.error(msg)
-
