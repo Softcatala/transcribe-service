@@ -114,9 +114,8 @@ class Usage(object):
             logging.error("Usage._is_old_line. Error:" + str(exception))
             invalid = True
 
-        return invalid or line_datetime < self._get_time_now() - datetime.timedelta(
-            days=self.DAYS_TO_KEEP
-        )
+        now = self._get_time_now() - datetime.timedelta(days=self.DAYS_TO_KEEP)
+        return invalid or line_datetime.date() <= now.date()
 
     def _rotate_file(self):
         NEW = "usage.new"

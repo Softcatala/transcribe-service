@@ -70,9 +70,7 @@ class TestUsage(unittest.TestCase):
         usage.log("conversion_error")
 
         lines = self.readLog()
-        print(lines)
-
-        self.assertEqual(len(lines), 2)
+        self.assertEqual(len(lines), 1)
 
     def _test_is_old_line_true(self):
         usage = UsageTest()
