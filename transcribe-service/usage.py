@@ -22,9 +22,9 @@ import os
 import datetime
 from shutil import copyfile
 import logging
-import threading
+import multiprocessing
 
-lock = threading.Lock()
+lock = multiprocessing.Lock()
 
 """
     This class keeps a log of the usage of a service
