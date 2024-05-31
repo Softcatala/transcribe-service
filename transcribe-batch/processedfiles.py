@@ -116,12 +116,12 @@ class ProcessedFiles:
 
         return ProcessedFiles._get_human_readable_size(total_size)
 
-    def get_free_space_in(directory=PROCESSED):
+    def get_free_space_in_directory(directory=PROCESSED):
         statvfs = os.statvfs(directory)
 
         # Available blocks * block size gives the available space in bytes
         free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
-        return ProcessedFiles._get_human_readable_size(free_space_byte)
+        return ProcessedFiles._get_human_readable_size(free_space_bytes)
 
     def purge_files(days, directory=PROCESSED):
         HOURS_DAY = 24
