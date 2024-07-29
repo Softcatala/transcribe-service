@@ -1,5 +1,5 @@
 psutil
 ctranslate2==4.2.1
-faster-whisper==1.0.2
-whisper-ctranslate2==0.4.3
+faster-whisper==1.0.3
+whisper-ctranslate2==0.4.5
 langdetect==1.0.9
