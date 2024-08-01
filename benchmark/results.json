@@ -3,31 +3,26 @@
         "small": [
             {
                 "audio": "samples/15GdH9-curt.mp3",
-                "wer": "72.57",
-                "time": 83
+                "wer": "27.12"
             },
             {
                 "audio": "samples/EloiBadiaCat.mp3",
-                "wer": "22.57",
-                "time": 63
+                "wer": "17.92"
             },
             {
                 "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
-                "wer": "40.51",
-                "time": 27
+                "wer": "27.06"
             },
             {
                 "audio": "samples/Universal_Declaration_of_Human_Rights_-_cat_-_nv.ogg",
-                "wer": "31.38",
-                "time": 200
+                "wer": "16.43"
             },
             {
                 "audio": "samples/Ona_catalan-balear.mp3",
-                "wer": "46.01",
-                "time": 38
+                "wer": "41.38"
             },
             {
-                "avg_wer": "42.61"
+                "avg_wer": "25.98"
             }
         ]
     },
@@ -35,38 +30,34 @@
         "medium": [
             {
                 "audio": "samples/15GdH9-curt.mp3",
-                "wer": "35.62",
-                "time": 181
+                "wer": "18.41"
             },
             {
                 "audio": "samples/EloiBadiaCat.mp3",
-                "wer": "14.73",
-                "time": 175
+                "wer": "8.24"
             },
             {
                 "audio": "samples/Son_Goku_catalan_valencian_voice.ogg",
-                "wer": "27.85",
-                "time": 52
+                "wer": "12.35"
             },
             {
                 "audio": "samples/Universal_Declaration_of_Human_Rights_-_cat_-_nv.ogg",
-                "wer": "19.12",
-                "time": 532
+                "wer": "18.23"
             },
             {
                 "audio": "samples/Ona_catalan-balear.mp3",
-                "wer": "21.54",
-                "time": 92
+                "wer": "16.71"
             },
             {
-                "avg_wer": "23.77"
+                "avg_wer": "14.79"
             }
         ]
     },
     {
         "totals": {
-            "wer": "33.19",
-            "time": "1443"
+            "wer": "20.38",
+            "rtf": "0.03",
+            "time": "633"
         }
     }
 ]
