@@ -98,20 +98,30 @@ class ProcessedFiles:
         files = ProcessedFiles._find_files(directory, "*")
         return len(files)
 
+    def _get_human_readable_size(size):
+        GB_IN_BYTES = 1024**3
+        if size > GB_IN_BYTES:
+            gbs = size / GB_IN_BYTES
+            text = f"{gbs:.2f} GB"
+        else:
+            text = f"{size} bytes"
+
+        return text
+
     def get_num_of_files_stored_size(directory=PROCESSED):
         files = ProcessedFiles._find_files(directory, "*")
         total_size = 0
         for _file in files:
             total_size += os.stat(_file).st_size
 
-        GB_IN_BYTES = 1024 * 1024 * 1024
-        if total_size > GB_IN_BYTES:
-            gbs = total_size / GB_IN_BYTES
-            size = f"{gbs:.2f} GB"
-        else:
-            size = f"{total_size} bytes"
+        return ProcessedFiles._get_human_readable_size(total_size)
 
-        return size
+    def get_free_space_in_directory(directory=PROCESSED):
+        statvfs = os.statvfs(directory)
+
+        # Available blocks * block size gives the available space in bytes
+        free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
+        return ProcessedFiles._get_human_readable_size(free_space_bytes)
 
     def purge_files(days, directory=PROCESSED):
         HOURS_DAY = 24

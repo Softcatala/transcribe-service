@@ -70,6 +70,7 @@ def stats():
 
     result["files_stored"] = ProcessedFiles.get_num_of_files_stored()
     result["files_stored_size"] = ProcessedFiles.get_num_of_files_stored_size()
+    result["free_storage_space"] = ProcessedFiles.get_free_space_in_directory()
     queue["items"] = len(records)
     queue["who"] = print_who
     result["queue"] = queue
