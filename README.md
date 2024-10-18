@@ -24,14 +24,6 @@ user to pick resulting files. The web services exposes the method *get_file* whi
 
 Elements on the processed directory are purged after certain amound of time.
 
-## Estimation
-
-The system keeps record of how much time each filetype (mp3, mp4, etc) was needed to transcribe it. It builds a ratio of MB/s which the
-system can process than it's used to estimate future files. The sample data points used to calculated this are the last ones, then if
-the hardware, version of the transcription tool or other external factor changes, the system will self-adjust based on the time need
-to do recent transcriptions.
-
-
 # Running the system locally using Docker
 
 This requires that you have *docker*, *docker-compose* and *make* installed in your system.
