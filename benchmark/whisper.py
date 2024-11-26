@@ -135,7 +135,7 @@ def main():
     with open("results.json", "w") as outfile:
         outfile.write(json_data)
 
-    print(totals)
+    print(f"{totals} averaged on {N_BATCHES} repetitions")
 
 
 if __name__ == "__main__":
