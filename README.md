@@ -3,7 +3,6 @@
 The transcribe-service provides the following functionality:
 * Receives files and creates a priortized queue to serve them
 * Notifies by email when file is ready or it has been error
-* Provides an estimated time for the file to be ready
 
 The requirements of the system is to process a file at the time, a maximum 100 files in queue to be processed and ability to easily
 to change the transcribe tool and models that we use.
