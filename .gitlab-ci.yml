@@ -7,17 +7,14 @@ variables:
   PROJECT_TO_BE_DEPLOYED: 'docker/collserola/transcribe-service'
 
 stages:
-  - test
-  - transcribe-models
-  - transcribe-service
-  - transcribe-batch
+  - transcribe
   - deploy
 
 test:
   image: python:3.11.1-slim-bullseye
   before_script:
     - pip install nose2
-  stage: test
+  stage: transcribe
   script:
     - apt-get update && apt-get install make -y
     - pip install -r transcribe-batch/requirements.txt
@@ -31,7 +28,7 @@ transcribe-models:
   services:
     - docker:dind
 
-  stage: transcribe-models
+  stage: transcribe
   script:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-models
     - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
@@ -46,7 +43,7 @@ transcribe-service:
   image: docker:latest
   services:
     - docker:dind
-  stage: transcribe-service
+  stage: transcribe
   script:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-service
     - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
@@ -55,13 +52,16 @@ transcribe-service:
     - docker push $IMAGE_NAME
 
 transcribe-batch:
+  needs:
+    - transcribe-models
+
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
   image: docker:latest
   services:
     - docker:dind
-  stage: transcribe-batch
+  stage: transcribe
   script:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-batch
     - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
