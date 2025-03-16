@@ -69,12 +69,8 @@ def _get_model_file(model_name):
         model = "small"
     elif model_name == "medium":
         model = "medium"
-    elif model_name == "sc-small":
-        model = "small"
-    elif model_name == "sc-medium":
-        model = "medium"
     else:  # default
-        model = "small"
+        model = "medium"
 
     return model
 
