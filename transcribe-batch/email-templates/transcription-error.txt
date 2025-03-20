@@ -1,0 +1,2 @@
+No hem pogut processar el vostre fitxer '{{ filename }}' transcrit amb el model '{{ model }}'.
+{{ missatge }}

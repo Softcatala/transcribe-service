@@ -1,0 +1,3 @@
+Ja tenim el vostre fitxer '{{ filename }}' transcrit amb el model '{{ model }}'. El podeu baixar des de https://www.softcatala.org/transcripcio/resultats/?uuid={{ uuid }}
+No compartiu aquesta adreça amb altres persones si no voleu que tinguin accés al fitxer.
+

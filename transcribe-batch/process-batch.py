@@ -84,25 +84,22 @@ def _get_timeout() -> int:
 
 
 def _send_mail(batchfile, inference_time, source_file_base):
-    text = f"Ja tenim el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'. El podeu baixar des de "
-    text += (
-        f"https://www.softcatala.org/transcripcio/resultats/?uuid={source_file_base} \n"
-    )
-    text += "No compartiu aquesta adreça amb altres persones si no voleu que tinguin accés al fitxer."
-
-    if "@softcatala" in batchfile.email:
-        THREADS = _get_threads()
-        text += f"\nL'execució ha trigat {inference_time} amb {THREADS} threads."
-
-    Sendmail().send(text, batchfile.email)
+    context = {
+        "uuid": source_file_base,
+        "filename": batchfile.original_filename,
+        "model": batchfile.model_name,
+    }
+    Sendmail().send_html(batchfile.email, "transcription-finished", context)
 
 
 def _send_mail_error(batchfile, inference_time, source_file_base, message):
-    text = f"No hem pogut processar el vostre fitxer '{batchfile.original_filename}' transcrit amb el model '{batchfile.model_name}'.\n"
-    text += message
-
     logging.info(f"_send_mail_error: {message} to {batchfile.email}")
-    Sendmail().send(text, batchfile.email)
+    context = {
+        "message": message,
+        "filename": batchfile.original_filename,
+        "model": batchfile.model_name,
+    }
+    Sendmail().send_html(batchfile.email, "transcription-error", context)
 
 
 def _delete_record(db, batchfile, converted_audio):

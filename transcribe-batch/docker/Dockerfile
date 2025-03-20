@@ -1,6 +1,7 @@
 FROM python:3.11.1-slim-bullseye as copied_files
 
 COPY transcribe-batch/*.py /srv/
+COPY transcribe-batch/email-templates/ /srv/email-templates/
 COPY transcribe-batch/docker/entry-point.sh /srv/
 COPY transcribe-batch/requirements.txt /srv/
 
