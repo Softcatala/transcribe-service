@@ -12,9 +12,10 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install ffmpeg sox libsox
 RUN apt-get install python3-pip python3-dev -y --no-install-recommends
 
 # Solve errors:
-# - Error: libcudnn_ops_infer.so.8: cannot open shared object file: No such file or directory
-# - Error: libcublasLt.so.11: cannot open shared object file: No such file or directory
-RUN apt-get install libcudnn8=8.8.1.3-1+cuda11.8 && apt-get install libcublas-12-3 &&  apt-get install libcublas-11-8 -y
+# - Error: Unable to load any of {libcudnn_ops.so.9.1.0, libcudnn_ops.so.9.1, libcudnn_ops.so.9, libcudnn_ops.so}
+# - Error: RuntimeError: Library libcublas.so.12 is not found or cannot be loaded
+
+RUN apt-get install libcudnn9-cuda-12 libcublas-12-3 -y
 
 WORKDIR /srv
 
