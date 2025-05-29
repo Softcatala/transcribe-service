@@ -33,6 +33,7 @@ from langdetect import detect_langs
 class Command(object):
     TIMEOUT_ERROR = -1
     NO_ERROR = 0
+    RUNTIME_ERROR = 100
 
     def __init__(self, cmd):
         self.cmd = cmd

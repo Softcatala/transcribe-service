@@ -32,10 +32,11 @@ import datetime
 import tempfile
 from usage import Usage
 
+LOGID = os.environ.get("LOGID", "0")
+
 
 def init_logging():
     LOGDIR = os.environ.get("LOGDIR", "")
-    LOGID = os.environ.get("LOGID", "0")
     LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
     logfile = os.path.join(LOGDIR, f"process-batch-{LOGID}.log")
     logger = logging.getLogger()
@@ -116,8 +117,10 @@ def _delete_record(db, batchfile, converted_audio):
 
 
 def main():
-    print("Process batch files to transcribe")
     init_logging()
+
+    device = os.environ.get("DEVICE", "cpu")
+    logging.info(f"Process batch files to transcribe id: {LOGID} with device {device}")
     db = BatchFilesDB()
     ProcessedFiles.ensure_dir()
     purge_last_time = time.time()
@@ -183,6 +186,12 @@ def main():
                 batchfile.num_chars,
                 batchfile.num_sentences,
             )
+
+            if result == Command.RUNTIME_ERROR:
+                logging.info(
+                    f"Runtime error. File '{batchfile.original_filename}' not processed"
+                )
+                continue
 
             if result == Command.TIMEOUT_ERROR:
                 _delete_record(db, batchfile, converted_audio)
