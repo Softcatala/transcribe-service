@@ -55,6 +55,42 @@ def init_logging():
     logger.addHandler(console)
 
 
+def _check_device(device):
+    devices = [device]
+    if device == "cuda":
+        devices.append("cpu")
+
+    filename = os.path.join("audio", "test_audio.mp3")
+    TEST_TIMEOUT = 60
+    execution = Execution(_get_threads())
+
+    for try_device in devices:
+        inference_time, result, target_file_txt, _, _ = execution.run_inference(
+            device=try_device,
+            original_filename=filename,
+            model="medium",
+            converted_audio=filename,
+            timeout=TEST_TIMEOUT,
+            remove_file=False,
+        )
+        if result == Command.NO_ERROR:
+            if device == try_device:
+                logging.info(f"Worker {LOGID} device {try_device} working properly")
+                return
+            else:
+                os.environ["DEVICE"] = try_device
+                logging.info(f"Worker {LOGID} downgrading to device {try_device}")
+                return
+
+        logging.error(f"Worker {LOGID} unable to use {try_device} device")
+
+    logging.error(
+        f"Worker {LOGID} unable find a working device '{devices}'. There may a problem with the system. Putting the system on hold."
+    )
+    while True:
+        time.sleep(1_000_000)
+
+
 def _get_extension(original_filename):
     split_tup = os.path.splitext(original_filename)
 
@@ -120,7 +156,11 @@ def main():
     init_logging()
 
     device = os.environ.get("DEVICE", "cpu")
-    logging.info(f"Process batch files to transcribe id: {LOGID} with device {device}")
+    logging.info(
+        f"Process batch files to transcribe. Worker {LOGID} setup with device {device}"
+    )
+    _check_device(device)
+
     db = BatchFilesDB()
     ProcessedFiles.ensure_dir()
     purge_last_time = time.time()
@@ -177,7 +217,6 @@ def main():
                 target_file_srt,
                 target_file_json,
             ) = execution.run_inference(
-                source_file,
                 batchfile.original_filename,
                 model,
                 converted_audio,

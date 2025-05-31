@@ -4,6 +4,7 @@ COPY transcribe-batch/*.py /srv/
 COPY transcribe-batch/email-templates/ /srv/email-templates/
 COPY transcribe-batch/docker/entry-point.sh /srv/
 COPY transcribe-batch/requirements.txt /srv/
+COPY transcribe-batch/audio/test_audio.mp3 /srv/audio/
 
 FROM transcribe-models as models
 FROM nvidia/cuda:12.3.1-base-ubuntu22.04

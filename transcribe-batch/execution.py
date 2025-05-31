@@ -171,7 +171,6 @@ class Execution(object):
 
     def run_inference(
         self,
-        source_file: str,
         original_filename: str,
         model: str,
         converted_audio: str,
@@ -179,6 +178,8 @@ class Execution(object):
         highlight_words: Optional[int] = None,
         num_chars: Optional[int] = None,
         num_sentences: Optional[int] = None,
+        device=None,
+        remove_file=True,
     ):
         WHISPER_PATH = "whisper-ctranslate2"
         OUTPUT_DIR = "output_dir/"
@@ -204,7 +205,8 @@ class Execution(object):
         start_time = datetime.datetime.now()
         compute_type = os.environ.get("COMPUTE_TYPE", "int8")
         verbose = os.environ.get("WHISPER_VERBOSE", "false").lower()
-        device = os.environ.get("DEVICE", "cpu")
+        if not device:
+            device = os.environ.get("DEVICE", "cpu")
         device_index = os.environ.get("DEVICE_INDEX", "0")
         redirect = " > /dev/null" if verbose == "false" else ""
 
@@ -217,7 +219,7 @@ class Execution(object):
 
         logging.debug(f"Run {cmd} in {end_time} with result {result}")
 
-        if os.path.exists(converted_audio):
+        if remove_file and os.path.exists(converted_audio):
             os.remove(converted_audio)
 
         filename = os.path.basename(converted_audio).rsplit(".", 1)[0]
