@@ -1,6 +1,6 @@
 psutil
 ctranslate2==4.6.0
-faster-whisper==1.1.1
-whisper-ctranslate2==0.5.3
+faster-whisper==1.2.0
+whisper-ctranslate2==0.5.4
 langdetect==1.0.9
 Jinja2==3.1.6
