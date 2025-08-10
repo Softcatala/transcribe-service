@@ -299,6 +299,44 @@ def upload_file():
     return json_answer(result)
 
 
+@app.route("/delete_uuid/", methods=["POST"])
+def delete_uuid():
+    logging.debug(f"delete_uuid: {request.values}")
+    uuid = request.values.get("uuid", "")
+    email = request.values.get("email", "")
+
+    if email == "":
+        result = {"error": "No s'ha especificat el correu"}
+        return json_answer(result, 404)
+
+    processedFiles = ProcessedFiles(uuid)
+    if not processedFiles.is_valid_uuid():
+        result = {"error": "uuid no vàlid"}
+        return json_answer(result, 400)
+
+    exists, _ = processedFiles.do_files_exists()
+    if not exists:
+        result = {"error": "no s'ha trobat la transcripció a esborrar"}
+        return json_answer(result, 404)
+
+    record = _get_record(uuid)
+    if record.email != email:
+        result = {
+            "error": "el correu electrònic no coincideix amb el que ens vau donar"
+        }
+        return json_answer(result, 400)
+
+    deleted = processedFiles.delete_files()
+    if deleted > 0:
+        msg = {}
+        result_code = 200
+        Usage().log("delete_transcription")
+    else:
+        result_code = 404
+        msg = {"error": "no s'ha trobat la transcripció a esborrar"}
+    return json_answer(msg, result_code)
+
+
 def json_answer(data, status=200):
     json_data = json.dumps(data, indent=4, separators=(",", ": "))
     resp = Response(json_data, mimetype="application/json", status=status)

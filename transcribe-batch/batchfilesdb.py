@@ -32,7 +32,7 @@ class BatchFile:
         email: str,
         model_name: str,
         original_filename: str,
-        estimated_time: int,
+        delete_token: str,
         highlight_words: Optional[int] = None,
         num_chars: Optional[int] = None,
         num_sentences: Optional[int] = None,
@@ -42,7 +42,7 @@ class BatchFile:
         self.email = email
         self.model_name = model_name
         self.original_filename = original_filename
-        self.estimated_time = estimated_time
+        self.delete_token = delete_token
         self.highlight_words = highlight_words
         self.num_chars = num_chars
         self.num_sentences = num_sentences
@@ -118,8 +118,9 @@ class BatchFilesDB(Queue):
             record_uuid = self.get_new_uuid()
 
         filename_dbrecord = self.get_record_file_from_uuid(record_uuid)
-        _estimated_time = 0  # Old field no longer used
-        line = f"v2{self.SEPARATOR}{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{_estimated_time}"
+        dt_token = self.get_new_uuid()
+        delete_token = f"dt_{dt_token}"
+        line = f"v2{self.SEPARATOR}{filename}{self.SEPARATOR}{email}{self.SEPARATOR}{model_name}{self.SEPARATOR}{original_filename}{self.SEPARATOR}{delete_token}"
         line += f"{self.SEPARATOR}{highlight_words}{self.SEPARATOR}{num_chars}{self.SEPARATOR}{num_sentences}"
         self.put(filename_dbrecord, line)
         return record_uuid
@@ -154,7 +155,7 @@ class BatchFilesDB(Queue):
                         email=components[2],
                         model_name=components[3],
                         original_filename=components[4],
-                        estimated_time=int(components[5]),
+                        delete_token=components[5],
                         highlight_words=self._optional_bool(components[6]),
                         num_chars=self._optional_int(components[7]),
                         num_sentences=self._optional_int(components[8]),

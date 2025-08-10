@@ -123,6 +123,16 @@ class ProcessedFiles:
         free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
         return ProcessedFiles._get_human_readable_size(free_space_bytes)
 
+    @staticmethod
+    def _delete_file(file):
+        try:
+            os.remove(file)
+            logging.debug(f"Deleted file: {file}")
+            return True
+        except Exception as e:
+            logging.error(f"Error deleting file {file}: {e}")
+            return False
+
     def purge_files(days, directory=PROCESSED):
         HOURS_DAY = 24
         MINUTES_HOUR = 60
@@ -134,11 +144,18 @@ class ProcessedFiles:
         for file in files:
             file_time = os.stat(file).st_mtime
             if file_time < time_limit:
-                try:
-                    os.remove(file)
-                    logging.debug(f"Deleted file: {file}")
+                if ProcessedFiles._delete_file(file):
                     deleted += 1
-                except Exception as e:
-                    logging.error(f"Error deleting file {file}: {e}")
+
+        return deleted
+
+    def delete_files(self):
+        directory = ProcessedFiles.get_processed_directory()
+        deleted = 0
+        files = ProcessedFiles._find_files(directory, f"{self.uuid}.*")
+        logging.info(f"Delete files: {files}")
+        for file in files:
+            if ProcessedFiles._delete_file(file):
+                deleted += 1
 
         return deleted
