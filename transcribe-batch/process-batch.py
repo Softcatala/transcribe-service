@@ -227,7 +227,8 @@ def main():
             )
 
             if result == Command.RUNTIME_ERROR:
-                logging.info(
+                Usage().log("whisper_runtime_error")
+                logging.error(
                     f"Runtime error. File '{batchfile.original_filename}' not processed"
                 )
                 continue

@@ -164,10 +164,10 @@ class Execution(object):
 
             with open(whisper_errfile, "r") as fh:
                 for line in fh.readlines():
-                    logging.debug(f"_whisper_errors: {line.rstrip()}")
+                    logging.error(f"_whisper_errors: {line.rstrip()}")
 
         except Exception as exception:
-            logging.error(f"whisper_errfile. Error: {exception}")
+            logging.error(f"_whisper_errors. Error: {exception}")
 
     def run_inference(
         self,
@@ -213,7 +213,8 @@ class Execution(object):
         whisper_errfile = "whisper_error.log"
         cmd = f"{WHISPER_PATH} {options} --pretty_json True --local_files_only True --compute_type {compute_type} --verbose True --threads {self.threads} --model {model} --output_dir {OUTPUT_DIR} --language ca --device {device} --device_index {device_index} {converted_audio} {redirect} 2> {whisper_errfile}"
         result = Command(cmd).run(timeout=timeout)
-        self._whisper_errors(whisper_errfile)
+        if result != Command.NO_ERROR:
+            self._whisper_errors(whisper_errfile)
 
         end_time = datetime.datetime.now() - start_time
 
