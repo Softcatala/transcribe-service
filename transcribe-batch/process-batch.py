@@ -231,6 +231,7 @@ def main():
                 logging.error(
                     f"Runtime error. File '{batchfile.original_filename}' not processed"
                 )
+                time.sleep(3600)  # 1h
                 continue
 
             if result == Command.TIMEOUT_ERROR:
