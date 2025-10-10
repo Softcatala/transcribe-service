@@ -33,7 +33,7 @@ class BatchFile:
         model_name: str,
         original_filename: str,
         delete_token: str,
-        highlight_words: Optional[int] = None,
+        highlight_words: Optional[bool] = None,
         num_chars: Optional[int] = None,
         num_sentences: Optional[int] = None,
     ):
@@ -44,8 +44,17 @@ class BatchFile:
         self.original_filename = original_filename
         self.delete_token = delete_token
         self.highlight_words = highlight_words
-        self.num_chars = num_chars
-        self.num_sentences = num_sentences
+        self.num_chars = self._safe_int(num_chars)
+        self.num_sentences = self._safe_int(num_sentences)
+
+    @staticmethod
+    def _safe_int(value) -> Optional[int]:
+        if not value:
+            return None
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return None
 
 
 # This is a disk based priority queue with works as filenames
@@ -98,10 +107,18 @@ class BatchFilesDB(Queue):
         return str(uuid.uuid4())
 
     def _optional_int(self, string):
-        return None if string == "None" or len(string) == 0 else int(string)
+        try:
+            return None if string == "None" or len(string) == 0 else int(string)
+        except Exception as e:
+            logging.error(f"_optional_int. Error: {e}")
+            return None
 
     def _optional_bool(self, string):
-        return None if string == "None" or len(string) == 0 else string == "True"
+        try:
+            return None if string == "None" or len(string) == 0 else string == "True"
+        except Exception as e:
+            logging.error(f"_optional_bool. Error: {e}")
+            return None
 
     def create(
         self,

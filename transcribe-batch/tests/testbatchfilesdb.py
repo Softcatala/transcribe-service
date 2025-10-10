@@ -165,6 +165,33 @@ class TestBatchFilesDB(unittest.TestCase):
         self.assertEqual(NUM_CHARS, record.num_chars)
         self.assertEqual(NUM_SENTENCES, record.num_sentences)
 
+    def _test_create_with_bad_params(self):
+        db = self._create_db_object()
+
+        HIGHLIGHT_WORDS = True
+        NUM_CHARS = "AA"
+        NUM_SENTENCES = ".2"
+
+        _uuid = db.create(
+            self.FILENAME,
+            self.EMAIL,
+            self.MODEL_NAME,
+            "original_filename.mp3",
+            HIGHLIGHT_WORDS,
+            NUM_CHARS,
+            NUM_SENTENCES,
+        )
+        filename_dbrecord = db.get_record_file_from_uuid(_uuid)
+
+        record = db._read_record(filename_dbrecord)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL, record.email)
+        self.assertEqual(self.MODEL_NAME, record.model_name)
+
+        self.assertEqual(HIGHLIGHT_WORDS, record.highlight_words)
+        self.assertEqual(None, record.num_chars)
+        self.assertEqual(None, record.num_sentences)
+
 
 if __name__ == "__main__":
     unittest.main()
