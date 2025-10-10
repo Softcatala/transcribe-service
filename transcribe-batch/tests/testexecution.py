@@ -31,7 +31,7 @@ class TestExecution(unittest.TestCase):
 
             execution = Execution(threads=4)
             language = execution.get_transcription_language(temp_file.name)
-            self.assertEquals("ca", language)
+            self.assertEqual("ca", language)
 
     def test_get_transcription_language_long_english(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=True) as temp_file:
@@ -40,7 +40,7 @@ class TestExecution(unittest.TestCase):
             temp_file.flush()
             execution = Execution(threads=4)
             language = execution.get_transcription_language(temp_file.name)
-            self.assertEquals("en", language)
+            self.assertEqual("en", language)
 
     def test_get_transcription_language_long_catalan(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=True) as temp_file:
@@ -49,7 +49,7 @@ class TestExecution(unittest.TestCase):
             temp_file.flush()
             execution = Execution(threads=4)
             language = execution.get_transcription_language(temp_file.name)
-            self.assertEquals("ca", language)
+            self.assertEqual("ca", language)
 
 
 if __name__ == "__main__":

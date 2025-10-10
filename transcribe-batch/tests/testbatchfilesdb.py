@@ -51,9 +51,9 @@ class TestBatchFilesDB(unittest.TestCase):
         filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         record = db._read_record(filename_dbrecord)
-        self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL, record.email)
-        self.assertEquals(self.MODEL_NAME, record.model_name)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL, record.email)
+        self.assertEqual(self.MODEL_NAME, record.model_name)
 
     def test_create_extraparams_None(self):
         db = self._create_db_object()
@@ -63,25 +63,25 @@ class TestBatchFilesDB(unittest.TestCase):
         filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         record = db._read_record(filename_dbrecord)
-        self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL, record.email)
-        self.assertEquals(self.MODEL_NAME, record.model_name)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL, record.email)
+        self.assertEqual(self.MODEL_NAME, record.model_name)
 
-        self.assertEquals(None, record.highlight_words)
-        self.assertEquals(None, record.num_chars)
-        self.assertEquals(None, record.num_sentences)
+        self.assertEqual(None, record.highlight_words)
+        self.assertEqual(None, record.num_chars)
+        self.assertEqual(None, record.num_sentences)
 
     def test_select(self):
         db = self._create_db_object()
         db.create(self.FILENAME, self.EMAIL, self.MODEL_NAME, "original_filename.mp3")
 
         records = db.select()
-        self.assertEquals(1, len(records))
+        self.assertEqual(1, len(records))
 
         record = records[0]
-        self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL, record.email)
-        self.assertEquals(self.MODEL_NAME, record.model_name)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL, record.email)
+        self.assertEqual(self.MODEL_NAME, record.model_name)
 
     def test_select_email(self):
         db = self._create_db_object()
@@ -89,12 +89,12 @@ class TestBatchFilesDB(unittest.TestCase):
         db.create(self.FILENAME, self.EMAIL2, self.MODEL_NAME, "original_filename.mp3")
 
         records = db.select(email=self.EMAIL)
-        self.assertEquals(1, len(records))
+        self.assertEqual(1, len(records))
 
         record = records[0]
-        self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL, record.email)
-        self.assertEquals(self.MODEL_NAME, record.model_name)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL, record.email)
+        self.assertEqual(self.MODEL_NAME, record.model_name)
 
     def test_select_email_uppercase(self):
         db = self._create_db_object()
@@ -103,12 +103,12 @@ class TestBatchFilesDB(unittest.TestCase):
         db.create(self.FILENAME, self.EMAIL3, self.MODEL_NAME, "original_filename.mp3")
 
         records = db.select(email=self.EMAIL)
-        self.assertEquals(2, len(records))
+        self.assertEqual(2, len(records))
 
         record = records[0]
-        self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL.lower(), record.email.lower())
-        self.assertEquals(self.MODEL_NAME, record.model_name)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL.lower(), record.email.lower())
+        self.assertEqual(self.MODEL_NAME, record.model_name)
 
     def test_selected_expected_order(self):
         db = self._create_db_object()
@@ -123,7 +123,7 @@ class TestBatchFilesDB(unittest.TestCase):
 
         records = db.select()
         for id in range(0, MAX_FILES_IN_QUEUE):
-            self.assertEquals(str(id), records[id].filename)
+            self.assertEqual(str(id), records[id].filename)
 
     def test_delete(self):
         db = self._create_db_object()
@@ -136,7 +136,7 @@ class TestBatchFilesDB(unittest.TestCase):
         db.delete(filename_dbrecord)
 
         records = len(records_org) - len(db.select())
-        self.assertEquals(1, records)
+        self.assertEqual(1, records)
 
     def test_create_extraparams_values(self):
         db = self._create_db_object()
@@ -157,13 +157,13 @@ class TestBatchFilesDB(unittest.TestCase):
         filename_dbrecord = db.get_record_file_from_uuid(_uuid)
 
         record = db._read_record(filename_dbrecord)
-        self.assertEquals(self.FILENAME, record.filename)
-        self.assertEquals(self.EMAIL, record.email)
-        self.assertEquals(self.MODEL_NAME, record.model_name)
+        self.assertEqual(self.FILENAME, record.filename)
+        self.assertEqual(self.EMAIL, record.email)
+        self.assertEqual(self.MODEL_NAME, record.model_name)
 
-        self.assertEquals(HIGHLIGHT_WORDS, record.highlight_words)
-        self.assertEquals(NUM_CHARS, record.num_chars)
-        self.assertEquals(NUM_SENTENCES, record.num_sentences)
+        self.assertEqual(HIGHLIGHT_WORDS, record.highlight_words)
+        self.assertEqual(NUM_CHARS, record.num_chars)
+        self.assertEqual(NUM_SENTENCES, record.num_sentences)
 
 
 if __name__ == "__main__":

@@ -26,26 +26,26 @@ class TestLockFile(unittest.TestCase):
     def test_create(self):
         filename = tempfile.NamedTemporaryFile().name
         result = LockFile(filename).create()
-        self.assertEquals(True, result)
+        self.assertEqual(True, result)
 
     def test_create_locked_by_other_process(self):
         filename = tempfile.NamedTemporaryFile().name
         LockFile(filename).create()
         result = LockFile(filename).create()
-        self.assertEquals(False, result)
+        self.assertEqual(False, result)
 
     def test_has_lock(self):
         filename = tempfile.NamedTemporaryFile().name
         lockfile = LockFile(filename)
         lockfile.create()
-        self.assertEquals(True, lockfile.has_lock())
+        self.assertEqual(True, lockfile.has_lock())
 
     def test_has_delete(self):
         filename = tempfile.NamedTemporaryFile().name
         lockfile = LockFile(filename)
         lockfile.create()
         lockfile.delete()
-        self.assertEquals(False, lockfile.has_lock())
+        self.assertEqual(False, lockfile.has_lock())
 
 
 if __name__ == "__main__":

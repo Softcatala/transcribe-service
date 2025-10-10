@@ -45,7 +45,7 @@ class TestProcessedFiles(unittest.TestCase):
             os.utime(filename, (old_time, old_time))
 
         deleted = ProcessedFiles.purge_files(3, self.temp_dir.name)
-        self.assertEquals(7, deleted)
+        self.assertEqual(7, deleted)
 
     def test_get_num_of_files_stored(self):
         TOTAL_FILES = 10
@@ -55,7 +55,7 @@ class TestProcessedFiles(unittest.TestCase):
                 file.write("Hello")
 
         num = ProcessedFiles.get_num_of_files_stored(self.temp_dir.name)
-        self.assertEquals(TOTAL_FILES, num)
+        self.assertEqual(TOTAL_FILES, num)
 
     def test_get_num_of_files_stored_size(self):
         for day in range(0, 2):
@@ -64,7 +64,7 @@ class TestProcessedFiles(unittest.TestCase):
                 file.write("Hello")
 
         size = ProcessedFiles.get_num_of_files_stored_size(self.temp_dir.name)
-        self.assertEquals("10 bytes", size)
+        self.assertEqual("10 bytes", size)
 
 
 if __name__ == "__main__":
