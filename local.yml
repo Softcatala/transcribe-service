@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   transcribe-service:
     image: transcribe-service:latest
@@ -21,10 +19,20 @@ services:
     volumes:
       - transcribe-files:/srv/data
 
+    deploy:
+       resources:
+         reservations:
+           devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+
     environment:
       LOGLEVEL: 'DEBUG'
       LOGID: '1'
       LOGDIR: "/srv/data/logs"
+      DEVICE: 'cuda'
+      DEVICE_INDEX: "0"
 
   transcribe-batch_2:
     image: transcribe-batch:latest
