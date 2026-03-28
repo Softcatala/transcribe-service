@@ -31,11 +31,21 @@ from usage import Usage
 import datetime
 from urllib.parse import quote
 import unicodedata
+from telemetry import REQUEST_COUNTER
+from metrics import init_metrics
 
 app = Flask(__name__)
 
 # Access-Control-Allow-Origin header is defined here for all endpoints
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Initialize metrics
+init_metrics(app)
+
+
+@app.before_request
+def track_request():
+    REQUEST_COUNTER.labels(endpoint=request.path, method=request.method).inc()
 
 UPLOAD_FOLDER = "/srv/data/files/"
 PROCESSED_FOLDER = "/srv/data/processed/"
