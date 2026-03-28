@@ -47,6 +47,7 @@ init_metrics(app)
 def track_request():
     REQUEST_COUNTER.labels(endpoint=request.path, method=request.method).inc()
 
+
 UPLOAD_FOLDER = "/srv/data/files/"
 PROCESSED_FOLDER = "/srv/data/processed/"
 
