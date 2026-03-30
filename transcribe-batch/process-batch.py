@@ -31,6 +31,7 @@ from lockfile import LockFile
 import datetime
 import tempfile
 from usage import Usage
+from metrics_writer import write_metrics
 
 LOGID = os.environ.get("LOGID", "0")
 
@@ -190,92 +191,94 @@ def main():
                 f"Processing: {source_file} - for {batchfile.email} - pending {len(batchfiles)}"
             )
 
-            model = _get_model_file(batchfile.model_name)
-            source_file_base = os.path.basename(source_file)
-            processed = ProcessedFiles(source_file_base)
+            if True:
+                model = _get_model_file(batchfile.model_name)
+                source_file_base = os.path.basename(source_file)
+                processed = ProcessedFiles(source_file_base)
 
-            converted_audio = os.path.join(out_dir, WAV_FILE)
+                converted_audio = os.path.join(out_dir, WAV_FILE)
 
-            timeout = _get_timeout()
-            result = execution.run_conversion(
-                batchfile.original_filename, source_file, converted_audio, timeout
-            )
-
-            if result != Command.NO_ERROR:
-                _delete_record(db, batchfile, converted_audio)
-                msg = "No s'ha pogut llegir el fitxer. Normalment, això succeeix perquè el fitxer que heu enviat no és d'àudio o vídeo o és malmès.\n"
-                msg += "Si està malmès, podeu provar de convertir-lo a una altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
-                msg += "i tornar-nos a enviar la versió convertida."
-                Usage().log("conversion_error")
-                _send_mail_error(batchfile, 0, source_file_base, msg)
-                continue
-
-            (
-                inference_time,
-                result,
-                target_file_txt,
-                target_file_srt,
-                target_file_json,
-            ) = execution.run_inference(
-                batchfile.original_filename,
-                model,
-                converted_audio,
-                timeout,
-                batchfile.highlight_words,
-                batchfile.num_chars,
-                batchfile.num_sentences,
-            )
-
-            if result == Command.RUNTIME_ERROR:
-                Usage().log("whisper_runtime_error")
-                logging.error(
-                    f"Runtime error. File '{batchfile.original_filename}' not processed"
+                timeout = _get_timeout()
+                result = execution.run_conversion(
+                    batchfile.original_filename, source_file, converted_audio, timeout
                 )
-                time.sleep(3600)  # 1h
-                continue
 
-            if result == Command.TIMEOUT_ERROR:
-                _delete_record(db, batchfile, converted_audio)
-                minutes = int(timeout / 60)
-                msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
-                msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
-                Usage().log("whisper_timeout")
-                _send_mail_error(batchfile, inference_time, source_file_base, msg)
-                continue
+                if result != Command.NO_ERROR:
+                    _delete_record(db, batchfile, converted_audio)
+                    msg = "No s'ha pogut llegir el fitxer. Normalment, això succeeix perquè el fitxer que heu enviat no és d'àudio o vídeo o és malmès.\n"
+                    msg += "Si està malmès, podeu provar de convertir-lo a una altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
+                    msg += "i tornar-nos a enviar la versió convertida."
+                    Usage().log("conversion_error")
+                    _send_mail_error(batchfile, 0, source_file_base, msg)
+                    continue
 
-            if result != Command.NO_ERROR:
-                _delete_record(db, batchfile, converted_audio)
-                _send_mail_error(
-                    batchfile,
+                (
                     inference_time,
-                    source_file_base,
-                    "Reviseu que sigui un d'àudio o vídeo vàlid.",
+                    result,
+                    target_file_txt,
+                    target_file_srt,
+                    target_file_json,
+                ) = execution.run_inference(
+                    batchfile.original_filename,
+                    model,
+                    converted_audio,
+                    timeout,
+                    batchfile.highlight_words,
+                    batchfile.num_chars,
+                    batchfile.num_sentences,
                 )
-                Usage().log("whisper_returns_error")
-                continue
 
-            language = execution.get_transcription_language(target_file_txt)
-            if language in ["es", "en", "fr"]:
-                _delete_record(db, batchfile, converted_audio)
-                msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
-                _send_mail_error(batchfile, inference_time, source_file_base, msg)
-                logging.info(
-                    f"Non-Catalan language detected: '{language}' for '{batchfile.original_filename}'"
-                )
-                Usage().log("whisper_not_catalan")
-                continue
+                if result == Command.RUNTIME_ERROR:
+                    Usage().log("whisper_runtime_error")
+                    logging.error(
+                        f"Runtime error. File '{batchfile.original_filename}' not processed"
+                    )
+                    time.sleep(3600)  # 1h
+                    continue
 
-            extension = _get_extension(batchfile.original_filename)
-            _send_mail(batchfile, inference_time, source_file_base)
-            logging.info(f"File for {batchfile.email} completed in {inference_time}")
+                if result == Command.TIMEOUT_ERROR:
+                    _delete_record(db, batchfile, converted_audio)
+                    minutes = int(timeout / 60)
+                    msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
+                    msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
+                    Usage().log("whisper_timeout")
+                    _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                    continue
 
-            processed.move_file(batchfile.filename_dbrecord)
-            processed.move_file(target_file_srt)
-            processed.move_file(target_file_txt)
-            processed.move_file(target_file_json)
-            processed.move_file_bin(source_file, extension)
-            LockFile(batchfile.filename_dbrecord).delete()
+                if result != Command.NO_ERROR:
+                    _delete_record(db, batchfile, converted_audio)
+                    _send_mail_error(
+                        batchfile,
+                        inference_time,
+                        source_file_base,
+                        "Reviseu que sigui un d'àudio o vídeo vàlid.",
+                    )
+                    Usage().log("whisper_returns_error")
+                    continue
 
+                language = execution.get_transcription_language(target_file_txt)
+                if language in ["es", "en", "fr"]:
+                    _delete_record(db, batchfile, converted_audio)
+                    msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
+                    _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                    logging.info(
+                        f"Non-Catalan language detected: '{language}' for '{batchfile.original_filename}'"
+                    )
+                    Usage().log("whisper_not_catalan")
+                    continue
+
+                extension = _get_extension(batchfile.original_filename)
+                _send_mail(batchfile, inference_time, source_file_base)
+                logging.info(f"File for {batchfile.email} completed in {inference_time}")
+
+                processed.move_file(batchfile.filename_dbrecord)
+                processed.move_file(target_file_srt)
+                processed.move_file(target_file_txt)
+                processed.move_file(target_file_json)
+                processed.move_file_bin(source_file, extension)
+                LockFile(batchfile.filename_dbrecord).delete()
+
+        write_metrics(db.count() + 1)  # Track queue depth
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
             purge_last_time = now

@@ -23,6 +23,7 @@ from prometheus_client import generate_latest, REGISTRY
 from telemetry import MEM_GAUGE, UPTIME_GAUGE
 import psutil
 import time
+import os
 
 metrics_bp = Blueprint("metrics", __name__)
 
@@ -37,9 +38,22 @@ def init_metrics(app):
     app.register_blueprint(metrics_bp)
 
 
+def _read_batch_metrics():
+    """Read batch metrics from file if it exists"""
+    logdir = os.environ.get("LOGDIR", "/tmp")
+    batch_metrics_file = os.path.join(logdir, "batch_metrics.txt")
+    try:
+        if os.path.exists(batch_metrics_file):
+            with open(batch_metrics_file, "r") as f:
+                return f.read()
+    except Exception:
+        pass
+    return ""
+
+
 @metrics_bp.route("/metrics", methods=["GET"])
 def metrics():
-    """Expose Prometheus metrics"""
+    """Expose Prometheus metrics including batch metrics"""
     # Update memory usage gauge
     process = psutil.Process()
     memory_mb = process.memory_info().rss / 1024 / 1024
@@ -50,4 +64,13 @@ def metrics():
         uptime = time.time() - _startup_time
         UPTIME_GAUGE.set(uptime)
 
-    return Response(generate_latest(REGISTRY), mimetype="text/plain")
+    # Get web service metrics
+    web_metrics = generate_latest(REGISTRY).decode("utf-8")
+
+    # Get batch metrics if available
+    batch_metrics = _read_batch_metrics()
+
+    # Combine metrics
+    all_metrics = web_metrics + "\n" + batch_metrics if batch_metrics else web_metrics
+
+    return Response(all_metrics, mimetype="text/plain")
