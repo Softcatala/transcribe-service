@@ -45,10 +45,12 @@ init_metrics(app)
 
 EXCLUDED_PATHS = {"/metrics", "/health", "/stats"}
 
+
 @app.before_request
 def track_request():
     if request.path not in EXCLUDED_PATHS:
         REQUEST_COUNTER.labels(endpoint=request.path, method=request.method).inc()
+
 
 UPLOAD_FOLDER = "/srv/data/files/"
 PROCESSED_FOLDER = "/srv/data/processed/"
