@@ -19,7 +19,7 @@
 # Boston, MA 02111-1307, USA.
 
 from flask import Blueprint, Response
-from prometheus_client import generate_latest, REGISTRY
+from prometheus_client import generate_latest, CollectorRegistry, multiprocess
 from telemetry import MEM_GAUGE, UPTIME_GAUGE
 import psutil
 import time
@@ -64,8 +64,13 @@ def metrics():
         uptime = time.time() - _startup_time
         UPTIME_GAUGE.set(uptime)
 
-    # Get web service metrics
-    web_metrics = generate_latest(REGISTRY).decode("utf-8")
+    # Get web service metrics - use multiprocess collector when running under gunicorn
+    if "PROMETHEUS_MULTIPROC_DIR" in os.environ:
+        registry = CollectorRegistry()
+        multiprocess.MultiProcessCollector(registry)
+    else:
+        from prometheus_client import REGISTRY as registry
+    web_metrics = generate_latest(registry).decode("utf-8")
 
     # Get batch metrics if available
     batch_metrics = _read_batch_metrics()
