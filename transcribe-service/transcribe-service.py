@@ -49,7 +49,8 @@ EXCLUDED_PATHS = {"/metrics", "/health", "/stats"}
 @app.before_request
 def track_request():
     if request.path not in EXCLUDED_PATHS:
-        REQUEST_COUNTER.labels(endpoint=request.path, method=request.method).inc()
+        endpoint = str(request.url_rule) if request.url_rule else request.path
+        REQUEST_COUNTER.labels(endpoint=endpoint, method=request.method).inc()
 
 
 UPLOAD_FOLDER = "/srv/data/files/"
