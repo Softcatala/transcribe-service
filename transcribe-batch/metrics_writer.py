@@ -7,7 +7,7 @@ LOGDIR = os.environ.get("LOGDIR", "/tmp")
 FILE = os.path.join(LOGDIR, "batch_metrics.txt")
 
 
-def write_metrics(jobs_started=0, jobs_completed=0, files_processed=0):
+def write_metrics(jobs_started=0, jobs_completed=0, files_processed=0, conversion_errors=0, whisper_not_catalan=0, files_stored=0, files_stored_mb=0):
     """Write simple metrics to file"""
     try:
         uptime = time.time() - getattr(write_metrics, "_start", time.time())
@@ -21,6 +21,18 @@ batch_jobs_completed_total {jobs_completed}
 # HELP batch_files_processed_total Total files processed
 # TYPE batch_files_processed_total counter
 batch_files_processed_total {files_processed}
+# HELP batch_conversion_errors_total Total conversion errors
+# TYPE batch_conversion_errors_total counter
+batch_conversion_errors_total {conversion_errors}
+# HELP batch_whisper_not_catalan_total Total files rejected as non-Catalan
+# TYPE batch_whisper_not_catalan_total counter
+batch_whisper_not_catalan_total {whisper_not_catalan}
+# HELP batch_files_stored Current number of files stored
+# TYPE batch_files_stored gauge
+batch_files_stored {files_stored}
+# HELP batch_files_stored_mb Disk space used by stored files in MB
+# TYPE batch_files_stored_mb gauge
+batch_files_stored_mb {files_stored_mb:.1f}
 # HELP batch_uptime_seconds Uptime in seconds
 # TYPE batch_uptime_seconds gauge
 batch_uptime_seconds {uptime:.0f}

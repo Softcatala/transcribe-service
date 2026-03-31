@@ -35,3 +35,8 @@ UPTIME_GAUGE = Gauge(
     "uptime_seconds",
     "Application uptime in seconds",
 )
+
+QUEUE_MAX_PER_MAIL_COUNTER = Counter(
+    "queue_max_per_mail_total",
+    "Total requests rejected due to per-email queue limit",
+)

@@ -31,7 +31,7 @@ from usage import Usage
 import datetime
 from urllib.parse import quote
 import unicodedata
-from telemetry import REQUEST_COUNTER
+from telemetry import REQUEST_COUNTER, QUEUE_MAX_PER_MAIL_COUNTER
 from metrics import init_metrics
 
 app = Flask(__name__)
@@ -289,6 +289,7 @@ def upload_file():
         }
         logging.info(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_max_per_mail")
+        QUEUE_MAX_PER_MAIL_COUNTER.inc()
         return json_answer(result, 429)
 
     waiting_queue = len(db.select())

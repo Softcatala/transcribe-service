@@ -169,6 +169,9 @@ def main():
     PURGE_OLDER_THAN_DAYS = 3
     WAV_FILE = "file.wav"
     execution = Execution(_get_threads())
+    _conversion_errors = 0
+    _whisper_not_catalan = 0
+    _files_processed = 0
 
     temp_dir = tempfile.TemporaryDirectory()
     out_dir = temp_dir.name
@@ -209,6 +212,7 @@ def main():
                     msg += "Si està malmès, podeu provar de convertir-lo a una altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
                     msg += "i tornar-nos a enviar la versió convertida."
                     Usage().log("conversion_error")
+                    _conversion_errors += 1
                     _send_mail_error(batchfile, 0, source_file_base, msg)
                     continue
 
@@ -265,6 +269,7 @@ def main():
                         f"Non-Catalan language detected: '{language}' for '{batchfile.original_filename}'"
                     )
                     Usage().log("whisper_not_catalan")
+                    _whisper_not_catalan += 1
                     continue
 
                 extension = _get_extension(batchfile.original_filename)
@@ -279,8 +284,15 @@ def main():
                 processed.move_file(target_file_json)
                 processed.move_file_bin(source_file, extension)
                 LockFile(batchfile.filename_dbrecord).delete()
+                _files_processed += 1
 
-        write_metrics(db.count() + 1)  # Track queue depth
+        write_metrics(
+            files_processed=_files_processed,
+            conversion_errors=_conversion_errors,
+            whisper_not_catalan=_whisper_not_catalan,
+            files_stored=ProcessedFiles.get_num_of_files_stored(),
+            files_stored_mb=ProcessedFiles.get_num_of_files_stored_size_mb(),
+        )
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
             purge_last_time = now
