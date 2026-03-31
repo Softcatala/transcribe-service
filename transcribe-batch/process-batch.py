@@ -292,6 +292,7 @@ def main():
             whisper_not_catalan=_whisper_not_catalan,
             files_stored=ProcessedFiles.get_num_of_files_stored(),
             files_stored_mb=ProcessedFiles.get_num_of_files_stored_size_mb(),
+            free_disk_mb=ProcessedFiles.get_free_space_in_directory_mb(),
         )
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:

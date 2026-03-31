@@ -7,7 +7,7 @@ LOGDIR = os.environ.get("LOGDIR", "/tmp")
 FILE = os.path.join(LOGDIR, "batch_metrics.txt")
 
 
-def write_metrics(jobs_started=0, jobs_completed=0, files_processed=0, conversion_errors=0, whisper_not_catalan=0, files_stored=0, files_stored_mb=0):
+def write_metrics(jobs_started=0, jobs_completed=0, files_processed=0, conversion_errors=0, whisper_not_catalan=0, files_stored=0, files_stored_mb=0, free_disk_mb=0):
     """Write simple metrics to file"""
     try:
         uptime = time.time() - getattr(write_metrics, "_start", time.time())
@@ -33,6 +33,9 @@ batch_files_stored {files_stored}
 # HELP batch_files_stored_mb Disk space used by stored files in MB
 # TYPE batch_files_stored_mb gauge
 batch_files_stored_mb {files_stored_mb:.1f}
+# HELP batch_free_disk_mb Free disk space in MB
+# TYPE batch_free_disk_mb gauge
+batch_free_disk_mb {free_disk_mb:.1f}
 # HELP batch_uptime_seconds Uptime in seconds
 # TYPE batch_uptime_seconds gauge
 batch_uptime_seconds {uptime:.0f}

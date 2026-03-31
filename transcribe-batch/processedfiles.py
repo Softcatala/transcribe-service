@@ -131,6 +131,11 @@ class ProcessedFiles:
         free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
         return ProcessedFiles._get_human_readable_size(free_space_bytes)
 
+    def get_free_space_in_directory_mb(directory=PROCESSED):
+        statvfs = os.statvfs(directory)
+        free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
+        return free_space_bytes / (1024 * 1024)
+
     @staticmethod
     def _delete_file(file):
         try:
