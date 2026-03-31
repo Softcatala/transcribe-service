@@ -1,5 +1,9 @@
 UPLOAD_FOLDER=/srv/data/files/
 mkdir -p $UPLOAD_FOLDER
+
+PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+mkdir -p $PROMETHEUS_MULTIPROC_DIR
+export PROMETHEUS_MULTIPROC_DIR
 # Notes on the configuration:
 # - POST of large video/audio files can take over 1m depending on connection quality and file size
 # - When you reproduce the media file from OTranscribe, it goes long requests to /get_file/, it can take

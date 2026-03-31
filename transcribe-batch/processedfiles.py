@@ -116,12 +116,25 @@ class ProcessedFiles:
 
         return ProcessedFiles._get_human_readable_size(total_size)
 
+    def get_num_of_files_stored_size_mb(directory=PROCESSED):
+        files = ProcessedFiles._find_files(directory, "*")
+        total_size = 0
+        for _file in files:
+            total_size += os.stat(_file).st_size
+
+        return total_size / (1024 * 1024)
+
     def get_free_space_in_directory(directory=PROCESSED):
         statvfs = os.statvfs(directory)
 
         # Available blocks * block size gives the available space in bytes
         free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
         return ProcessedFiles._get_human_readable_size(free_space_bytes)
+
+    def get_free_space_in_directory_mb(directory=PROCESSED):
+        statvfs = os.statvfs(directory)
+        free_space_bytes = statvfs.f_frsize * statvfs.f_bavail
+        return free_space_bytes / (1024 * 1024)
 
     @staticmethod
     def _delete_file(file):

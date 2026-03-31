@@ -31,11 +31,27 @@ from usage import Usage
 import datetime
 from urllib.parse import quote
 import unicodedata
+from telemetry import REQUEST_COUNTER, QUEUE_MAX_PER_MAIL_COUNTER
+from metrics import init_metrics
 
 app = Flask(__name__)
 
 # Access-Control-Allow-Origin header is defined here for all endpoints
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Initialize metrics
+init_metrics(app)
+
+
+EXCLUDED_PATHS = {"/metrics", "/health", "/stats"}
+
+
+@app.before_request
+def track_request():
+    if request.path not in EXCLUDED_PATHS:
+        endpoint = str(request.url_rule) if request.url_rule else request.path
+        REQUEST_COUNTER.labels(endpoint=endpoint, method=request.method).inc()
+
 
 UPLOAD_FOLDER = "/srv/data/files/"
 PROCESSED_FOLDER = "/srv/data/processed/"
@@ -273,6 +289,7 @@ def upload_file():
         }
         logging.info(f"/transcribe_file/ {result['error']} - {email}")
         Usage().log("queue_max_per_mail")
+        QUEUE_MAX_PER_MAIL_COUNTER.inc()
         return json_answer(result, 429)
 
     waiting_queue = len(db.select())
