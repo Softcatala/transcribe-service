@@ -7,7 +7,7 @@ LOGDIR = os.environ.get("LOGDIR", "/tmp")
 FILE = os.path.join(LOGDIR, "batch_metrics.txt")
 
 
-def write_metrics(jobs_started=0, jobs_completed=0, files_processed=0, conversion_errors=0, whisper_not_catalan=0, files_stored=0, files_stored_mb=0, free_disk_mb=0):
+def write_metrics(jobs_started=0, jobs_completed=0, files_processed=0, conversion_errors=0, whisper_not_catalan=0, whisper_timeout=0, files_stored=0, files_stored_mb=0, free_disk_mb=0):
     """Write simple metrics to file"""
     try:
         uptime = time.time() - getattr(write_metrics, "_start", time.time())
@@ -27,6 +27,9 @@ batch_conversion_errors_total {conversion_errors}
 # HELP batch_whisper_not_catalan_total Total files rejected as non-Catalan
 # TYPE batch_whisper_not_catalan_total counter
 batch_whisper_not_catalan_total {whisper_not_catalan}
+# HELP batch_whisper_timeout_total Total files that timed out during transcription
+# TYPE batch_whisper_timeout_total counter
+batch_whisper_timeout_total {whisper_timeout}
 # HELP batch_files_stored Current number of files stored
 # TYPE batch_files_stored gauge
 batch_files_stored {files_stored}

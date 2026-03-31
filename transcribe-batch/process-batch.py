@@ -171,6 +171,7 @@ def main():
     execution = Execution(_get_threads())
     _conversion_errors = 0
     _whisper_not_catalan = 0
+    _whisper_timeout = 0
     _files_processed = 0
 
     temp_dir = tempfile.TemporaryDirectory()
@@ -246,6 +247,7 @@ def main():
                     msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
                     msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
                     Usage().log("whisper_timeout")
+                    _whisper_timeout += 1
                     _send_mail_error(batchfile, inference_time, source_file_base, msg)
                     continue
 
@@ -290,6 +292,7 @@ def main():
             files_processed=_files_processed,
             conversion_errors=_conversion_errors,
             whisper_not_catalan=_whisper_not_catalan,
+            whisper_timeout=_whisper_timeout,
             files_stored=ProcessedFiles.get_num_of_files_stored(),
             files_stored_mb=ProcessedFiles.get_num_of_files_stored_size_mb(),
             free_disk_mb=ProcessedFiles.get_free_space_in_directory_mb(),
