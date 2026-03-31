@@ -293,6 +293,7 @@ def main():
             files_stored=ProcessedFiles.get_num_of_files_stored(),
             files_stored_mb=ProcessedFiles.get_num_of_files_stored_size_mb(),
             free_disk_mb=ProcessedFiles.get_free_space_in_directory_mb(),
+            queue_size=db.count(),
         )
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
