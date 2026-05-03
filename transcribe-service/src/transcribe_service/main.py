@@ -19,18 +19,20 @@
 # Boston, MA 02111-1307, USA.
 
 from __future__ import print_function
-from flask import Flask, request, Response, send_file, make_response
-from flask_cors import CORS
+
+import datetime
 import json
-from batchfilesdb import BatchFilesDB
-from processedfiles import ProcessedFiles
-import os
 import logging
 import logging.handlers
-from usage import Usage
-import datetime
-from urllib.parse import quote
+import os
 import unicodedata
+from urllib.parse import quote
+
+from flask import Flask, Response, make_response, request, send_file
+from flask_cors import CORS
+from transcribe_core.batchfilesdb import BatchFilesDB
+from transcribe_core.processedfiles import ProcessedFiles
+from transcribe_core.usage import Usage
 
 app = Flask(__name__)
 
@@ -43,7 +45,9 @@ PROCESSED_FOLDER = "/srv/data/processed/"
 
 @app.route("/stats/", methods=["GET"])
 def stats():
-    requested = request.args.get("date", datetime.datetime.today().strftime("%Y-%m-%d"))
+    requested = request.args.get(
+        "date", datetime.datetime.today().strftime("%Y-%m-%d")
+    )
     try:
         date_requested = datetime.datetime.strptime(requested, "%Y-%m-%d")
     except Exception:
@@ -214,7 +218,9 @@ def get_file():
 
     filenames = _get_download_names(original_name, ext)
     mime_type = _get_mimetype(ext)
-    resp = make_response(send_file(fullname, as_attachment=True, mimetype=mime_type))
+    resp = make_response(
+        send_file(fullname, as_attachment=True, mimetype=mime_type)
+    )
     resp.headers["Content-Disposition"] = f"attachment; {filenames}"
     resp.headers["Accept-Ranges"] = "bytes"
     resp.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
@@ -224,7 +230,9 @@ def get_file():
 
 
 QUEUE_CAPACITY = int(os.environ.get("QUEUE_CAPACITY", "150"))
-MAX_SIZE = int(os.environ.get("MAX_SIZE", 1024 * 1024 * 1024))  # 1GB by default
+MAX_SIZE = int(
+    os.environ.get("MAX_SIZE", 1024 * 1024 * 1024)
+)  # 1GB by default
 MAX_PER_EMAIL = int(os.environ.get("MAX_PER_EMAIL", "3"))
 
 
@@ -232,8 +240,12 @@ MAX_PER_EMAIL = int(os.environ.get("MAX_PER_EMAIL", "3"))
 def upload_file():
     file = request.files["file"] if "file" in request.files else ""
     email = request.values["email"] if "email" in request.values else ""
-    model_name = request.values["model_name"] if "model_name" in request.values else ""
-    highlight_words = True if request.values.get("highlight_words", None) else False
+    model_name = (
+        request.values["model_name"] if "model_name" in request.values else ""
+    )
+    highlight_words = (
+        True if request.values.get("highlight_words", None) else False
+    )
     num_chars = request.values.get("num_chars", "")
     num_sentences = request.values.get("num_sentences", "")
 

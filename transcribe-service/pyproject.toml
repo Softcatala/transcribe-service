@@ -1,0 +1,18 @@
+[project]
+name = "transcribe-service"
+version = "0.1.0"
+description = "API Service Backend for handling transcriptions of catalan audio files."
+requires-python = ">=3.13"
+dependencies = [
+  "flask==3.0.2",
+  "flask_cors==4.0.0",
+  "gunicorn==22.0.0",
+  "transcribe-core",
+]
+
+[tool.uv.sources]
+transcribe-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

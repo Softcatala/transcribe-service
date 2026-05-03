@@ -19,18 +19,21 @@
 # Boston, MA 02111-1307, USA.
 
 from __future__ import print_function
-import time
+
+import datetime
 import logging
 import logging.handlers
 import os
-from batchfilesdb import BatchFilesDB
-from processedfiles import ProcessedFiles
-from sendmail import Sendmail
-from execution import Execution, Command
-from lockfile import LockFile
-import datetime
 import tempfile
-from usage import Usage
+import time
+
+from transcribe_core.batchfilesdb import BatchFilesDB
+from transcribe_core.processedfiles import ProcessedFiles
+from transcribe_core.usage import Usage
+
+from transcribe_batch.execution import Command, Execution
+from transcribe_batch.lockfile import LockFile
+from transcribe_batch.sendmail import Sendmail
 
 LOGID = os.environ.get("LOGID", "0")
 
@@ -65,21 +68,27 @@ def _check_device(device):
     execution = Execution(_get_threads())
 
     for try_device in devices:
-        inference_time, result, target_file_txt, _, _ = execution.run_inference(
-            device=try_device,
-            original_filename=filename,
-            model="medium",
-            converted_audio=filename,
-            timeout=TEST_TIMEOUT,
-            remove_file=False,
+        inference_time, result, target_file_txt, _, _ = (
+            execution.run_inference(
+                device=try_device,
+                original_filename=filename,
+                model="medium",
+                converted_audio=filename,
+                timeout=TEST_TIMEOUT,
+                remove_file=False,
+            )
         )
         if result == Command.NO_ERROR:
             if device == try_device:
-                logging.info(f"Worker {LOGID} device {try_device} working properly")
+                logging.info(
+                    f"Worker {LOGID} device {try_device} working properly"
+                )
                 return
             else:
                 os.environ["DEVICE"] = try_device
-                logging.info(f"Worker {LOGID} downgrading to device {try_device}")
+                logging.info(
+                    f"Worker {LOGID} downgrading to device {try_device}"
+                )
                 return
 
         logging.error(f"Worker {LOGID} unable to use {try_device} device")
@@ -198,7 +207,10 @@ def main():
 
             timeout = _get_timeout()
             result = execution.run_conversion(
-                batchfile.original_filename, source_file, converted_audio, timeout
+                batchfile.original_filename,
+                source_file,
+                converted_audio,
+                timeout,
             )
 
             if result != Command.NO_ERROR:
@@ -240,7 +252,9 @@ def main():
                 msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
                 msg += "Podeu enviar fitxers més curts, usar un model petit o bé usar el client Buzz per fer-ho al vostre PC."
                 Usage().log("whisper_timeout")
-                _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                _send_mail_error(
+                    batchfile, inference_time, source_file_base, msg
+                )
                 continue
 
             if result != Command.NO_ERROR:
@@ -258,7 +272,9 @@ def main():
             if language in ["es", "en", "fr"]:
                 _delete_record(db, batchfile, converted_audio)
                 msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
-                _send_mail_error(batchfile, inference_time, source_file_base, msg)
+                _send_mail_error(
+                    batchfile, inference_time, source_file_base, msg
+                )
                 logging.info(
                     f"Non-Catalan language detected: '{language}' for '{batchfile.original_filename}'"
                 )
@@ -267,7 +283,9 @@ def main():
 
             extension = _get_extension(batchfile.original_filename)
             _send_mail(batchfile, inference_time, source_file_base)
-            logging.info(f"File for {batchfile.email} completed in {inference_time}")
+            logging.info(
+                f"File for {batchfile.email} completed in {inference_time}"
+            )
 
             processed.move_file(batchfile.filename_dbrecord)
             processed.move_file(target_file_srt)
@@ -280,7 +298,9 @@ def main():
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
             purge_last_time = now
             purged = ProcessedFiles.purge_files(PURGE_OLDER_THAN_DAYS)
-            logging.info(f"Purging {datetime.datetime.now()}, {purged} files deleted")
+            logging.info(
+                f"Purging {datetime.datetime.now()}, {purged} files deleted"
+            )
 
         time.sleep(30)
 

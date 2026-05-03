@@ -18,7 +18,7 @@ test:
 	cd transcribe-batch && python -m nose2
 
 whisper-models:
-	python3 -c 'from faster_whisper import WhisperModel; WhisperModel("small");  WhisperModel("medium")'
+	uv run python3 -c 'from faster_whisper import WhisperModel; WhisperModel("small");  WhisperModel("medium")'
 
 benchmark-samples:
 	mkdir -p benchmark

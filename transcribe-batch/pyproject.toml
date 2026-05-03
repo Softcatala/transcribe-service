@@ -1,0 +1,21 @@
+[project]
+name = "transcribe-batch"
+version = "0.1.0"
+description = "A service for transcribing catalan audio files."
+requires-python = ">=3.13"
+dependencies = [
+  "psutil",
+  "ctranslate2==4.7.1",
+  "faster-whisper==1.2.1",
+  "langdetect==1.0.9",
+  "Jinja2==3.1.6",
+  "whisper-ctranslate2",
+  "transcribe-core",
+]
+
+[tool.uv.sources]
+transcribe-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

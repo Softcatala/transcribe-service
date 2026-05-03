@@ -1,11 +1,16 @@
-FROM python:3.11.1-slim-bullseye as get_models
-RUN apt-get update -y && apt-get upgrade -y && apt-get install make -y
+FROM python:3.13-slim AS get_models
 
-# Get models
-COPY Makefile .
-COPY transcribe-batch/requirements.txt .
-RUN pip install -r requirements.txt
-RUN make whisper-models
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-FROM python:3.11.1-slim-bullseye
-COPY --from=get_models /root/.cache/huggingface/  /srv/models/
+WORKDIR /workspace
+
+COPY pyproject.toml uv.lock ./
+COPY transcribe-core/pyproject.toml transcribe-core/
+COPY transcribe-batch/pyproject.toml transcribe-batch/
+
+RUN uv sync --frozen --package transcribe-batch --no-install-workspace
+
+RUN uv run python -c 'from faster_whisper import WhisperModel; WhisperModel("small"); WhisperModel("medium")'
+
+FROM python:3.13-slim
+COPY --from=get_models /root/.cache/huggingface/ /srv/models/

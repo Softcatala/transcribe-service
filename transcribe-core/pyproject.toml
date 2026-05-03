@@ -1,0 +1,9 @@
+[project]
+name = "transcribe-core"
+version = "0.1.0"
+description = "Shared code for transcribe-service and transcribe-batch"
+requires-python = ">=3.13"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
