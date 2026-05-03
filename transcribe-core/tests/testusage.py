@@ -20,7 +20,7 @@
 import unittest
 import os
 import datetime
-from usage import Usage
+from transcribe_core.usage import Usage
 
 
 class UsageTest(Usage):
