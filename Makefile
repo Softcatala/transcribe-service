@@ -37,4 +37,4 @@ install-dev-tools:
 	uv sync --frozen --group dev
 
 lint:
-	uv run ruff check transcribe-batch/ transcribe-service/
+	uv run ruff check transcribe-batch/ transcribe-service/ transcribe-core/
