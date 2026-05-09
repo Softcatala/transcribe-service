@@ -36,7 +36,7 @@ First build by running:
 Once the system is built, you can run it typing:
 
 ```shell
-docker-run
+make docker-run
 ```
 
 And open http://localhost:8700/stats to verify that the service works.
