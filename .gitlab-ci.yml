@@ -11,14 +11,12 @@ stages:
   - deploy
 
 test:
-  image: python:3.11.1-slim-bullseye
-  before_script:
-    - pip install nose2
+  image: ghcr.io/astral-sh/uv:python3.13-trixie-slim
   stage: transcribe
   script:
-    - apt-get update && apt-get install make -y
-    - pip install -r transcribe-batch/requirements.txt
-    - cd transcribe-batch && nose2
+    - uv sync --all-extras --all-packages
+    - cd transcribe-batch
+    - uv run nose2
 
 transcribe-models:
   before_script:
