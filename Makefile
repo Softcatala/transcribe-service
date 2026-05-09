@@ -28,7 +28,7 @@ benchmark-deps: whisper-models benchmark-samples
 	uv add evaluate jiwer
 
 benchmark-run: whisper-models benchmark-samples
-	cd benchmark && python3 whisper.py
+	cd benchmark && uv run whisper.py
 	@uv run python -c 'import faster_whisper; print(f"faster_whisper: {faster_whisper.__version__}")'
 	@uv run python -c 'import ctranslate2; print(f"ctranslate2: {ctranslate2.__version__}")'
 	@uv run whisper-ctranslate2 --version
