@@ -15,7 +15,7 @@ docker-run:
 	docker compose -f local.yml up;
 
 test:
-	cd transcribe-batch && python -m nose2
+	cd transcribe-batch && uv run python -m nose2
 
 whisper-models:
 	uv run python3 -c 'from faster_whisper import WhisperModel; WhisperModel("small");  WhisperModel("medium")'
@@ -25,17 +25,16 @@ benchmark-samples:
 	if [ ! -d "benchmark/samples" ]; then git clone --depth 1 https://gitlab.softcatala.org/nous-projectes/catalan-audio-samples.git/ benchmark/samples; fi
 
 benchmark-deps: whisper-models benchmark-samples
-	pip install evaluate jiwer
+	uv add evaluate jiwer
 
 benchmark-run: whisper-models benchmark-samples
 	cd benchmark && python3 whisper.py
-	@python3 -c 'import faster_whisper; print(f"faster_whisper: {faster_whisper.__version__}")'
-	@python3 -c 'import ctranslate2; print(f"ctranslate2: {ctranslate2.__version__}")'
-	@whisper-ctranslate2 --version
+	@uv run python -c 'import faster_whisper; print(f"faster_whisper: {faster_whisper.__version__}")'
+	@uv run python -c 'import ctranslate2; print(f"ctranslate2: {ctranslate2.__version__}")'
+	@uv run whisper-ctranslate2 --version
 
 install-dev-tools:
-	pip install -r requirements-dev.txt
+	uv sync --frozen --group dev
 
-run-check-code:
-	python -m black --check transcribe-batch/ transcribe-service/
-	python -m flake8 --ignore E501,W503 transcribe-batch/ transcribe-service/
+lint:
+	uv run ruff check transcribe-batch/ transcribe-service/
