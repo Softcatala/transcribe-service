@@ -20,8 +20,8 @@
 import datetime
 import logging
 import multiprocessing
-import os
 from datetime import date
+from pathlib import Path
 from shutil import copyfile
 
 lock = multiprocessing.Lock()
@@ -44,7 +44,7 @@ class Usage:
         self.FILE = filename
 
     def _get_time_now(self) -> datetime.datetime:
-        return datetime.datetime.utcnow()
+        return datetime.datetime.utcnow()  # pyrefly: ignore
 
     def get_date_from_line(self, line: str) -> str:
         """TODO: Docstring this."""
@@ -55,10 +55,10 @@ class Usage:
         current_time = self._get_time_now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with lock:
-                with open(self.FILE, "a+") as file_out:
+                with Path(self.FILE).open("a+") as file_out:
                     file_out.write(f"{current_time}\t{action}\n")
 
-                if self.rotate and self._is_old_line(self._read_first_line()):
+                if self.rotate and self._is_old_line(self._read_first_line()):  # pyrefly: ignore
                     self._rotate_file()
         except Exception as exception:
             logging.error("Usage.log. Error:" + str(exception))
@@ -72,7 +72,7 @@ class Usage:
         """TODO: Docstring this."""
         results = {}
         try:
-            with open(self.FILE, "r") as file_in:
+            with Path(self.FILE).open("r") as file_in:
                 for line in file_in:
                     date_component, action = self._get_line_components(line)
 
@@ -99,7 +99,7 @@ class Usage:
 
     def _read_first_line(self) -> str | None:
         try:
-            with open(self.FILE, "r") as f:
+            with Path(self.FILE).open("r") as f:
                 first = f.readline()
                 return first
         except IOError:
@@ -126,14 +126,13 @@ class Usage:
 
     def _rotate_file(self) -> None:
         NEW = "usage.new"
-        directory = os.path.dirname(os.path.abspath(self.FILE))
-        new_file = os.path.join(directory, NEW)
+        directory = Path(self.FILE).resolve().parent
+        new_file: Path = directory / NEW
 
-        with open(self.FILE, "r") as temp:
-            with open(new_file, "w") as new:
-                for line in temp:
-                    if self._is_old_line(line) is False:
-                        new.write(line)
+        with Path(self.FILE).open("r") as temp, new_file.open("w") as new:
+            for line in temp:
+                if self._is_old_line(line) is False:
+                    new.write(line)
 
         copyfile(new_file, self.FILE)
-        os.remove(new_file)
+        new_file.unlink()

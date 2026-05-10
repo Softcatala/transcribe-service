@@ -23,6 +23,7 @@ import os
 import shutil
 import time
 import uuid
+from pathlib import Path
 
 PROCESSED = "/srv/data/processed"
 
@@ -51,10 +52,10 @@ class ProcessedFiles:
         """TODO: Docstring this."""
         extensions = ["txt", "srt", "dbrecord"]
         for extension in extensions:
-            fullname = os.path.join(PROCESSED, self.uuid)
+            fullname = Path(PROCESSED) / self.uuid
             fullname = f"{fullname}.{extension}"
 
-            if not os.path.exists(fullname):
+            if not Path(fullname).exists():
                 message = f"file {extension} does not exist"
                 return False, message
 
@@ -63,32 +64,30 @@ class ProcessedFiles:
     @staticmethod
     def ensure_dir() -> None:
         """TODO: Docstring this."""
-        if not os.path.exists(PROCESSED):
-            os.makedirs(PROCESSED)
+        if not Path(PROCESSED).exists():
+            Path(PROCESSED).mkdir(parents=True)
 
     def _get_extension(self, filename: str) -> str:
-        split_tup = os.path.splitext(filename)
-        file_extension = split_tup[1]
-        return file_extension
+        return Path(filename).suffix
 
     def copy_file(self, full_filename: str) -> None:
         """TODO: Docstring this."""
-        filename = os.path.basename(full_filename)
-        target = os.path.join(PROCESSED, filename)
+        filename = Path(full_filename).name
+        target = Path(PROCESSED) / filename
         shutil.copy(full_filename, target)
         logging.debug(f"Copy file {full_filename} to {target}")
 
     def move_file(self, full_filename: str) -> None:
         """TODO: Docstring this."""
-        filename = os.path.basename(full_filename)
+        filename = Path(full_filename).name
         ext = self._get_extension(filename)
-        target = os.path.join(PROCESSED, f"{self.uuid}{ext}")
+        target = Path(PROCESSED) / f"{self.uuid}{ext}"
         shutil.move(full_filename, target)
         logging.debug(f"Moved file {full_filename} to {target}")
 
     def move_file_bin(self, full_filename: str, extension: str) -> None:
         """TODO: Docstring this."""
-        target = os.path.join(PROCESSED, f"{self.uuid}{extension}")
+        target = Path(PROCESSED) / f"{self.uuid}{extension}"
         shutil.move(full_filename, target)
 
         logging.debug(f"Moved file {full_filename} to {target}")
@@ -99,7 +98,7 @@ class ProcessedFiles:
         for root, _, files in os.walk(directory):
             for basename in files:
                 if fnmatch.fnmatch(basename, pattern):
-                    filename = os.path.join(root, basename)
+                    filename = str(Path(root) / basename)
                     filelist.append(filename)
 
         return filelist
@@ -124,7 +123,7 @@ class ProcessedFiles:
         files = ProcessedFiles._find_files(directory, "*")
         total_size = 0
         for _file in files:
-            total_size += os.stat(_file).st_size
+            total_size += Path(_file).stat().st_size
 
         return ProcessedFiles._get_human_readable_size(total_size)
 
@@ -139,7 +138,7 @@ class ProcessedFiles:
     @staticmethod
     def _delete_file(file: str) -> bool:
         try:
-            os.remove(file)
+            Path(file).unlink()
             logging.debug(f"Deleted file: {file}")
             return True
         except Exception as e:
@@ -158,7 +157,7 @@ class ProcessedFiles:
             HOURS_DAY * MINUTES_HOUR * MINUTES_SEC * days
         )
         for file in files:
-            file_time = os.stat(file).st_mtime
+            file_time = Path(file).stat().st_mtime
             if file_time < time_limit and ProcessedFiles._delete_file(file):
                 deleted += 1
 
