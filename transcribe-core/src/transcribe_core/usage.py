@@ -17,11 +17,12 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
 import datetime
-from shutil import copyfile
 import logging
 import multiprocessing
+import os
+from datetime import date
+from shutil import copyfile
 
 lock = multiprocessing.Lock()
 
@@ -63,7 +64,7 @@ class Usage(object):
         components = line.strip().split("\t")
         return components[0], components[1]
 
-    def get_stats(self, date_requested):
+    def get_stats(self, date_requested: date):
         results = {}
         try:
             with open(self.FILE, "r") as file_in:
@@ -74,7 +75,7 @@ class Usage(object):
                     line_datetime = datetime.datetime.strptime(
                         datetime_no_newline, "%Y-%m-%d %H:%M:%S"
                     )
-                    if line_datetime.date() != date_requested.date():
+                    if line_datetime.date() != date_requested:
                         continue
 
                     cnt = results.get(action)
@@ -107,7 +108,9 @@ class Usage(object):
 
         try:
             line = self.get_date_from_line(line)
-            line_datetime = datetime.datetime.strptime(line, "%Y-%m-%d %H:%M:%S")
+            line_datetime = datetime.datetime.strptime(
+                line, "%Y-%m-%d %H:%M:%S"
+            )
 
         except Exception as exception:
             logging.error("Usage._is_old_line. Error:" + str(exception))

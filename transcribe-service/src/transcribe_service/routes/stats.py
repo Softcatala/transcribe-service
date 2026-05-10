@@ -16,7 +16,7 @@ def stats(
     ],
 ) -> dict:
     """TODO: Docstring this endpoint."""
-    if not date:
-        date = datetime.today().strftime("%Y-%m-%d")
+    if date is None:
+        date = datetime.today().date()
 
     return StatsService.get_stats(date)
