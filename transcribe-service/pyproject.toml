@@ -8,6 +8,7 @@ dependencies = [
   "flask==3.0.2",
   "flask_cors==4.0.0",
   "gunicorn==22.0.0",
+  "python-multipart>=0.0.28",
   "transcribe-core",
   "uvicorn>=0.46.0",
 ]
