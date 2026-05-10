@@ -38,7 +38,7 @@ function sendFile()
         }
 
         var formData = new FormData(document.getElementById('form-id'));
-        url = URL + `/transcribe_file/`;
+        url = URL + `/file/transcribe`;
         xmlHttp.open("post", url);
         xmlHttp.send(formData); 
 }
