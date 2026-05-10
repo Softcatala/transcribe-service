@@ -33,21 +33,25 @@ lock = multiprocessing.Lock()
 """
 
 
-class Usage(object):
+class Usage:
+    """TODO: Docstring this."""
+
     FILE = "/srv/data/usage.txt"
     DAYS_TO_KEEP = 7
     rotate = True
 
-    def _set_filename(self, filename):
+    def _set_filename(self, filename: str) -> None:
         self.FILE = filename
 
-    def _get_time_now(self):
+    def _get_time_now(self) -> datetime.datetime:
         return datetime.datetime.utcnow()
 
-    def get_date_from_line(self, line):
+    def get_date_from_line(self, line: str) -> str:
+        """TODO: Docstring this."""
         return line.split("\t", 1)[0]
 
-    def log(self, action):
+    def log(self, action: str) -> None:
+        """TODO: Docstring this."""
         current_time = self._get_time_now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with lock:
@@ -60,11 +64,12 @@ class Usage(object):
             logging.error("Usage.log. Error:" + str(exception))
             pass
 
-    def _get_line_components(self, line):
+    def _get_line_components(self, line: str) -> tuple[str, str]:
         components = line.strip().split("\t")
         return components[0], components[1]
 
-    def get_stats(self, date_requested: date):
+    def get_stats(self, date_requested: date) -> dict:
+        """TODO: Docstring this."""
         results = {}
         try:
             with open(self.FILE, "r") as file_in:
@@ -92,7 +97,7 @@ class Usage(object):
 
         return results
 
-    def _read_first_line(self):
+    def _read_first_line(self) -> str | None:
         try:
             with open(self.FILE, "r") as f:
                 first = f.readline()
@@ -100,7 +105,7 @@ class Usage(object):
         except IOError:
             return None
 
-    def _is_old_line(self, line):
+    def _is_old_line(self, line: str) -> bool:
         if line is None:
             return False
 
@@ -117,9 +122,9 @@ class Usage(object):
             invalid = True
 
         now = self._get_time_now() - datetime.timedelta(days=self.DAYS_TO_KEEP)
-        return invalid or line_datetime.date() <= now.date()
+        return invalid or line_datetime.date() <= now.date()  # pyrefly: ignore
 
-    def _rotate_file(self):
+    def _rotate_file(self) -> None:
         NEW = "usage.new"
         directory = os.path.dirname(os.path.abspath(self.FILE))
         new_file = os.path.join(directory, NEW)
