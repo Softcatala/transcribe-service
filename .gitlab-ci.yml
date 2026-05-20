@@ -1,3 +1,4 @@
+
 include:
   - project: 'docker/process-webhooks'
     file: '/gitlab/deploy.yml'
@@ -8,7 +9,7 @@ variables:
 
 stages:
   - transcribe
-  - deploy
+#  - deploy
 
 test:
   image: python:3.11.1-slim-bullseye
@@ -69,7 +70,7 @@ transcribe-batch:
     - docker build --cache-from $IMAGE_NAME -f $DOCKER_PATH --tag $IMAGE_NAME .
     - docker push $IMAGE_NAME
 
-deploy:
-  stage: deploy
-  extends:
-    .default-deploy
+#deploy:
+#  stage: deploy
+#  extends:
+#    .default-deploy
