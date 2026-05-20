@@ -1,3 +1,4 @@
+
 include:
   - project: 'docker/process-webhooks'
     file: '/gitlab/deploy.yml'
@@ -8,7 +9,7 @@ variables:
 
 stages:
   - transcribe
-  - deploy
+#  - deploy
 
 test:
   image: ghcr.io/astral-sh/uv:python3.13-trixie-slim
@@ -29,7 +30,7 @@ transcribe-models:
   stage: transcribe
   script:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-models
-    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
+    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_SLUG
     - export DOCKER_PATH=transcribe-batch/docker/Dockerfile-models
     - docker build --cache-from $IMAGE_NAME --tag transcribe-models --tag $IMAGE_NAME . -f $DOCKER_PATH
     - docker push $IMAGE_NAME
@@ -44,7 +45,7 @@ transcribe-service:
   stage: transcribe
   script:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-service
-    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
+    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_SLUG
     - export DOCKER_PATH=transcribe-service/docker/Dockerfile
     - docker build --cache-from $IMAGE_NAME --tag transcribe-service -f $DOCKER_PATH --tag $IMAGE_NAME .
     - docker push $IMAGE_NAME
@@ -62,12 +63,12 @@ transcribe-batch:
   stage: transcribe
   script:
     - export REPO_NAME=$CI_REGISTRY_IMAGE/transcribe-batch
-    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_NAME
+    - export IMAGE_NAME=$REPO_NAME:$CI_COMMIT_REF_SLUG
     - export DOCKER_PATH=transcribe-batch/docker/Dockerfile
     - docker build --cache-from $IMAGE_NAME -f $DOCKER_PATH --tag $IMAGE_NAME .
     - docker push $IMAGE_NAME
 
-deploy:
-  stage: deploy
-  extends:
-    .default-deploy
+#deploy:
+#  stage: deploy
+#  extends:
+#    .default-deploy
