@@ -8,7 +8,8 @@ dependencies = []
 dev = [
   "nose2",
   "ruff",
-  "jiwer"
+  "jiwer",
+  "evaluate"
 ]
 
 [tool.uv.workspace]
