@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS get_models
+FROM python:3.14-slim AS get_models
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
@@ -8,9 +8,9 @@ COPY pyproject.toml uv.lock ./
 COPY transcribe-core/pyproject.toml transcribe-core/
 COPY transcribe-batch/pyproject.toml transcribe-batch/
 
-RUN uv sync --frozen --package transcribe-batch --no-install-workspace
+RUN uv sync --frozen --package transcribe-batch --no-install-workspace --no-dev
 
-RUN uv run python -c 'from faster_whisper import WhisperModel; WhisperModel("small"); WhisperModel("medium")'
+RUN uv run --no-sync python -c 'from faster_whisper import WhisperModel; WhisperModel("small"); WhisperModel("medium")'
 
-FROM python:3.13-slim
+FROM python:3.14-slim
 COPY --from=get_models /root/.cache/huggingface/ /srv/models/

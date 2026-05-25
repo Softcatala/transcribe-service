@@ -19,7 +19,7 @@ COPY transcribe-core/pyproject.toml transcribe-core/
 
 COPY transcribe-batch/pyproject.toml transcribe-batch/
 
-RUN uv sync --frozen --package transcribe-batch --no-install-workspace
+RUN uv sync --frozen --package transcribe-batch --no-install-workspace --no-dev
 
 COPY transcribe-core/src transcribe-core/src
 
@@ -29,7 +29,7 @@ COPY transcribe-batch/email-templates transcribe-batch/email-templates
 
 COPY transcribe-batch/audio transcribe-batch/audio
 
-RUN uv sync --frozen --package transcribe-batch
+RUN uv sync --frozen --package transcribe-batch --no-dev
 
 COPY transcribe-batch/docker/entry-point.sh /srv/entry-point.sh
 

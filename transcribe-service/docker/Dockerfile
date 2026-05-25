@@ -1,4 +1,4 @@
-FROM python:3.13.12-slim
+FROM python:3.14-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
@@ -10,13 +10,13 @@ COPY transcribe-core/pyproject.toml transcribe-core/
 
 COPY transcribe-service/pyproject.toml transcribe-service/
 
-RUN uv sync --frozen --package transcribe-service --no-install-workspace
+RUN uv sync --frozen --package transcribe-service --no-install-workspace --no-dev
 
 COPY transcribe-core/src transcribe-core/src
 
 COPY transcribe-service/src transcribe-service/src
 
-RUN uv sync --frozen --package transcribe-service
+RUN uv sync --frozen --package transcribe-service --no-dev
 
 COPY transcribe-service/docker/entry-point.sh /srv/entry-point.sh
 

@@ -4,4 +4,4 @@ if [ ! -z "$LOGDIR" ]
 then
     mkdir -p $LOGDIR
 fi
-uv run src/transcribe_batch/main.py
+uv run --no-sync src/transcribe_batch/main.py
