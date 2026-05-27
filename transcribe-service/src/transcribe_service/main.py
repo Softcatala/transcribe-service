@@ -34,13 +34,21 @@ from transcribe_core.batchfilesdb import BatchFilesDB
 from transcribe_core.processedfiles import ProcessedFiles
 from transcribe_core.usage import Usage
 
+from transcribe_service.constants import (
+    ALLOWED_MIMEYPES,
+    LOGDIR,
+    LOGLEVEL,
+    MAX_PER_EMAIL,
+    MAX_SIZE,
+    PROCESSED_FOLDER,
+    QUEUE_CAPACITY,
+    UPLOAD_FOLDER,
+)
+
 app = Flask(__name__)
 
 # Access-Control-Allow-Origin header is defined here for all endpoints
 CORS(app, resources={r"/*": {"origins": "*"}})
-
-UPLOAD_FOLDER = "/srv/data/files/"
-PROCESSED_FOLDER = "/srv/data/processed/"
 
 
 @app.route("/stats/", methods=["GET"])
@@ -83,8 +91,6 @@ def stats():
 
 
 def init_logging():
-    LOGDIR = os.environ.get("LOGDIR", "")
-    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
     logger = logging.getLogger()
     logfile = os.path.join(LOGDIR, "transcribe-service.log")
     hdlr = logging.handlers.RotatingFileHandler(
@@ -120,19 +126,6 @@ def uuid_exists():
     exists, result_msg = processedFiles.do_files_exists()
     result_code = 200 if exists else 404
     return json_answer(result_msg, result_code)
-
-
-ALLOWED_MIMEYPES = {
-    "mp3": "audio/mpeg",
-    "wav": "audio/wav",
-    "ogg": "application/ogg",
-    "flac": "audio/flac",
-    "avi": "video/x-msvideo",
-    "mp4": "video/mp4",
-    "mkv": "video/x-matroska",
-    "mov": "video/quicktime",
-    "mts": "video/mts",
-}
 
 
 def _allowed_file(filename):
@@ -227,13 +220,6 @@ def get_file():
 
     Usage().log("get_file")
     return resp
-
-
-QUEUE_CAPACITY = int(os.environ.get("QUEUE_CAPACITY", "150"))
-MAX_SIZE = int(
-    os.environ.get("MAX_SIZE", 1024 * 1024 * 1024)
-)  # 1GB by default
-MAX_PER_EMAIL = int(os.environ.get("MAX_PER_EMAIL", "3"))
 
 
 @app.route("/transcribe_file/", methods=["POST"])
