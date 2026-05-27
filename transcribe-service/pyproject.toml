@@ -4,10 +4,13 @@ version = "0.1.0"
 description = "API Service Backend for handling transcriptions of catalan audio files."
 requires-python = ">=3.13"
 dependencies = [
+  "fastapi>=0.136.1",
   "flask==3.0.2",
   "flask_cors==4.0.0",
   "gunicorn==22.0.0",
+  "python-multipart>=0.0.28",
   "transcribe-core",
+  "uvicorn>=0.46.0",
 ]
 
 [tool.uv.sources]

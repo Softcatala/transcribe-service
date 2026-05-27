@@ -21,9 +21,13 @@ import fnmatch
 import logging
 import os
 import uuid
+from pathlib import Path
+from typing import Any
 
 
 class BatchFile:
+    """TODO: Docstring this class."""
+
     def __init__(
         self,
         filename_dbrecord: str,
@@ -35,7 +39,8 @@ class BatchFile:
         highlight_words: bool | None = None,
         num_chars: int | None = None,
         num_sentences: int | None = None,
-    ):
+    ) -> None:
+        """TODO: Docstring this."""
         self.filename_dbrecord = filename_dbrecord
         self.filename = filename
         self.email = email
@@ -47,7 +52,7 @@ class BatchFile:
         self.num_sentences = self._safe_int(num_sentences)
 
     @staticmethod
-    def _safe_int(value) -> int | None:
+    def _safe_int(value: Any) -> int | None:
         if not value:
             return None
         try:
@@ -59,77 +64,96 @@ class BatchFile:
 # This is a disk based priority queue with works as filenames
 # as items to store
 class Queue:  # works with filenames
+    """TODO: Docstring this class."""
+
     g_check_directory = True
 
-    def __init__(self, entries="/srv/data/entries"):
+    def __init__(self, entries: str = "/srv/data/entries") -> None:
+        """TODO: Docstring this."""
         self.ENTRIES = entries
 
-    def _find(self, directory, pattern):
+    def _find(self, directory: str, pattern: str) -> list[str]:
         filelist = []
 
-        for root, dirs, files in os.walk(directory):
+        for root, _, files in os.walk(directory):
             for basename in files:
                 if fnmatch.fnmatch(basename, pattern):
-                    filename = os.path.join(root, basename)
+                    filename = str(Path(root) / basename)
                     filelist.append(filename)
 
-        filelist.sort(key=lambda filename: os.path.getmtime(filename))
+        filelist.sort(key=lambda filename: Path(filename).stat().st_mtime)
         return filelist
 
-    def count(self):
+    def count(self) -> int:
+        """TODO: Docstring this."""
         filenames = self._find(self.ENTRIES, "*.dbrecord")
         return len(filenames)
 
-    def get_all(self):
+    def get_all(self) -> list[str]:
+        """TODO: Docstring this."""
         return self._find(self.ENTRIES, "*.dbrecord")
 
-    def put(self, filename_dbrecord, content):
+    def put(self, filename_dbrecord: str, content: str) -> None:
+        """TODO: Docstring this."""
         if self.g_check_directory:
             self.g_check_directory = False
-        if not os.path.exists(self.ENTRIES):
-            os.makedirs(self.ENTRIES)
 
-        with open(filename_dbrecord, "w") as fh:
-            fh.write(content)
+        entries_path = Path(self.ENTRIES)
+        if not entries_path.exists():
+            entries_path.mkdir(parents=True)
 
-    def delete(self, filename):
-        os.remove(filename)
+        Path(filename_dbrecord).write_text(content)
+
+    def delete(self, filename: str) -> None:
+        """TODO: Docstring this."""
+        Path(filename).unlink()
 
 
 class BatchFilesDB(Queue):
+    """TODO: Docstring this."""
+
     SEPARATOR = "\t"
 
-    def get_record_file_from_uuid(self, _uuid):
-        return os.path.join(self.ENTRIES, _uuid + ".dbrecord")
+    def get_record_file_from_uuid(self, _uuid: str) -> str:
+        """TODO: Docstring this."""
+        return str(Path(self.ENTRIES) / (_uuid + ".dbrecord"))
 
-    def get_new_uuid(self):
+    def get_new_uuid(self) -> str:
+        """TODO: Docstring this."""
         return str(uuid.uuid4())
 
-    def _optional_int(self, string):
+    def _optional_int(self, string: str) -> int | None:
         try:
-            return None if string == "None" or len(string) == 0 else int(string)
+            return (
+                None if string == "None" or len(string) == 0 else int(string)
+            )
         except Exception as e:
             logging.error(f"_optional_int. Error: {e}")
             return None
 
-    def _optional_bool(self, string):
+    def _optional_bool(self, string: str) -> bool | None:
         try:
-            return None if string == "None" or len(string) == 0 else string == "True"
+            return (
+                None
+                if string == "None" or len(string) == 0
+                else string == "True"
+            )
         except Exception as e:
             logging.error(f"_optional_bool. Error: {e}")
             return None
 
     def create(
         self,
-        filename,
-        email,
-        model_name,
-        original_filename,
-        highlight_words=None,
-        num_chars=None,
-        num_sentences=None,
-        record_uuid=None,
-    ):
+        filename: str,
+        email: str,
+        model_name: str,
+        original_filename: str,
+        highlight_words: bool | None = None,
+        num_chars: str | None = None,
+        num_sentences: str | None = None,
+        record_uuid: str | None = None,
+    ) -> str | None:
+        """TODO: Docstring this."""
         if not record_uuid:
             record_uuid = self.get_new_uuid()
 
@@ -141,27 +165,29 @@ class BatchFilesDB(Queue):
         self.put(filename_dbrecord, line)
         return record_uuid
 
-    def select(self, email=None):
+    def select(self, email: str | None = None) -> list[BatchFile]:
+        """TODO: Docstring this."""
         filenames = self.get_all()
         records = []
         for filename in filenames:
             record = self._read_record(filename)
 
-            if email and record.email.lower() != email.lower():
+            if email and record and record.email.lower() != email.lower():
                 continue
 
-            records.append(record)
+            if record is not None:
+                records.append(record)
 
         return records
 
-    def _read_record_from_uuid(self, _uuid):
-        record_fullpath = os.path.join(self.ENTRIES, _uuid + ".dbrecord")
+    def _read_record_from_uuid(self, _uuid: str) -> BatchFile | None:
+        record_fullpath = str(Path(self.ENTRIES) / (_uuid + ".dbrecord"))
         record = self._read_record(record_fullpath)
         return record
 
-    def _read_record(self, filename_dbrecord):
+    def _read_record(self, filename_dbrecord: str) -> BatchFile | None:
         try:
-            with open(filename_dbrecord, "r") as fh:
+            with Path(filename_dbrecord).open("r") as fh:
                 line = fh.readline()
                 components = line.split(self.SEPARATOR)
                 if components[0] == "v2":
@@ -176,8 +202,7 @@ class BatchFilesDB(Queue):
                         num_chars=self._optional_int(components[7]),
                         num_sentences=self._optional_int(components[8]),
                     )
-                else:
-                    raise RuntimeError("dbrecord version not supported")
+                raise RuntimeError("dbrecord version not supported")
 
         except Exception as exception:
             logging.error(
