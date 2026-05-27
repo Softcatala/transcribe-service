@@ -1,29 +1,42 @@
-FROM python:3.11.1-slim-bullseye as copied_files
+FROM transcribe-models AS models
 
-COPY transcribe-batch/*.py /srv/
-COPY transcribe-batch/email-templates/ /srv/email-templates/
-COPY transcribe-batch/docker/entry-point.sh /srv/
-COPY transcribe-batch/requirements.txt /srv/
-COPY transcribe-batch/audio/test_audio.mp3 /srv/audio/
-
-FROM transcribe-models as models
 FROM nvidia/cuda:12.3.1-base-ubuntu22.04
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install ffmpeg sox libsox-fmt-mp3 -y
-RUN apt-get install python3-pip python3-dev -y --no-install-recommends
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends ffmpeg sox libsox-fmt-mp3 libcudnn9-cuda-12 libcublas-12-3 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Solve errors:
-# - Error: Unable to load any of {libcudnn_ops.so.9.1.0, libcudnn_ops.so.9.1, libcudnn_ops.so.9, libcudnn_ops.so}
-# - Error: RuntimeError: Library libcublas.so.12 is not found or cannot be loaded
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-RUN apt-get install libcudnn9-cuda-12 libcublas-12-3 -y
+ENV UV_PYTHON_DOWNLOADS=automatic
+ENV PATH="/workspace/.venv/bin:$PATH"
 
-WORKDIR /srv
+WORKDIR /workspace
 
-COPY --from=copied_files /srv/ /srv/
-RUN pip3 install -r /srv/requirements.txt
+COPY pyproject.toml uv.lock ./
+
+COPY transcribe-core/pyproject.toml transcribe-core/
+
+COPY transcribe-batch/pyproject.toml transcribe-batch/
+
+RUN uv sync --frozen --package transcribe-batch --no-install-workspace --no-dev
+
+COPY transcribe-core/src transcribe-core/src
+
+COPY transcribe-batch/src transcribe-batch/src
+
+COPY transcribe-batch/email-templates transcribe-batch/email-templates
+
+COPY transcribe-batch/audio transcribe-batch/audio
+
+RUN uv sync --frozen --package transcribe-batch --no-dev
+
+COPY transcribe-batch/docker/entry-point.sh /srv/entry-point.sh
+
+RUN chmod +x /srv/entry-point.sh
 
 COPY --from=models /srv/models/ /root/.cache/huggingface/
 
-ENTRYPOINT /srv/entry-point.sh
+WORKDIR /workspace/transcribe-batch
 
+ENTRYPOINT ["/srv/entry-point.sh"]

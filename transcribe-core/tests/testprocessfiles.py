@@ -17,12 +17,12 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from processedfiles import ProcessedFiles
 import unittest
 import os
 import tempfile
 import time
 
+from transcribe_core.processedfiles import ProcessedFiles
 
 class TestProcessedFiles(unittest.TestCase):
     def setUp(self):

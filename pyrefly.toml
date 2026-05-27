@@ -1,0 +1,19 @@
+project-includes = [
+    "transcribe-core/src/**/*.py",
+    "transcribe-batch/src/**/*.py",
+]
+
+project-excludes = [
+    "**/.git/**",
+    "**/tests/**",
+    "**/docker/**",
+    "**/email-templates/**",
+    "**/__pycache__/**",
+]
+
+search-path = [
+    "transcribe-core/src",
+    "transcribe-batch/src",
+]
+
+python-version = "3.13"

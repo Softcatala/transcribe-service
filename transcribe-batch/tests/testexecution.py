@@ -17,9 +17,10 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from execution import Execution
-import unittest
 import tempfile
+import unittest
+
+from transcribe_batch.execution import Execution
 
 
 class TestExecution(unittest.TestCase):

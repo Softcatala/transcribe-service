@@ -1,5 +1,7 @@
+#!/bin/sh
+
 if [ ! -z "$LOGDIR" ]
 then
     mkdir -p $LOGDIR
 fi
-python3 process-batch.py
+uv run --no-sync src/transcribe_batch/main.py

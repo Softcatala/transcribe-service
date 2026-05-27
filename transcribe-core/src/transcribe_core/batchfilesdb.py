@@ -17,11 +17,10 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
-import uuid
 import fnmatch
 import logging
-from typing import Optional
+import os
+import uuid
 
 
 class BatchFile:
@@ -33,9 +32,9 @@ class BatchFile:
         model_name: str,
         original_filename: str,
         delete_token: str,
-        highlight_words: Optional[bool] = None,
-        num_chars: Optional[int] = None,
-        num_sentences: Optional[int] = None,
+        highlight_words: bool | None = None,
+        num_chars: int | None = None,
+        num_sentences: int | None = None,
     ):
         self.filename_dbrecord = filename_dbrecord
         self.filename = filename
@@ -48,7 +47,7 @@ class BatchFile:
         self.num_sentences = self._safe_int(num_sentences)
 
     @staticmethod
-    def _safe_int(value) -> Optional[int]:
+    def _safe_int(value) -> int | None:
         if not value:
             return None
         try:

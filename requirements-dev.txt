@@ -1,5 +1,0 @@
-jiwer
-flake8==7.*
-black==24.*
-nose2
-
