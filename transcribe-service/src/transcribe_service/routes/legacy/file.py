@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import (APIRouter, File, Form, HTTPException, Query, Request,
+from fastapi import (APIRouter, File, Form, Query, Request,
                      UploadFile)
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -73,9 +73,9 @@ upload_file_router = APIRouter(prefix="/transcribe_file")
 @upload_file_router.post(path="/")
 async def upload_file(
     request: Request,
-    file: Annotated[UploadFile, File()],
-    email: Annotated[str, Form()],
-    model_name: Annotated[str, Form()],
+    email: Annotated[str | None, Form()] = None,
+    model_name: Annotated[str | None, Form()] = None,
+    file: Annotated[UploadFile | None, File()] = None,
     highlight_words: Annotated[bool | None, Form()] = None,
     num_chars: Annotated[str | None, Form()] = None,
     num_sentences: Annotated[str | None, Form()] = None,
@@ -84,37 +84,48 @@ async def upload_file(
     Legacy endpoint to upload a file to transcribe.
     Only used temporarily to not have breaking changes.
     """
-    if (
-        email == ""
-        or model_name == ""
-        or num_chars == ""
-        or num_sentences == ""
-    ):
-        raise HTTPException(
-            status_code=400, detail="Form fields cannot be empty"
+
+    if not file or file.filename == "":
+        return JSONResponse(
+            status_code=404, content={"error": "No s'ha especificat el fitxer"}
+        )
+
+    if email == "" or not email:
+        return JSONResponse(
+            status_code=404, content={"error": "No s'ha especificat el correu"}
+        )
+    if model_name == "" or not model_name:
+        return JSONResponse(
+            status_code=404, content={"error": "No s'ha especificat el model"}
         )
 
     if int(request.headers.get("content-length")) >= MAX_SIZE:
-        raise HTTPException(status_code=413, detail="El fitxer és massa gran")
+        return JSONResponse(
+            status_code=413, content={"error": "El fitxer és massa gran"}
+        )
 
     match await FileService.upload_file(
         file, email, model_name, highlight_words, num_chars, num_sentences
     ):
         case UploadFileResult.TypeNotAllowed, _:
-            raise HTTPException(
-                status_code=415, detail="Tipus de fitxer no vàlid"
+            return JSONResponse(
+                status_code=415, content={"error": "Tipus de fitxer no vàlid"}
             )
 
         case UploadFileResult.QueueFull, _:
-            raise HTTPException(
+            return JSONResponse(
                 status_code=429,
-                detail="Hi ha massa fitxers a la cua. Proveu-ho en una estona.",
+                content={
+                    "error": "Hi ha massa fitxers a la cua. Proveu-ho en una estona."
+                },
             )
 
         case UploadFileResult.MaxPerEmailReached, _:
-            raise HTTPException(
-                status_code=403,
-                detail="Ja teniu massa fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous.",
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "Ja teniu massa fitxers a la cua. Espereu-vos que es processin per enviar-ne de nous."
+                },
             )
 
         case UploadFileResult.Ok, waiting_queue_len:
