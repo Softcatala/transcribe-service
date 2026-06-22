@@ -33,19 +33,19 @@ def get_file(
     """TODO: Docstring this."""
     if not ext:
         raise HTTPException(
-            status_code=422, detail="No s'ha especificat l'extensió"
+            status_code=400, detail="No s'ha especificat l'extensió"
         )
 
     match FileService.get_file(uuid, ext):
         case GetFileResult.NotValid, _:
-            raise HTTPException(status_code=422, detail="Uuid no vàlid")
+            raise HTTPException(status_code=400, detail="Uuid no vàlid")
 
         case GetFileResult.UuidNotFound, _:
-            raise HTTPException(status_code=422, detail="Uuid no existeix")
+            raise HTTPException(status_code=404, detail="Uuid no existeix")
 
         case GetFileResult.FileNotFound, _:
             raise HTTPException(
-                status_code=422,
+                status_code=404,
                 detail="No existeix aquest fitxer. Potser ja s'ha esborrat",
             )
 

@@ -17,7 +17,7 @@ def get_uuid(uuid: UUID) -> None:
     """TODO: Docstring this endpoint."""
     match UUIDService.get_uuid(uuid):
         case GetUUIDResult.NotValid:
-            raise HTTPException(status_code=422, detail="UUID no vàlid")
+            raise HTTPException(status_code=400, detail="UUID no vàlid")
 
         case GetUUIDResult.NotFound:
             raise HTTPException(
@@ -39,7 +39,7 @@ def delete_uuid(
 
     if not email:
         raise HTTPException(
-            status_code=422, detail="No s'ha especificat el correu"
+            status_code=400, detail="No s'ha especificat el correu"
         )
 
     match UUIDService.delete_uuid(uuid, email):
