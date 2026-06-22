@@ -1,12 +1,14 @@
 from typing import Annotated
 
-from fastapi import (APIRouter, File, Form, Query, Request,
-                     UploadFile)
+from fastapi import APIRouter, File, Form, Query, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
 from transcribe_service.constants import MAX_SIZE
-from transcribe_service.services.file import (FileService, GetFileResult,
-                                              UploadFileResult)
+from transcribe_service.services.file import (
+    FileService,
+    GetFileResult,
+    UploadFileResult,
+)
 
 get_file_router = APIRouter(prefix="/get_file")
 

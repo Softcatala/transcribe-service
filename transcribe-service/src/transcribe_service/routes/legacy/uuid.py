@@ -1,11 +1,13 @@
 from typing import Annotated
-from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Query, Response
 from fastapi.responses import JSONResponse
 
-from transcribe_service.services.uuid import (DeleteUUIDResult, GetUUIDResult,
-                                              UUIDService)
+from transcribe_service.services.uuid import (
+    DeleteUUIDResult,
+    GetUUIDResult,
+    UUIDService,
+)
 
 get_uuid_router = APIRouter(prefix="/uuid_exists")
 
