@@ -1,9 +1,8 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import (APIRouter, File, Form, HTTPException, Query, Request,
                      UploadFile)
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from transcribe_service.constants import MAX_SIZE
 from transcribe_service.services.file import (FileService, GetFileResult,
@@ -14,7 +13,9 @@ get_file_router = APIRouter(prefix="/get_file")
 
 @get_file_router.get(path="/")
 def get_file(
-    uuid: Annotated[UUID, Query(description="The file uuid to retrieve")],
+    uuid: Annotated[
+        str | None, Query(description="The file uuid to retrieve")
+    ] = None,
     ext: Annotated[
         str | None,
         Query(description="File extension for the file to retrieve"),
@@ -25,21 +26,33 @@ def get_file(
     Only used temporarily to not have breaking changes.
     """
     if not ext:
-        raise HTTPException(
-            status_code=422, detail="No s'ha especificat l'extensió"
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No s'ha especificat l'extensió"},
+        )
+    if not uuid:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No s'ha especificat l'UUID"},
         )
 
     match FileService.get_file(uuid, ext):
         case GetFileResult.NotValid, _:
-            raise HTTPException(status_code=422, detail="Uuid no vàlid")
+            return JSONResponse(
+                status_code=400, content={"error": "UUID no vàlid"}
+            )
 
         case GetFileResult.UuidNotFound, _:
-            raise HTTPException(status_code=422, detail="Uuid no existeix")
+            return JSONResponse(
+                status_code=404, content={"error": "UUID no existeix"}
+            )
 
         case GetFileResult.FileNotFound, _:
-            raise HTTPException(
-                status_code=422,
-                detail="No existeix aquest fitxer. Potser ja s'ha esborrat",
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "No existeix aquest fitxer. Potser ja s'ha esborrat."
+                },
             )
 
         case GetFileResult.Ok, (fullname, filenames, mimetype):
