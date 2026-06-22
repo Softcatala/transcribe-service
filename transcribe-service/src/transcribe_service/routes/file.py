@@ -67,9 +67,9 @@ async def upload_file(
     file: Annotated[UploadFile, File()],
     email: Annotated[str, Form()],
     model_name: Annotated[str, Form()],
-    highlight_words: Annotated[bool, Form()],
-    num_chars: Annotated[str, Form()],
-    num_sentences: Annotated[str, Form()],
+    highlight_words: Annotated[bool | None, Form()] = None,
+    num_chars: Annotated[str | None, Form()] = None,
+    num_sentences: Annotated[str | None, Form()] = None,
 ) -> dict:
     """TODO: Docstring this endpoint."""
     if (
