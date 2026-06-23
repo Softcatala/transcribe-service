@@ -46,11 +46,5 @@ services:
       LOGID: '2'      
       LOGDIR: "/srv/data/logs"
 
-networks:
-  default:
-    external:
-      name: softcatala
-
-  
 volumes:
   transcribe-files:
