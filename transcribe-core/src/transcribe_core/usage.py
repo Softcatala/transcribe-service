@@ -17,11 +17,12 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
 import datetime
-from shutil import copyfile
 import logging
 import multiprocessing
+from datetime import date
+from pathlib import Path
+from shutil import copyfile
 
 lock = multiprocessing.Lock()
 
@@ -32,41 +33,46 @@ lock = multiprocessing.Lock()
 """
 
 
-class Usage(object):
+class Usage:
+    """TODO: Docstring this."""
+
     FILE = "/srv/data/usage.txt"
     DAYS_TO_KEEP = 7
     rotate = True
 
-    def _set_filename(self, filename):
+    def _set_filename(self, filename: str) -> None:
         self.FILE = filename
 
-    def _get_time_now(self):
-        return datetime.datetime.utcnow()
+    def _get_time_now(self) -> datetime.datetime:
+        return datetime.datetime.utcnow()  # pyrefly: ignore
 
-    def get_date_from_line(self, line):
+    def get_date_from_line(self, line: str) -> str:
+        """TODO: Docstring this."""
         return line.split("\t", 1)[0]
 
-    def log(self, action):
+    def log(self, action: str) -> None:
+        """TODO: Docstring this."""
         current_time = self._get_time_now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with lock:
-                with open(self.FILE, "a+") as file_out:
+                with Path(self.FILE).open("a+") as file_out:
                     file_out.write(f"{current_time}\t{action}\n")
 
-                if self.rotate and self._is_old_line(self._read_first_line()):
+                if self.rotate and self._is_old_line(self._read_first_line()):  # pyrefly: ignore
                     self._rotate_file()
         except Exception as exception:
             logging.error("Usage.log. Error:" + str(exception))
             pass
 
-    def _get_line_components(self, line):
+    def _get_line_components(self, line: str) -> tuple[str, str]:
         components = line.strip().split("\t")
         return components[0], components[1]
 
-    def get_stats(self, date_requested):
+    def get_stats(self, date_requested: date) -> dict:
+        """TODO: Docstring this."""
         results = {}
         try:
-            with open(self.FILE, "r") as file_in:
+            with Path(self.FILE).open("r") as file_in:
                 for line in file_in:
                     date_component, action = self._get_line_components(line)
 
@@ -74,7 +80,7 @@ class Usage(object):
                     line_datetime = datetime.datetime.strptime(
                         datetime_no_newline, "%Y-%m-%d %H:%M:%S"
                     )
-                    if line_datetime.date() != date_requested.date():
+                    if line_datetime.date() != date_requested:
                         continue
 
                     cnt = results.get(action)
@@ -91,15 +97,15 @@ class Usage(object):
 
         return results
 
-    def _read_first_line(self):
+    def _read_first_line(self) -> str | None:
         try:
-            with open(self.FILE, "r") as f:
+            with Path(self.FILE).open("r") as f:
                 first = f.readline()
                 return first
         except IOError:
             return None
 
-    def _is_old_line(self, line):
+    def _is_old_line(self, line: str) -> bool:
         if line is None:
             return False
 
@@ -107,25 +113,26 @@ class Usage(object):
 
         try:
             line = self.get_date_from_line(line)
-            line_datetime = datetime.datetime.strptime(line, "%Y-%m-%d %H:%M:%S")
+            line_datetime = datetime.datetime.strptime(
+                line, "%Y-%m-%d %H:%M:%S"
+            )
 
         except Exception as exception:
             logging.error("Usage._is_old_line. Error:" + str(exception))
             invalid = True
 
         now = self._get_time_now() - datetime.timedelta(days=self.DAYS_TO_KEEP)
-        return invalid or line_datetime.date() <= now.date()
+        return invalid or line_datetime.date() <= now.date()  # pyrefly: ignore
 
-    def _rotate_file(self):
+    def _rotate_file(self) -> None:
         NEW = "usage.new"
-        directory = os.path.dirname(os.path.abspath(self.FILE))
-        new_file = os.path.join(directory, NEW)
+        directory = Path(self.FILE).resolve().parent
+        new_file: Path = directory / NEW
 
-        with open(self.FILE, "r") as temp:
-            with open(new_file, "w") as new:
-                for line in temp:
-                    if self._is_old_line(line) is False:
-                        new.write(line)
+        with Path(self.FILE).open("r") as temp, new_file.open("w") as new:
+            for line in temp:
+                if self._is_old_line(line) is False:
+                    new.write(line)
 
         copyfile(new_file, self.FILE)
-        os.remove(new_file)
+        new_file.unlink()

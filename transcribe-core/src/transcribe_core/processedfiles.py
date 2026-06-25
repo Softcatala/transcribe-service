@@ -17,88 +17,98 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
-import logging
-import shutil
-import uuid
-import time
 import fnmatch
+import logging
+import os
+import shutil
+import time
+import uuid
+from pathlib import Path
 
 PROCESSED = "/srv/data/processed"
 
 
 class ProcessedFiles:
-    def __init__(self, uuid):
+    """TODO: Docstring this class."""
+
+    def __init__(self, uuid: str) -> None:
+        """TODO: Docstring this."""
         self.uuid = uuid
 
     @staticmethod
-    def get_processed_directory():
+    def get_processed_directory() -> str:
+        """TODO: DOcstring this."""
         return PROCESSED
 
-    def is_valid_uuid(self):
+    def is_valid_uuid(self) -> bool:
+        """TODO: Docstring this."""
         try:
             uuid.UUID(str(self.uuid))
             return True
         except ValueError:
             return False
 
-    def do_files_exists(self):
+    def do_files_exists(self) -> tuple[bool, str]:
+        """TODO: Docstring this."""
         extensions = ["txt", "srt", "dbrecord"]
         for extension in extensions:
-            fullname = os.path.join(PROCESSED, self.uuid)
+            fullname = Path(PROCESSED) / self.uuid
             fullname = f"{fullname}.{extension}"
 
-            if not os.path.exists(fullname):
+            if not Path(fullname).exists():
                 message = f"file {extension} does not exist"
                 return False, message
 
         return True, ""
 
     @staticmethod
-    def ensure_dir():
-        if not os.path.exists(PROCESSED):
-            os.makedirs(PROCESSED)
+    def ensure_dir() -> None:
+        """TODO: Docstring this."""
+        if not Path(PROCESSED).exists():
+            Path(PROCESSED).mkdir(parents=True)
 
-    def _get_extension(self, filename):
-        split_tup = os.path.splitext(filename)
-        file_extension = split_tup[1]
-        return file_extension
+    def _get_extension(self, filename: str) -> str:
+        return Path(filename).suffix
 
-    def copy_file(self, full_filename):
-        filename = os.path.basename(full_filename)
-        target = os.path.join(PROCESSED, filename)
+    def copy_file(self, full_filename: str) -> None:
+        """TODO: Docstring this."""
+        filename = Path(full_filename).name
+        target = Path(PROCESSED) / filename
         shutil.copy(full_filename, target)
         logging.debug(f"Copy file {full_filename} to {target}")
 
-    def move_file(self, full_filename):
-        filename = os.path.basename(full_filename)
+    def move_file(self, full_filename: str) -> None:
+        """TODO: Docstring this."""
+        filename = Path(full_filename).name
         ext = self._get_extension(filename)
-        target = os.path.join(PROCESSED, f"{self.uuid}{ext}")
+        target = Path(PROCESSED) / f"{self.uuid}{ext}"
         shutil.move(full_filename, target)
         logging.debug(f"Moved file {full_filename} to {target}")
 
-    def move_file_bin(self, full_filename, extension):
-        target = os.path.join(PROCESSED, f"{self.uuid}{extension}")
+    def move_file_bin(self, full_filename: str, extension: str) -> None:
+        """TODO: Docstring this."""
+        target = Path(PROCESSED) / f"{self.uuid}{extension}"
         shutil.move(full_filename, target)
 
         logging.debug(f"Moved file {full_filename} to {target}")
 
-    def _find_files(directory, pattern):
+    def _find_files(directory: str, pattern: str) -> list[str]:
         filelist = []
 
-        for root, dirs, files in os.walk(directory):
+        for root, _, files in os.walk(directory):
             for basename in files:
                 if fnmatch.fnmatch(basename, pattern):
-                    filename = os.path.join(root, basename)
+                    filename = str(Path(root) / basename)
                     filelist.append(filename)
 
         return filelist
 
-    def get_num_of_files_stored(directory=PROCESSED):
+    def get_num_of_files_stored(directory: str = PROCESSED) -> int:
+        """TODO: Docstring this."""
         files = ProcessedFiles._find_files(directory, "*")
         return len(files)
 
-    def _get_human_readable_size(size):
+    def _get_human_readable_size(size: int) -> str:
         GB_IN_BYTES = 1024**3
         if size > GB_IN_BYTES:
             gbs = size / GB_IN_BYTES
@@ -108,15 +118,17 @@ class ProcessedFiles:
 
         return text
 
-    def get_num_of_files_stored_size(directory=PROCESSED):
+    def get_num_of_files_stored_size(directory: str = PROCESSED) -> str:
+        """TODO: Docstring this."""
         files = ProcessedFiles._find_files(directory, "*")
         total_size = 0
         for _file in files:
-            total_size += os.stat(_file).st_size
+            total_size += Path(_file).stat().st_size
 
         return ProcessedFiles._get_human_readable_size(total_size)
 
-    def get_free_space_in_directory(directory=PROCESSED):
+    def get_free_space_in_directory(directory: str = PROCESSED) -> str:
+        """TODO: Docstring this."""
         statvfs = os.statvfs(directory)
 
         # Available blocks * block size gives the available space in bytes
@@ -124,32 +136,35 @@ class ProcessedFiles:
         return ProcessedFiles._get_human_readable_size(free_space_bytes)
 
     @staticmethod
-    def _delete_file(file):
+    def _delete_file(file: str) -> bool:
         try:
-            os.remove(file)
+            Path(file).unlink()
             logging.debug(f"Deleted file: {file}")
             return True
         except Exception as e:
             logging.error(f"Error deleting file {file}: {e}")
             return False
 
-    def purge_files(days, directory=PROCESSED):
+    def purge_files(days: int, directory: str = PROCESSED) -> int:
+        """TODO: Docstring this."""
         HOURS_DAY = 24
         MINUTES_HOUR = 60
         MINUTES_SEC = 60
         deleted = 0
 
         files = ProcessedFiles._find_files(directory, "*")
-        time_limit = time.time() - (HOURS_DAY * MINUTES_HOUR * MINUTES_SEC * days)
+        time_limit = time.time() - (
+            HOURS_DAY * MINUTES_HOUR * MINUTES_SEC * days
+        )
         for file in files:
-            file_time = os.stat(file).st_mtime
-            if file_time < time_limit:
-                if ProcessedFiles._delete_file(file):
-                    deleted += 1
+            file_time = Path(file).stat().st_mtime
+            if file_time < time_limit and ProcessedFiles._delete_file(file):
+                deleted += 1
 
         return deleted
 
-    def delete_files(self):
+    def delete_files(self) -> int:
+        """TODO: Docstring this."""
         directory = ProcessedFiles.get_processed_directory()
         deleted = 0
         files = ProcessedFiles._find_files(directory, f"{self.uuid}.*")
