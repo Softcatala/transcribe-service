@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, Response
+from fastapi import APIRouter, Form, Query, Response
 from fastapi.responses import JSONResponse
 
 from transcribe_service.services.uuid import (
@@ -48,10 +48,8 @@ delete_uuid_router = APIRouter(prefix="/delete_uuid")
 
 @delete_uuid_router.post(path="/")
 def delete_uuid(
-    uuid: Annotated[str | None, Query(description="UUID to delete")] = None,
-    email: Annotated[
-        str | None, Query(description="Email of the user who created the file")
-    ] = None,
+    uuid: Annotated[str | None, Form()] = None,
+    email: Annotated[str | None, Form()] = None,
 ):
     """
     Legacy endpoint to delete a file UUID.
