@@ -8,6 +8,7 @@ from transcribe_service.services.uuid import (
     GetUUIDResult,
     UUIDService,
 )
+from transcribe_service.telemetry.metrics import deleted_counter
 
 router = APIRouter(prefix="/uuid")
 
@@ -44,19 +45,23 @@ def delete_uuid(
 
     match UUIDService.delete_uuid(uuid, email):
         case DeleteUUIDResult.NotValid:
+            deleted_counter.add(1, {"uuid": uuid, "result": "uuid_not_valid"})
             raise HTTPException(status_code=400, detail="UUID no vàlid")
 
         case DeleteUUIDResult.NotFound:
+            deleted_counter.add(1, {"uuid": uuid, "result": "uuid_not_found"})
             raise HTTPException(
                 status_code=404,
                 detail="No s'ha trobat la transcripció a borrar",
             )
 
         case DeleteUUIDResult.WrongEmail:
+            deleted_counter.add(1, {"uuid": uuid, "result": "wrong_email"})
             raise HTTPException(
                 status_code=400,
                 detail="El correu electrònic no coincideix amb el que ens vau donar.",
             )
 
         case DeleteUUIDResult.Ok:
+            deleted_counter.add(1, {"uuid": uuid, "result": "ok"})
             return Response(status_code=204)
