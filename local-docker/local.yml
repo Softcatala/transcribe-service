@@ -55,6 +55,8 @@ services:
       LOGDIR: "/srv/data/logs"
       DEVICE: 'cuda'
       DEVICE_INDEX: "0"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
 
   transcribe-batch_2:
     image: transcribe-batch:latest
@@ -67,6 +69,8 @@ services:
       LOGLEVEL: 'DEBUG'
       LOGID: '2'      
       LOGDIR: "/srv/data/logs"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
 
 volumes:
   transcribe-files:
