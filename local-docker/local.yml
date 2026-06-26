@@ -1,4 +1,24 @@
 services:
+  prometheus:
+    image: prom/prometheus:v3.11.2
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.150.1
+    restart: unless-stopped
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+
   transcribe-service:
     image: transcribe-service:latest
     restart: always
@@ -11,6 +31,8 @@ services:
     environment:
       LOGLEVEL: 'DEBUG'
       LOGDIR: "/srv/data/logs"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
 
   transcribe-batch_1:
     image: transcribe-batch:latest
