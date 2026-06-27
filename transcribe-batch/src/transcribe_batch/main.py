@@ -38,7 +38,7 @@ from transcribe_batch.telemetry.metrics import (
     audio_conversion_histogram,
     processed_files_counter,
     whisper_inference_histogram,
-    language_detected_counter
+    language_detected_counter,
 )
 
 LOGID = os.environ.get("LOGID", "0")
@@ -321,8 +321,13 @@ def main():
             processed_files_counter.add(
                 1, {"model": model, "result": "success"}
             )
-            audio_conversion_histogram.record(conversion_time, {"model": model, "device": device})
-            whisper_inference_histogram.record(inference_time.total_seconds(), {"model": model, "device": device})
+            audio_conversion_histogram.record(
+                conversion_time, {"model": model, "device": device}
+            )
+            whisper_inference_histogram.record(
+                inference_time.total_seconds(),
+                {"model": model, "device": device},
+            )
 
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
