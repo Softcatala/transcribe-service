@@ -34,7 +34,12 @@ from transcribe_core.usage import Usage
 from transcribe_batch.execution import Command, Execution
 from transcribe_batch.lockfile import LockFile
 from transcribe_batch.sendmail import Sendmail
-from transcribe_batch.telemetry.metrics import processed_files_counter
+from transcribe_batch.telemetry.metrics import (
+    audio_conversion_histogram,
+    processed_files_counter,
+    whisper_inference_histogram,
+    language_detected_counter
+)
 
 LOGID = os.environ.get("LOGID", "0")
 
@@ -207,15 +212,19 @@ def main():
             converted_audio = os.path.join(out_dir, WAV_FILE)
 
             timeout = _get_timeout()
+            conversion_start = time.time()
             result = execution.run_conversion(
                 batchfile.original_filename,
                 source_file,
                 converted_audio,
                 timeout,
             )
+            conversion_time = time.time() - conversion_start
 
             if result != Command.NO_ERROR:
-                processed_files_counter.add(1, {"model": model, "result": "conversion_error"})
+                processed_files_counter.add(
+                    1, {"model": model, "result": "conversion_error"}
+                )
                 _delete_record(db, batchfile, converted_audio)
                 msg = "No s'ha pogut llegir el fitxer. Normalment, això succeeix perquè el fitxer que heu enviat no és d'àudio o vídeo o és malmès.\n"
                 msg += "Si està malmès, podeu provar de convertir-lo a una altre format (procés que sol reparar el fitxer) a https://online-audio-converter.com/\n"
@@ -241,7 +250,9 @@ def main():
             )
 
             if result == Command.RUNTIME_ERROR:
-                processed_files_counter.add(1, {"model": model, "result": "runtime_error"})
+                processed_files_counter.add(
+                    1, {"model": model, "result": "runtime_error"}
+                )
                 Usage().log("whisper_runtime_error")
                 logging.error(
                     f"Runtime error. File '{batchfile.original_filename}' not processed"
@@ -250,7 +261,9 @@ def main():
                 continue
 
             if result == Command.TIMEOUT_ERROR:
-                processed_files_counter.add(1, {"model": model, "result": "timeout_error"})
+                processed_files_counter.add(
+                    1, {"model": model, "result": "timeout_error"}
+                )
                 _delete_record(db, batchfile, converted_audio)
                 minutes = int(timeout / 60)
                 msg = f"Ha trigat massa temps en processar-se. Aturem l'operació després de {minutes} minuts de processament.\n"
@@ -262,7 +275,9 @@ def main():
                 continue
 
             if result != Command.NO_ERROR:
-                processed_files_counter.add(1, {"model": model, "result": "whisper_error"})
+                processed_files_counter.add(
+                    1, {"model": model, "result": "whisper_error"}
+                )
                 _delete_record(db, batchfile, converted_audio)
                 _send_mail_error(
                     batchfile,
@@ -274,8 +289,11 @@ def main():
                 continue
 
             language = execution.get_transcription_language(target_file_txt)
+            language_detected_counter.add(1, {"language": language})
             if language in ["es", "en", "fr"]:
-                processed_files_counter.add(1, {"model": model, "result": "not_catalan"})
+                processed_files_counter.add(
+                    1, {"model": model, "result": "not_catalan"}
+                )
                 _delete_record(db, batchfile, converted_audio)
                 msg = "Aquest servei només transcriu textos en català. El fitxer que heu enviat és en un altra llengua.\n"
                 _send_mail_error(
@@ -300,7 +318,11 @@ def main():
             processed.move_file_bin(source_file, extension)
             LockFile(batchfile.filename_dbrecord).delete()
 
-            processed_files_counter.add(1, {"model": model, "result": "success"})
+            processed_files_counter.add(
+                1, {"model": model, "result": "success"}
+            )
+            audio_conversion_histogram.record(conversion_time, {"model": model, "device": device})
+            whisper_inference_histogram.record(inference_time.total_seconds(), {"model": model, "device": device})
 
         now = time.time()
         if now > purge_last_time + PURGE_INTERVAL_SECONDS:
