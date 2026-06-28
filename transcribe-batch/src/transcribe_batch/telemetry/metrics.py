@@ -36,3 +36,9 @@ language_detected_counter = meter.create_counter(
     unit="1",
     description="Total detected audio files by language.",
 )
+
+in_process_gauge = meter.create_up_down_counter(
+    "in_process_transcriptions",
+    unit="1",
+    description="Current transcriptions being processed (active lock files)",
+)

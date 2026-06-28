@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -8,12 +9,20 @@ from transcribe_service.logging import init_logging
 from transcribe_service.routes import file, stats, uuid
 from transcribe_service.routes.legacy import file as legacy_file
 from transcribe_service.routes.legacy import uuid as legacy_uuid
+from transcribe_service.telemetry.metrics import (
+    _reconcile_in_process,
+    _update_queue_depth,
+)
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):  # noqa: ANN201, D103
     init_logging()
+    task_queue_depth = asyncio.create_task(_update_queue_depth())
+    task_reconcile = asyncio.create_task(_reconcile_in_process())
     yield
+    task_queue_depth.cancel()
+    task_reconcile.cancel()
 
 
 app = FastAPI(title="Softcatalà Transcription Service", lifespan=lifespan)
