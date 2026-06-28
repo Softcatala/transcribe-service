@@ -162,7 +162,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "queue_depth_ratio",
+          "expr": "sum(queue_depth_ratio)",
           "refId": "A"
         }
       ],
@@ -221,11 +221,13 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(files_processed_total)",
+          "expr": "floor(sum(increase(files_processed_total[$__range])))",
+          "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Total Files Processed (All Time)",
+      "timeFrom": "now-30d",
+      "title": "Total Files Processed (last 30 days)",
       "type": "stat"
     },
     {
@@ -280,7 +282,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "floor(sum(increase(files_processed_total[$__range])))",
+          "expr": "sum(floor(sum(increase(files_processed_total[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -357,7 +359,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(whisper_inference_duration_seconds_sum) / sum(whisper_inference_duration_seconds_count)",
+          "expr": "sum(rate(whisper_inference_duration_seconds_sum[$__range])) / sum(rate(whisper_inference_duration_seconds_count[$__range]))",
           "instant": true,
           "legendFormat": "avg",
           "refId": "H"
@@ -367,7 +369,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.0, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.0, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "min",
           "refId": "A"
@@ -377,7 +379,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.25, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.25, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p25",
           "refId": "B"
@@ -387,7 +389,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.50, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p50",
           "refId": "C"
@@ -397,7 +399,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.75, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.75, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p75",
           "refId": "D"
@@ -407,7 +409,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.90, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p90",
           "refId": "E"
@@ -417,7 +419,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.99, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p99",
           "refId": "F"
@@ -427,13 +429,14 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(1.0, sum by (le) (whisper_inference_duration_seconds_bucket))",
+          "expr": "histogram_quantile(1.0, sum by (le) (rate(whisper_inference_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "max",
           "refId": "G"
         }
       ],
-      "title": "Whisper Inference (All Time)",
+      "timeFrom": "now-30d",
+      "title": "Whisper Inference (last 30 days)",
       "type": "barchart"
     },
     {
@@ -627,7 +630,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(audio_conversion_duration_seconds_sum) / sum(audio_conversion_duration_seconds_count)",
+          "expr": "sum(rate(audio_conversion_duration_seconds_sum[$__range])) / sum(rate(audio_conversion_duration_seconds_count[$__range]))",
           "instant": true,
           "legendFormat": "avg",
           "refId": "H"
@@ -637,7 +640,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.0, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.0, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "min",
           "refId": "A"
@@ -647,7 +650,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.25, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.25, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p25",
           "refId": "B"
@@ -657,7 +660,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.50, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p50",
           "refId": "C"
@@ -667,7 +670,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.75, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.75, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p75",
           "refId": "D"
@@ -677,7 +680,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.90, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p90",
           "refId": "E"
@@ -687,7 +690,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.99, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p99",
           "refId": "F"
@@ -697,13 +700,14 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(1.0, sum by (le) (audio_conversion_duration_seconds_bucket))",
+          "expr": "histogram_quantile(1.0, sum by (le) (rate(audio_conversion_duration_seconds_bucket[$__range])))",
           "instant": true,
           "legendFormat": "max",
           "refId": "G"
         }
       ],
-      "title": "Audio Conversion (All Time)",
+      "timeFrom": "now-30d",
+      "title": "Audio Conversion (last 30 days)",
       "type": "barchart"
     },
     {
@@ -908,13 +912,14 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (model) (transcriptions_uploaded_total)",
+          "expr": "sum by (model) (increase(transcriptions_uploaded_total[$__range]))",
           "instant": true,
           "legendFormat": "{{model}}",
           "refId": "A"
         }
       ],
-      "title": "Uploads by Model (All Time)",
+      "timeFrom": "now-30d",
+      "title": "Uploads by Model (last 30 days)",
       "type": "piechart"
     },
     {
@@ -971,13 +976,14 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (language) (language_detected_total)",
+          "expr": "sum by (language) (increase(language_detected_total[$__range]))",
           "instant": true,
           "legendFormat": "{{language}}",
           "refId": "A"
         }
       ],
-      "title": "Languages Detected (All Time)",
+      "timeFrom": "now-30d",
+      "title": "Languages Detected (last 30 days)",
       "type": "piechart"
     },
     {
@@ -1027,7 +1033,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.0, sum by (le) (uploaded_transcription_size_bytes_bucket))",
+          "expr": "histogram_quantile(0.0, sum by (le) (rate(uploaded_transcription_size_bytes_bucket[$__range])))",
           "instant": true,
           "legendFormat": "min",
           "refId": "E"
@@ -1037,7 +1043,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(uploaded_transcription_size_bytes_sum) / sum(uploaded_transcription_size_bytes_count)",
+          "expr": "sum(rate(uploaded_transcription_size_bytes_sum[$__range])) / sum(rate(uploaded_transcription_size_bytes_count[$__range]))",
           "instant": true,
           "legendFormat": "avg",
           "refId": "A"
@@ -1047,7 +1053,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.50, sum by (le) (uploaded_transcription_size_bytes_bucket))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(uploaded_transcription_size_bytes_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p50",
           "refId": "B"
@@ -1057,7 +1063,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.90, sum by (le) (uploaded_transcription_size_bytes_bucket))",
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(uploaded_transcription_size_bytes_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p90",
           "refId": "C"
@@ -1067,7 +1073,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.99, sum by (le) (uploaded_transcription_size_bytes_bucket))",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(uploaded_transcription_size_bytes_bucket[$__range])))",
           "instant": true,
           "legendFormat": "p99",
           "refId": "D"
@@ -1077,13 +1083,14 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(1.0, sum by (le) (uploaded_transcription_size_bytes_bucket))",
+          "expr": "histogram_quantile(1.0, sum by (le) (rate(uploaded_transcription_size_bytes_bucket[$__range])))",
           "instant": true,
           "legendFormat": "max",
           "refId": "F"
         }
       ],
-      "title": "Transcription Size Stats (All Time)",
+      "timeFrom": "now-30d",
+      "title": "Transcription Size Stats (last 30 days)",
       "type": "stat"
     },
     {
