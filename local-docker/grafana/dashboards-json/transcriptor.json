@@ -69,7 +69,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
+        "w": 8,
         "x": 0,
         "y": 1
       },
@@ -136,8 +136,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 4,
+        "w": 8,
+        "x": 8,
         "y": 1
       },
       "id": 3,
@@ -196,7 +196,7 @@
       "gridPos": {
         "h": 5,
         "w": 8,
-        "x": 8,
+        "x": 16,
         "y": 1
       },
       "id": 4,
@@ -251,10 +251,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 16,
-        "y": 1
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 6
       },
       "id": 5,
       "options": {
@@ -290,7 +290,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 13
       },
       "id": 6,
       "panels": [],
@@ -316,7 +316,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 14
       },
       "id": 7,
       "options": {
@@ -452,7 +452,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 14
       },
       "id": 8,
       "options": {
@@ -587,7 +587,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 15
+        "y": 22
       },
       "id": 9,
       "options": {
@@ -723,7 +723,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 22
       },
       "id": 10,
       "options": {
@@ -866,9 +866,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 32
+        "w": 12,
+        "x": 12,
+        "y": 39
       },
       "id": 19,
       "options": {
@@ -907,7 +907,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 30
       },
       "id": 15,
       "panels": [],
@@ -937,7 +937,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 24
+        "y": 31
       },
       "id": 16,
       "options": {
@@ -990,7 +990,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 24
+        "y": 31
       },
       "id": 17,
       "options": {
@@ -1043,7 +1043,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 24
+        "y": 31
       },
       "id": 18,
       "options": {
@@ -1071,6 +1071,59 @@
         }
       ],
       "title": "Download Results",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineInterpolation": "smooth",
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(queue_depth_ratio)",
+          "legendFormat": "queue depth",
+          "refId": "A"
+        }
+      ],
+      "title": "Queue Depth Over Time",
       "type": "timeseries"
     }
   ],
