@@ -68,20 +68,20 @@ def delete_uuid(
 
     match UUIDService.delete_uuid(uuid, email):
         case DeleteUUIDResult.NotValid:
-            deleted_counter.add(1, {"uuid": uuid, "result": "uuid_not_valid"})
+            deleted_counter.add(1, {"result": "uuid_not_valid"})
             return JSONResponse(
                 status_code=400, content={"error": "UUID no vàlid"}
             )
 
         case DeleteUUIDResult.NotFound:
-            deleted_counter.add(1, {"uuid": uuid, "result": "uuid_not_found"})
+            deleted_counter.add(1, {"result": "uuid_not_found"})
             return JSONResponse(
                 status_code=404,
                 content={"error": "No s'ha trobat la transcripció a esborrar"},
             )
 
         case DeleteUUIDResult.WrongEmail:
-            deleted_counter.add(1, {"uuid": uuid, "result": "wrong_email"})
+            deleted_counter.add(1, {"result": "wrong_email"})
             return JSONResponse(
                 status_code=400,
                 content={
@@ -90,5 +90,5 @@ def delete_uuid(
             )
 
         case DeleteUUIDResult.Ok:
-            deleted_counter.add(1, {"uuid": uuid, "result": "ok"})
+            deleted_counter.add(1, {"result": "ok"})
             return JSONResponse(status_code=200, content={})

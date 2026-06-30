@@ -129,7 +129,6 @@ async def upload_file(
                 1,
                 {
                     "model": model_name,
-                    "email": email,
                     "result": "file_type_not_allowed",
                 },
             )
@@ -140,7 +139,7 @@ async def upload_file(
         case UploadFileResult.QueueFull, _:
             uploads_counter.add(
                 1,
-                {"model": model_name, "email": email, "result": "queue_full"},
+                {"model": model_name, "result": "queue_full"},
             )
             return JSONResponse(
                 status_code=429,
@@ -154,7 +153,6 @@ async def upload_file(
                 1,
                 {
                     "model": model_name,
-                    "email": email,
                     "result": "max_per_email_reached",
                 },
             )
@@ -167,10 +165,10 @@ async def upload_file(
 
         case UploadFileResult.Ok, waiting_queue_len:
             uploads_counter.add(
-                1, {"model": model_name, "email": email, "result": "ok"}
+                1, {"model": model_name, "result": "ok"}
             )
             uploaded_file_size_histogram.record(
                 int(request.headers.get("content-length", 0)),
-                {"model": model_name, "email": email},
+                {"model": model_name},
             )
             return {"waiting_queue": str(waiting_queue_len)}
