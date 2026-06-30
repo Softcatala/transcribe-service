@@ -36,7 +36,6 @@ from transcribe_batch.lockfile import LockFile
 from transcribe_batch.sendmail import Sendmail
 from transcribe_batch.telemetry.metrics import (
     audio_conversion_histogram,
-    in_process_gauge,
     processed_files_counter,
     whisper_inference_histogram,
     language_detected_counter,
@@ -156,7 +155,6 @@ def _send_mail_error(batchfile, inference_time, source_file_base, message):
 
 
 def _delete_record(db, batchfile, converted_audio):
-    in_process_gauge.add(-1)
     db.delete(batchfile.filename_dbrecord)
 
     if os.path.isfile(batchfile.filename):
@@ -200,8 +198,6 @@ def main():
             if not LockFile(batchfile.filename_dbrecord).create():
                 time.sleep(5)
                 continue
-
-            in_process_gauge.add(1)
 
             source_file = batchfile.filename
 
@@ -320,7 +316,6 @@ def main():
             processed.move_file(target_file_txt)
             processed.move_file(target_file_json)
             processed.move_file_bin(source_file, extension)
-            in_process_gauge.add(-1)
             LockFile(batchfile.filename_dbrecord).delete()
 
             processed_files_counter.add(

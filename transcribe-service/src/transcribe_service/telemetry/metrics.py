@@ -96,4 +96,4 @@ async def _reconcile_in_process() -> None:
     while True:
         processing = len(list(ENTRIES_DIR.glob("*.lock")))  # noqa: ASYNC240
         currently_processing_transcriptions_gauge.set(processing)
-        await asyncio.sleep(60)
+        await asyncio.sleep(4)
