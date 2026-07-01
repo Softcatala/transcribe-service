@@ -1,0 +1,91 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.11.2
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=31d"
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/dashboards-json:/var/lib/grafana/dashboards
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.150.1
+    restart: unless-stopped
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # /metrics endpoint
+
+  transcribe-service:
+    image: transcribe-service:latest
+    restart: always
+    ports:
+      - "8700:8700"
+
+    volumes:
+      - transcribe-files:/srv/data
+
+    environment:
+      LOGLEVEL: 'DEBUG'
+      LOGDIR: "/srv/data/logs"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
+
+  transcribe-batch_1:
+    image: transcribe-batch:latest
+    restart: always
+
+    volumes:
+      - transcribe-files:/srv/data
+
+    deploy:
+       resources:
+         reservations:
+           devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+
+    environment:
+      LOGLEVEL: 'DEBUG'
+      LOGID: '1'
+      LOGDIR: "/srv/data/logs"
+      DEVICE: 'cuda'
+      DEVICE_INDEX: "0"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
+
+  transcribe-batch_2:
+    image: transcribe-batch:latest
+    restart: always
+
+    volumes:
+      - transcribe-files:/srv/data
+
+    environment:
+      LOGLEVEL: 'DEBUG'
+      LOGID: '2'      
+      LOGDIR: "/srv/data/logs"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
+
+volumes:
+  transcribe-files:

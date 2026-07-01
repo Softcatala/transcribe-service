@@ -9,6 +9,11 @@ from transcribe_service.services.file import (
     GetFileResult,
     UploadFileResult,
 )
+from transcribe_service.telemetry.metrics import (
+    downloads_counter,
+    uploads_counter,
+    uploaded_file_size_histogram
+)
 
 get_file_router = APIRouter(prefix="/get_file")
 
@@ -40,16 +45,25 @@ def get_file(
 
     match FileService.get_file(uuid, ext):
         case GetFileResult.NotValid, _:
+            downloads_counter.add(
+                1, {"extension": ext, "result": "invalid_uuid"}
+            )
             return JSONResponse(
                 status_code=400, content={"error": "UUID no vàlid"}
             )
 
         case GetFileResult.UuidNotFound, _:
+            downloads_counter.add(
+                1, {"extension": ext, "result": "uuid_not_found"}
+            )
             return JSONResponse(
                 status_code=404, content={"error": "UUID no existeix"}
             )
 
         case GetFileResult.FileNotFound, _:
+            downloads_counter.add(
+                1, {"extension": ext, "result": "file_not_found"}
+            )
             return JSONResponse(
                 status_code=404,
                 content={
@@ -58,6 +72,7 @@ def get_file(
             )
 
         case GetFileResult.Ok, (fullname, filenames, mimetype):
+            downloads_counter.add(1, {"extension": ext, "result": "ok"})
             return FileResponse(
                 path=fullname,
                 media_type=mimetype,
@@ -110,11 +125,22 @@ async def upload_file(
         file, email, model_name, highlight_words, num_chars, num_sentences
     ):
         case UploadFileResult.TypeNotAllowed, _:
+            uploads_counter.add(
+                1,
+                {
+                    "model": model_name,
+                    "result": "file_type_not_allowed",
+                },
+            )
             return JSONResponse(
                 status_code=415, content={"error": "Tipus de fitxer no vàlid"}
             )
 
         case UploadFileResult.QueueFull, _:
+            uploads_counter.add(
+                1,
+                {"model": model_name, "result": "queue_full"},
+            )
             return JSONResponse(
                 status_code=429,
                 content={
@@ -123,6 +149,13 @@ async def upload_file(
             )
 
         case UploadFileResult.MaxPerEmailReached, _:
+            uploads_counter.add(
+                1,
+                {
+                    "model": model_name,
+                    "result": "max_per_email_reached",
+                },
+            )
             return JSONResponse(
                 status_code=429,
                 content={
@@ -131,4 +164,11 @@ async def upload_file(
             )
 
         case UploadFileResult.Ok, waiting_queue_len:
+            uploads_counter.add(
+                1, {"model": model_name, "result": "ok"}
+            )
+            uploaded_file_size_histogram.record(
+                int(request.headers.get("content-length", 0)),
+                {"model": model_name},
+            )
             return {"waiting_queue": str(waiting_queue_len)}
