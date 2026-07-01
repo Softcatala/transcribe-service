@@ -1,6 +1,6 @@
 from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
-    OTLPMetricExporter,
+    OTLPMetricExporter
 )
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
@@ -19,16 +19,10 @@ processed_files_counter = meter.create_counter(
     description="Total files processed by model and result",
 )
 
-audio_conversion_histogram = meter.create_histogram(
-    "audio_conversion_duration_seconds",
+transcription_duration_histogram = meter.create_histogram(
+    "transcription_duration_seconds",
     unit="s",
-    description="Time taken to convert an audio file using Ffmpeg or Sox.",
-)
-
-whisper_inference_histogram = meter.create_histogram(
-    "whisper_inference_duration_seconds",
-    unit="s",
-    description="Time taken by whisper to transcribe an audio file by model.",
+    description="Time taken to transcribe a file (from start of conversion to end of inference) by model",
 )
 
 language_detected_counter = meter.create_counter(

@@ -35,10 +35,9 @@ from transcribe_batch.execution import Command, Execution
 from transcribe_batch.lockfile import LockFile
 from transcribe_batch.sendmail import Sendmail
 from transcribe_batch.telemetry.metrics import (
-    audio_conversion_histogram,
-    processed_files_counter,
-    whisper_inference_histogram,
     language_detected_counter,
+    processed_files_counter,
+    transcription_duration_histogram,
 )
 
 LOGID = os.environ.get("LOGID", "0")
@@ -212,14 +211,13 @@ def main():
             converted_audio = os.path.join(out_dir, WAV_FILE)
 
             timeout = _get_timeout()
-            conversion_start = time.time()
+            transcription_start_time = time.time()
             result = execution.run_conversion(
                 batchfile.original_filename,
                 source_file,
                 converted_audio,
                 timeout,
             )
-            conversion_time = time.time() - conversion_start
 
             if result != Command.NO_ERROR:
                 processed_files_counter.add(
@@ -318,15 +316,13 @@ def main():
             processed.move_file_bin(source_file, extension)
             LockFile(batchfile.filename_dbrecord).delete()
 
+            transcription_total_time = time.time() - transcription_start_time
+
             processed_files_counter.add(
                 1, {"model": model, "result": "success"}
             )
-            audio_conversion_histogram.record(
-                conversion_time, {"model": model, "device": device}
-            )
-            whisper_inference_histogram.record(
-                inference_time.total_seconds(),
-                {"model": model, "device": device},
+            transcription_duration_histogram.record(
+                transcription_total_time, {"model": model, "device": device}
             )
 
         now = time.time()
