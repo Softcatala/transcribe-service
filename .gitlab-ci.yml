@@ -9,7 +9,7 @@ variables:
 
 stages:
   - transcribe
-  # - deploy
+  - deploy
 
 test:
   image: ghcr.io/astral-sh/uv:python3.13-trixie-slim
