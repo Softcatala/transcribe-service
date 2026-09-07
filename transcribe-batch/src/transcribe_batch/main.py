@@ -35,6 +35,7 @@ from transcribe_batch.execution import Command, Execution
 from transcribe_batch.lockfile import LockFile
 from transcribe_batch.sendmail import Sendmail
 from transcribe_batch.telemetry.metrics import (
+    email_failures_counter,
     language_detected_counter,
     processed_files_counter,
     transcription_duration_histogram,
@@ -140,7 +141,9 @@ def _send_mail(batchfile, inference_time, source_file_base):
         "filename": batchfile.original_filename,
         "model": batchfile.model_name,
     }
-    Sendmail().send_html(batchfile.email, "transcription-finished", context)
+    if not Sendmail().send_html(batchfile.email, "transcription-finished", context):
+        Usage().log("email_error")
+        email_failures_counter.add(1)
 
 
 def _send_mail_error(batchfile, inference_time, source_file_base, message):
@@ -150,7 +153,9 @@ def _send_mail_error(batchfile, inference_time, source_file_base, message):
         "filename": batchfile.original_filename,
         "model": batchfile.model_name,
     }
-    Sendmail().send_html(batchfile.email, "transcription-error", context)
+    if not Sendmail().send_html(batchfile.email, "transcription-error", context):
+        Usage().log("email_error")
+        email_failures_counter.add(1)
 
 
 def _delete_record(db, batchfile, converted_audio):
