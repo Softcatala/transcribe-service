@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import UploadFile
 from transcribe_core.batchfilesdb import BatchFilesDB
 from transcribe_core.processedfiles import ProcessedFiles
+from transcribe_core.usage import Usage
 
 from transcribe_service.constants import (
     MAX_PER_EMAIL,
@@ -56,12 +57,14 @@ class FileService:
             logging.info(
                 f"POST /file/transcribe - masses fitxers a la cua - {email}"
             )
+            Usage().log("queue_full_response")
             return UploadFileResult.QueueFull, None
 
         if len(db.select(email=email)) >= MAX_PER_EMAIL:
             logging.info(
                 f"POST /file/transcribe - masses fitxers per email - {email}"
             )
+            Usage().log("queue_max_per_mail")
             return UploadFileResult.MaxPerEmailReached, None
 
         waiting_queue = len(db.select())
@@ -84,6 +87,7 @@ class FileService:
         logging.info(
             f"Saved file {file.filename} to {fullname} (size: {size_mb:.2f}MB) for user {email}, waiting_queue: {waiting_queue}"
         )
+        Usage().log("transcribe_file")
         return UploadFileResult.Ok, waiting_queue
 
     @staticmethod
@@ -116,4 +120,5 @@ class FileService:
 
         filenames = _get_download_names(original_name, ext)
         mime_type = _get_mimetype(ext)
+        Usage().log("get_file")
         return GetFileResult.Ok, (fullname, filenames, mime_type)
