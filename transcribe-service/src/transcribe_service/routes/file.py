@@ -139,9 +139,7 @@ async def upload_file(
             )
 
         case UploadFileResult.Ok, waiting_queue_len:
-            uploads_counter.add(
-                1, {"model": model_name, "result": "ok"}
-            )
+            uploads_counter.add(1, {"model": model_name, "result": "ok"})
             uploaded_file_size_histogram.record(
                 int(request.headers.get("content-length", 0)),
                 {"model": model_name},
