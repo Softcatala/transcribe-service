@@ -18,6 +18,12 @@ else:
 metrics.set_meter_provider(provider)
 meter = metrics.get_meter("transcribe-batch")
 
+email_failures_counter = meter.create_counter(
+    "email_failures_total",
+    unit="1",
+    description="Total failures sending or preparing email notifications",
+)
+
 processed_files_counter = meter.create_counter(
     "files_processed_total",
     unit="1",

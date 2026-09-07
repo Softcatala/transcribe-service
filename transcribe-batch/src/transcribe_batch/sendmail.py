@@ -35,7 +35,7 @@ class Sendmail:
         port = int(mail_port)
         return mail_server, port, mail_username, mail_password
 
-    def _send_email(self, email, subject, message):
+    def _send_email(self, email, subject, message) -> bool:
         try:
             mail_server, port, mail_username, mail_password = (
                 self._get_mail_server_config()
@@ -50,23 +50,27 @@ class Sendmail:
                 message["From"] = sender_email
                 message["To"] = email
                 server.sendmail(sender_email, email, message.as_string())
+            return True
         except Exception as e:
             msg = f"Error '{e}' sending to {email}"
             logging.error(msg)
+            return False
 
-    def send(self, text, email):
-        """Send a plain text email."""
+    def send(self, text, email) -> bool:
+        """Send a plain text email, returning whether it succeeded."""
         try:
             message = MIMEMultipart("alternative")
             message["Subject"] = "Servei de transcripció de Softcatalà"
             part = MIMEText(text, "plain")
             message.attach(part)
-            self._send_email(email, message["Subject"], message)
+            return self._send_email(email, message["Subject"], message)
         except Exception as e:
             msg = f"Error '{e}' sending to {email}"
             logging.error(msg)
+            return False
 
-    def send_html(self, email, template_name, context):
+    def send_html(self, email, template_name, context) -> bool:
+        """Send a templated email, returning whether it succeeded."""
         try:
             TEMPLATES_DIR = "email-templates"
             env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
@@ -84,7 +88,8 @@ class Sendmail:
             message.attach(part_text)
             message.attach(part_html)
 
-            self._send_email(email, message["Subject"], message)
+            return self._send_email(email, message["Subject"], message)
         except Exception as e:
             msg = f"Error '{e}' sending to {email}"
             logging.error(msg)
+            return False
