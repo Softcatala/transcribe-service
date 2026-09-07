@@ -1,7 +1,8 @@
+import json
 from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response
 
 from transcribe_service.services.stats import StatsService
 
@@ -14,9 +15,12 @@ def stats(
         date | None,
         Query(title="date", description="A date in YYYY-MM-DD format"),
     ] = None,
-) -> dict:
+) -> Response:
     """TODO: Docstring this endpoint."""
     if date is None:
         date = datetime.today().date()
 
-    return StatsService.get_stats(date)
+    return Response(
+        content=json.dumps(StatsService.get_stats(date), indent=4),
+        media_type="application/json",
+    )
