@@ -1,14 +1,19 @@
+import os
+
 from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
-    OTLPMetricExporter
+    OTLPMetricExporter,
 )
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 
-reader = PeriodicExportingMetricReader(
-    OTLPMetricExporter(), export_interval_millis=5000
-)
-provider = MeterProvider(metric_readers=[reader])
+if os.getenv("OTEL_TELEMETRY_ENABLED", "true") in ("true", "1", "yes"):
+    reader = PeriodicExportingMetricReader(
+        OTLPMetricExporter(), export_interval_millis=5000
+    )
+    provider = MeterProvider(metric_readers=[reader])
+else:
+    provider = MeterProvider()
 
 metrics.set_meter_provider(provider)
 meter = metrics.get_meter("transcribe-batch")

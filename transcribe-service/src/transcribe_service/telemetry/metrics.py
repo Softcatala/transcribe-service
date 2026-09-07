@@ -1,4 +1,5 @@
 import asyncio
+import os
 from pathlib import Path
 
 from opentelemetry import metrics
@@ -6,16 +7,12 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
     OTLPMetricExporter,
 )
 from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.metrics.view import (
     ExplicitBucketHistogramAggregation,
     View,
 )
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from transcribe_core.batchfilesdb import BatchFilesDB
-
-reader = PeriodicExportingMetricReader(
-    OTLPMetricExporter(), export_interval_millis=5000
-)
 
 file_size_buckets = View(
     instrument_name="uploaded_transcription_size_bytes",
@@ -43,7 +40,15 @@ file_size_buckets = View(
     ),
 )
 
-provider = MeterProvider(metric_readers=[reader], views=[file_size_buckets])
+if os.getenv("OTEL_TELEMETRY_ENABLED", "true") in ("true", "1", "yes"):
+    reader = PeriodicExportingMetricReader(
+        OTLPMetricExporter(), export_interval_millis=5000
+    )
+    provider = MeterProvider(
+        metric_readers=[reader], views=[file_size_buckets]
+    )
+else:
+    provider = MeterProvider()
 
 metrics.set_meter_provider(provider)
 meter = metrics.get_meter("transcribe-service")
