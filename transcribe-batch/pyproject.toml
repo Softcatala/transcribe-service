@@ -2,7 +2,7 @@
 name = "transcribe-batch"
 version = "0.1.0"
 description = "A service for transcribing catalan audio files."
-requires-python = ">=3.13"
+requires-python = "==3.14.*"
 dependencies = [
   "psutil",
   "ctranslate2==4.9.0",

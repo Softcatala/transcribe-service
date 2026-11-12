@@ -16,4 +16,4 @@ search-path = [
     "transcribe-batch/src",
 ]
 
-python-version = "3.13"
+python-version = "3.14"
