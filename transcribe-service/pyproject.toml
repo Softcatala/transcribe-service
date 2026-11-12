@@ -2,7 +2,7 @@
 name = "transcribe-service"
 version = "0.1.0"
 description = "API Service Backend for handling transcriptions of catalan audio files."
-requires-python = ">=3.13"
+requires-python = "==3.14.*"
 dependencies = [
   "fastapi==0.136.1",
   "gunicorn==22.0.0",
