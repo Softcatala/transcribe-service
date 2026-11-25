@@ -16,7 +16,7 @@ from transcribe_service.constants import (
 )
 from transcribe_service.utils import (
     _allowed_file,
-    _get_download_names,
+    _get_content_disposition,
     _get_mimetype,
     _get_record,
 )
@@ -118,7 +118,7 @@ class FileService:
         if not Path(fullname).exists():
             return GetFileResult.FileNotFound, None
 
-        filenames = _get_download_names(original_name, ext)
+        content_disposition = _get_content_disposition(original_name, ext)
         mime_type = _get_mimetype(ext)
         Usage().log("get_file")
-        return GetFileResult.Ok, (fullname, filenames, mime_type)
+        return GetFileResult.Ok, (fullname, content_disposition, mime_type)

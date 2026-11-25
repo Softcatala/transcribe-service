@@ -14,13 +14,16 @@ def _get_record(_uuid: str) -> BatchFile | None:
 
 
 # Reference: https://github.com/pallets/werkzeug/blob/main/src/werkzeug/utils.py#L454
-def _get_download_names(download_name: str, ext: str) -> str:
+def _get_content_disposition(download_name: str, ext: str) -> str:
     simple = unicodedata.normalize("NFKD", download_name)
     simple = simple.encode("ascii", "ignore").decode("ascii")
+    simple = simple.replace("\\", "_").replace('"', "_")
     # safe = RFC 5987 attr-char
     quoted = quote(download_name, safe="!#$&+-.^_`|~")
-    names = f"filename=\"{simple}.{ext}\"; filename*=UTF-8''{quoted}.{ext}"
-    return names
+    return (
+        f'attachment; filename="{simple}.{ext}"; '
+        f"filename*=UTF-8''{quoted}.{ext}"
+    )
 
 
 def _get_mimetype(extension: str) -> str:
