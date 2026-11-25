@@ -16,6 +16,7 @@ docker-run:
 
 test:
 	cd transcribe-batch && uv run python -m nose2
+	cd transcribe-service && uv run python -m nose2
 
 whisper-models:
 	uv run python3 -c 'from faster_whisper import WhisperModel; WhisperModel("small");  WhisperModel("medium")'

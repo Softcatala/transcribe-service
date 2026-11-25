@@ -71,13 +71,13 @@ def get_file(
                 },
             )
 
-        case GetFileResult.Ok, (fullname, filenames, mimetype):
+        case GetFileResult.Ok, (fullname, content_disposition, mimetype):
             downloads_counter.add(1, {"extension": ext, "result": "ok"})
             return FileResponse(
                 path=fullname,
                 media_type=mimetype,
-                filename=filenames,
                 headers={
+                    "Content-Disposition": content_disposition,
                     "Accept-Ranges": "bytes",
                     "Access-Control-Expose-Headers": "Content-Disposition",
                 },
